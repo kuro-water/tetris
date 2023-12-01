@@ -1,0 +1,44 @@
+{
+	"name": "tetris",
+	"version": "1.0.0",
+	"description": "",
+	"main": "src/index.js",
+	"scripts": {
+		"start": "tsc && electron .",
+		"package": "electron-forge package",
+		"make": "electron-forge make",
+		"publish": "electron-forge publish",
+		"lint": "echo \"No linting configured\"",
+		"build": "electron-packager ."
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"electron": "^27.0.3",
+		"ts-loader": "^9.5.0",
+		"typed-query-selector": "^2.11.0",
+		"typescript": "^5.2.2",
+		"webpack": "^5.89.0",
+		"webpack-cli": "^5.1.4"
+	},
+	"build": {
+		"appId": "com.electron.yourapp",
+		"directories": {
+			"output": "dist"
+		},
+		"files": [
+			"assets",
+			"src",
+			"package.json",
+			"package-lock.json"
+		],
+		"nsis": {
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true
+		}
+	},
+	"dependencies": {
+		"electron-squirrel-startup": "^1.0.0"
+	}
+}

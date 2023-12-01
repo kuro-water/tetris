@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self'"
+        />
+        <title>tetris</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="./bulma.min.css" />
+    </head>
+
+    <body>
+        <a class="button" href="index.html">back</a>
+        <button class="button" id="button_print">print</button>
+        <button class="button" id="button_use_arrow">矢印操作</button>
+        <button class="button" id="button_use_WASD">WASD操作</button>
+        <div>
+            <canvas id="hold_canvas" width="80" height="420"></canvas>
+            <canvas id="field_canvas" width="240" height="420"></canvas>
+            <canvas id="next_canvas" width="80" height="420"></canvas>
+        </div>
+        <label id="score_label">score:0</label>
+        <label id="ren_label">ren:0</label>
+    </body>
+
+    <!-- <script src="mino_data.js" type="module"></script> -->
+    <script src="renderer.js" type="module"></script>
+</html>

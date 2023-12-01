@@ -1,0 +1,13 @@
+#text_div {
+    clear: both;
+    float: left;
+    width: 50%;
+    background-color: aqua;
+}
+#key_div {
+    background-color: blueviolet;
+}
+#empty_div {
+    clear: both;
+    background-color: black;
+}
