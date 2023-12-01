@@ -1,3 +1,5 @@
+declare var electronAPI: any;
+
 const MINO_DATA_PATH = "\\mino_data.json";
 const CONFIG_PATH = "\\config.json";
 
