@@ -1,4 +1,5 @@
 declare var electronAPI: any;
+declare var I_MINO: number;
 
 const MINO_DATA_PATH = "\\mino_data.json";
 const CONFIG_PATH = "\\config.json";
@@ -6,7 +7,6 @@ const CONFIG_PATH = "\\config.json";
 const main = async function () {
     const {
         T_MINO,
-        I_MINO,
         O_MINO,
         S_MINO,
         Z_MINO,
