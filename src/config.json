@@ -1,1 +1,12 @@
-{"key_mode":"custom","key_map":{"moveLeft":"KeyA","moveRight":"KeyD","moveDown":"KeyS","hardDrop":"KeyW","rotateLeft":"ArrowLeft","rotateRight":"ArrowRight","hold":"ArrowUp"}}
+{
+    "key_mode": "custom",
+    "key_map": {
+        "moveLeft": "KeyA",
+        "moveRight": "KeyD",
+        "moveDown": "KeyS",
+        "hardDrop": "KeyW",
+        "rotateLeft": "ArrowLeft",
+        "rotateRight": "ArrowRight",
+        "hold": "ArrowUp"
+    }
+}

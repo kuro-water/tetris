@@ -830,5 +830,3 @@ function debug() {
     USE_WASD_BUTTON.addEventListener("click", useWASD);
 }
 debug();
-
-//test
