@@ -361,12 +361,6 @@ class Field {
     }
 }
 
-/**
- *
- * @param canvasField
- * @param canvasHold
- * @param canvasNext
- */
 class Tetris {
     contextField: CanvasRenderingContext2D;
     contextHold: CanvasRenderingContext2D;
@@ -441,9 +435,6 @@ class Tetris {
 
     clearFieldContext() {
         this.contextField.fillStyle = FRAME_COLOR;
-        // this.contextField.fillRect(0, 0, 20, 420);
-        // this.contextField.fillRect(220, 0, 20, 420);
-        // this.contextField.fillRect(0, 400, 220, 20);
         this.contextField.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
         this.contextField.fillRect(
             FIELD_CANVAS_SIZE[2] - BLOCK_SIZE,
@@ -457,6 +448,10 @@ class Tetris {
             FIELD_CANVAS_SIZE[2],
             BLOCK_SIZE
         );
+        // 行っているのは以下と同等の操作
+        // this.contextField.fillRect(0, 0, 20, 420);
+        // this.contextField.fillRect(220, 0, 20, 420);
+        // this.contextField.fillRect(0, 400, 220, 20);
     }
 
     clearHoldContext() {
@@ -491,7 +486,7 @@ class Tetris {
         while (" ω ") {
             await this.sleep(1000);
             console.log("looping");
-            if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなる
+            if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
             // this.moveDown();
             if (this.currentMino.moveMino(0, 1)) {
                 this.lockDown();
@@ -819,21 +814,19 @@ class Tetris {
 
 let mainTetris = new Tetris();
 
-//-------------------- debug --------------------
-let keymode = 1;
-function useArrow() {
-    keymode = 0;
+function debug() {
+    var keymode = 1;
+    function useArrow() {
+        keymode = 0;
+    }
+    function useWASD() {
+        keymode = 1;
+    }
+    const PRINT_BUTTON = document.getElementById("button_print") as HTMLButtonElement;
+    const USE_ARROW_BUTTON = document.getElementById("button_use_arrow") as HTMLButtonElement;
+    const USE_WASD_BUTTON = document.getElementById("button_use_WASD") as HTMLButtonElement;
+    PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
+    USE_ARROW_BUTTON.addEventListener("click", useArrow);
+    USE_WASD_BUTTON.addEventListener("click", useWASD);
 }
-function useWASD() {
-    keymode = 1;
-}
-const PRINT_BUTTON = document.getElementById("button_print") as HTMLButtonElement;
-const USE_ARROW_BUTTON = document.getElementById("button_use_arrow") as HTMLButtonElement;
-const USE_WASD_BUTTON = document.getElementById("button_use_WASD") as HTMLButtonElement;
-PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
-USE_ARROW_BUTTON.addEventListener("click", useArrow);
-USE_WASD_BUTTON.addEventListener("click", useWASD);
-//-------------------- end debug -----------------
-// };
-
-// main();
+debug();
