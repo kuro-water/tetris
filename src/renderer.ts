@@ -1,7 +1,3 @@
-const MINO_DATA_PATH = "\\mino_data.json";
-const CONFIG_PATH = "\\config.json";
-console.log("read:mino_data");
-
 /**
  * @param  {number}x 基準ブロックを0とした相対座標
  * @param  y 基準ブロックを0とした相対座標
@@ -465,7 +461,6 @@ class Tetris {
     }
 
     getConfig = async () => {
-        //@ts-ignore
         const config = await window.electronAPI.readJson(CONFIG_PATH);
         // if (config.key_mode == "default") {
         //     this.keyMap = INIT_KEY_MAP;

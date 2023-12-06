@@ -41,3 +41,5 @@ declare var NEXT_CANVAS_SIZE: [number, number, number, number];
 declare var FRAME_COLOR: string;
 declare var PLACED_MINO_COLOR: string;
 declare var BACKGROUND_COLOR: string;
+
+declare var CONFIG_PATH: string;
