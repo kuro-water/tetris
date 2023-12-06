@@ -1,28 +1,28 @@
 declare var electronAPI: any;
-declare var I_MINO: number;
-declare var T_MINO: number;
-declare var O_MINO: number;
-declare var L_MINO: number;
-declare var J_MINO: number;
-declare var S_MINO: number;
-declare var Z_MINO: number;
+declare const I_MINO: number;
+declare const T_MINO: number;
+declare const O_MINO: number;
+declare const L_MINO: number;
+declare const J_MINO: number;
+declare const S_MINO: number;
+declare const Z_MINO: number;
 
-declare var INIT_FIELD: number[][];
-declare var MINO_POS: number[][][][];
+declare const INIT_FIELD: number[][];
+declare const MINO_POS: number[][][][];
 
-declare var MINO_COLORS: string[];
-declare var GHOST_COLORS: string[];
+declare const MINO_COLORS: string[];
+declare const GHOST_COLORS: string[];
 
-declare var SRS_TLJSZ: number[][][][];
-declare var SRS_I: number[][][][];
+declare const SRS_TLJSZ: number[][][][];
+declare const SRS_I: number[][][][];
 
-declare var DAS: number;
-declare var ARR: number;
-declare var LOCK_DOWN_DELAY: number;
-declare var SET_DELAY: number;
-declare var DEL_DELAY: number;
+declare const DAS: number;
+declare const ARR: number;
+declare const LOCK_DOWN_DELAY: number;
+declare const SET_DELAY: number;
+declare const DEL_DELAY: number;
 
-declare var INIT_KEY_MAP: {
+declare const INIT_KEY_MAP: {
     moveLeft: string;
     moveRight: string;
     hardDrop: string;
@@ -32,14 +32,14 @@ declare var INIT_KEY_MAP: {
     hold: string;
 };
 
-declare var BLOCK_SIZE: number;
+declare const BLOCK_SIZE: number;
 
-declare var HOLD_CANVAS_SIZE: [number, number, number, number];
-declare var FIELD_CANVAS_SIZE: [number, number, number, number];
-declare var NEXT_CANVAS_SIZE: [number, number, number, number];
+declare const HOLD_CANVAS_SIZE: [number, number, number, number];
+declare const FIELD_CANVAS_SIZE: [number, number, number, number];
+declare const NEXT_CANVAS_SIZE: [number, number, number, number];
 
-declare var FRAME_COLOR: string;
-declare var PLACED_MINO_COLOR: string;
-declare var BACKGROUND_COLOR: string;
+declare const FRAME_COLOR: string;
+declare const PLACED_MINO_COLOR: string;
+declare const BACKGROUND_COLOR: string;
 
-declare var CONFIG_PATH: string;
+declare const CONFIG_PATH: string;
