@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     writeJson: (jsonPath, data) => ipcRenderer.invoke('writeJson', jsonPath, data),
 });
 
-// const CONFIG_PATH = "\\config.json";
+const CONFIG_PATH = "\\config.json";
 contextBridge.exposeInMainWorld('CONFIG_PATH', CONFIG_PATH);
 
 
