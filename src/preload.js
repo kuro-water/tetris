@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     writeJson: (jsonPath, data) => ipcRenderer.invoke('writeJson', jsonPath, data),
 });
 
+const CONFIG_PATH = "\\config.json";
+contextBridge.exposeInMainWorld('CONFIG_PATH', CONFIG_PATH);
+
 
 const I_MINO = 0;
 const T_MINO = 1;
@@ -167,7 +170,7 @@ const INIT_KEY_MAP = {
     moveLeft: "ArrowLeft",
     moveRight: "ArrowRight",
     hardDrop: "Space",
-    moveDown: "ArrowDown",
+    softDrop: "ArrowDown",
     rotateLeft: "KeyZ",
     rotateRight: "KeyX",
     hold: "KeyC",
