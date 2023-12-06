@@ -26,7 +26,7 @@ declare const INIT_KEY_MAP: {
     moveLeft: string;
     moveRight: string;
     hardDrop: string;
-    moveDown: string;
+    softDrop: string;
     rotateLeft: string;
     rotateRight: string;
     hold: string;

@@ -391,9 +391,9 @@ class Tetris {
     constructor() {
         console.log("tetris constructor started.");
 
-        const CANVAS_FIELD = document.getElementById("field_canvas") as HTMLCanvasElement;
-        const CANVAS_HOLD = document.getElementById("hold_canvas") as HTMLCanvasElement;
-        const CANVAS_NEXT = document.getElementById("next_canvas") as HTMLCanvasElement;
+        const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
+        const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
+        const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
 
         this.contextField = CANVAS_FIELD.getContext("2d");
         this.contextHold = CANVAS_HOLD.getContext("2d");
@@ -403,8 +403,8 @@ class Tetris {
         this.clearHoldContext();
         this.clearNextContext();
 
-        this.labelScore = document.getElementById("score_label") as HTMLLabelElement;
-        this.labelRen = document.getElementById("ren_label") as HTMLLabelElement;
+        this.labelScore = document.getElementById("labelScore") as HTMLLabelElement;
+        this.labelRen = document.getElementById("labelRen") as HTMLLabelElement;
 
         this.field = new Field();
         this.latestTime = Date.now();
@@ -462,27 +462,26 @@ class Tetris {
 
     getConfig = async () => {
         const config = await window.electronAPI.readJson(CONFIG_PATH);
-        // if (config.key_mode == "default") {
+        // if (config.keyMode == "default") {
         //     this.keyMap = INIT_KEY_MAP;
-        // } else if (config.key_mode == "custom") {
-        //     this.keyMap = config.key_map;
+        // } else if (config.keyMode == "custom") {
+        //     this.keyMap = config.keyMap;
         // } else {
         //     console.log("error : unknown keymap");
         //     this.keyMap = INIT_KEY_MAP;
         // }
         // console.log(config);
-        // console.log(config.key_map);
+        // console.log(config.keyMap);
         // console.log(this.keyMap);
-        this.keyMap = config.key_map;
+        this.keyMap = config.keyMap;
         console.log("read:config");
     };
 
     mainloop = async () => {
         while (" ω ") {
             await this.sleep(1000);
-            console.log("looping");
+            console.log("mainloop");
             if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-            // this.moveDown();
             if (this.currentMino.moveMino(0, 1)) {
                 this.lockDown();
             } else {
@@ -677,7 +676,7 @@ class Tetris {
         }
     }
 
-    moveDown(): boolean {
+    softDrop(): boolean {
         // 下へ動かせなければ接地
         if (this.currentMino.moveMino(0, 1)) {
             this.lockDown();
@@ -692,7 +691,7 @@ class Tetris {
 
     hardDrop() {
         // 接地まで下へ動かす
-        while (!this.moveDown());
+        while (!this.softDrop());
         this.score += 10;
         this.set();
     }
@@ -781,7 +780,7 @@ class Tetris {
         //     if (event.code === "KeyA") this.moveLeft();
         //     if (event.code === "KeyD") this.moveRight();
         //     if (event.code === "KeyW") this.hardDrop();
-        //     if (event.code === "KeyS") this.moveDown();
+        //     if (event.code === "KeyS") this.softDrop();
         //     if (event.code === "ArrowLeft") this.rotate(-1);
         //     if (event.code === "ArrowRight") this.rotate();
         //     if (event.code === "ArrowUp") this.hold();
@@ -789,7 +788,7 @@ class Tetris {
         //     if (event.code === "ArrowLeft") this.moveLeft();
         //     if (event.code === "ArrowRight") this.moveRight();
         //     if (event.code === "Space") this.hardDrop();
-        //     if (event.code === "ArrowDown") this.moveDown();
+        //     if (event.code === "ArrowDown") this.softDrop();
         //     if (event.code === "ShiftLeft") this.rotate(-1);
         //     if (event.code === "ControlRight") this.rotate();
         //     if (event.code === "KeyZ") this.rotate(-1);
@@ -800,7 +799,7 @@ class Tetris {
         if (event.code === this.keyMap.moveLeft) this.moveLeft();
         if (event.code === this.keyMap.moveRight) this.moveRight();
         if (event.code === this.keyMap.hardDrop) this.hardDrop();
-        if (event.code === this.keyMap.moveDown) this.moveDown();
+        if (event.code === this.keyMap.softDrop) this.softDrop();
         if (event.code === this.keyMap.rotateLeft) this.rotate(-1);
         if (event.code === this.keyMap.rotateRight) this.rotate();
         if (event.code === this.keyMap.hold) this.hold();
@@ -810,18 +809,18 @@ class Tetris {
 let mainTetris = new Tetris();
 
 function debug() {
-    var keymode = 1;
-    function useArrow() {
-        keymode = 0;
-    }
-    function useWASD() {
-        keymode = 1;
-    }
-    const PRINT_BUTTON = document.getElementById("button_print") as HTMLButtonElement;
-    const USE_ARROW_BUTTON = document.getElementById("button_use_arrow") as HTMLButtonElement;
-    const USE_WASD_BUTTON = document.getElementById("button_use_WASD") as HTMLButtonElement;
+    // var keymode = 1;
+    // function useArrow() {
+    //     keymode = 0;
+    // }
+    // function useWASD() {
+    //     keymode = 1;
+    // }
+    const PRINT_BUTTON = document.getElementById("buttonPrint") as HTMLButtonElement;
+    // const USE_ARROW_BUTTON = document.getElementById("buttonUseArrow") as HTMLButtonElement;
+    // const USE_WASD_BUTTON = document.getElementById("buttonUseWASD") as HTMLButtonElement;
     PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
-    USE_ARROW_BUTTON.addEventListener("click", useArrow);
-    USE_WASD_BUTTON.addEventListener("click", useWASD);
+    // USE_ARROW_BUTTON.addEventListener("click", useArrow);
+    // USE_WASD_BUTTON.addEventListener("click", useWASD);
 }
 debug();

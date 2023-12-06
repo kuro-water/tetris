@@ -170,7 +170,7 @@ const INIT_KEY_MAP = {
     moveLeft: "ArrowLeft",
     moveRight: "ArrowRight",
     hardDrop: "Space",
-    moveDown: "ArrowDown",
+    softDrop: "ArrowDown",
     rotateLeft: "KeyZ",
     rotateRight: "KeyX",
     hold: "KeyC",
