@@ -27,9 +27,9 @@ class Mino {
     contextHold: CanvasRenderingContext2D;
     field: Field;
 
-    //基準ブロックの絶対座標
+    //基準ブロックの絶対座標(内部座標)
     x = 5;
-    y = 2;
+    y = DRAW_FIELD_TOP + 1;
     idxMino: number;
     angle = 0;
     blocks: Block[] = [];
@@ -59,7 +59,7 @@ class Mino {
     /**
      * 初期値では現在地をクリア
      */
-    clearMino(x = this.x, y = this.y) {
+    clearMino(x = this.x, y = this.y - DRAW_FIELD_TOP) {
         for (const block of this.blocks) block.drawBlock(x, y, BACKGROUND_COLOR, this.contextField);
     }
 
@@ -68,7 +68,7 @@ class Mino {
      */
     drawMino(
         x = this.x,
-        y = this.y,
+        y = this.y - DRAW_FIELD_TOP,
         color = MINO_COLORS[this.idxMino],
         context = this.contextField
     ) {
@@ -88,7 +88,7 @@ class Mino {
                     // ゴーストの描画
                     this.drawMino(
                         this.x,
-                        this.y + i - 1,
+                        this.y + i - DRAW_FIELD_TOP - 1,
                         GHOST_COLORS[this.idxMino],
                         this.contextField
                     );
@@ -307,7 +307,7 @@ class Field {
      */
     isFilled(x: number, y: number): boolean {
         // console.log("checking at (%d,%d)", x, y)
-        if (x < 0 || 11 < x || y < 0 || 20 < y) return true;
+        if (x < 0 || 11 < x || y < 0 || this.field.length < y) return true;
         return !!this.field[y][x]; //number to boolean
     }
 
@@ -322,7 +322,7 @@ class Field {
     }
 
     isPerfectClear(): boolean {
-        for (let i = 0; i < 20; i++)
+        for (let i = 0; i < this.field.length; i++)
             for (let j = 0; j < 11; j++) if (this.field[i][j] !== INIT_FIELD[i][j]) return false;
         return true;
     }
@@ -333,7 +333,8 @@ class Field {
      */
     deleteLines(): number {
         let count = 0;
-        for (let y = 0; y < 20; y++) {
+        // 一番下の行は消さない
+        for (let y = 0; y < this.field.length - 1; y++) {
             // console.log("checking:" + y)
             // console.log(this.field.field[y]);
             let x: number;
@@ -387,7 +388,7 @@ class Tetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloop = true; // debug
+    isMainloop = false; // debug
 
     constructor() {
         console.log("tetris constructor started.");
@@ -480,6 +481,7 @@ class Tetris {
 
     mainloop = async () => {
         while (" ω ") {
+            if (!this.isMainloop) return;
             await this.sleep(1000);
             console.log("mainloop");
             if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
@@ -488,16 +490,19 @@ class Tetris {
             } else {
                 this.isLocking = false;
             }
-            if (!this.isMainloop) return;
         }
     };
 
     draw() {
+        // const DRAW_FIELD_TOP = 20;
+        // const DRAW_FIELD_HEIGHT = 20;
+        // const DRAW_FIELD_WITDH = 10;
+        // const DRAW_FIELD_LEFT = 1;
         // console.log("i:" + this.field.field.length);
         // console.log("j:" + this.field.field[0].length);
-        for (let i = 0; i < 20; i++) {
+        for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
             // console.log(this.field.field[i])
-            for (let j = 1; j < 11; j++) {
+            for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
                 if (this.field.field[i][j]) {
                     this.contextField.fillStyle = PLACED_MINO_COLOR;
                     // this.contextField.fillStyle = BACKGROUND_COLOR;
@@ -505,8 +510,13 @@ class Tetris {
                 } else {
                     this.contextField.fillStyle = BACKGROUND_COLOR;
                 }
-                this.contextField.fillRect(j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                // console.log("draw:" + i + "," + j)
+                this.contextField.fillRect(
+                    j * BLOCK_SIZE,
+                    (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
+                    BLOCK_SIZE,
+                    BLOCK_SIZE
+                );
+                console.log("draw:" + i + "," + j);
             }
         }
         this.currentMino.drawGhostMino();
@@ -708,7 +718,8 @@ class Tetris {
     }
 
     onButtonPrint() {
-        for (let i = 0; i < 21; i++) console.log(mainTetris.field.field[i]);
+        for (let i = 0; i < mainTetris.field.field.length; i++)
+            console.log(String(i) + ":" + String(mainTetris.field.field[i]));
     }
 
     getTurn(): number[] {
@@ -821,9 +832,11 @@ function debug() {
     //     keymode = 1;
     // }
     const PRINT_BUTTON = document.getElementById("buttonPrint") as HTMLButtonElement;
+    const DRAW_BUTTON = document.getElementById("buttonDraw") as HTMLButtonElement;
     // const USE_ARROW_BUTTON = document.getElementById("buttonUseArrow") as HTMLButtonElement;
     // const USE_WASD_BUTTON = document.getElementById("buttonUseWASD") as HTMLButtonElement;
     PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
+    DRAW_BUTTON.addEventListener("click", mainTetris.draw);
     // USE_ARROW_BUTTON.addEventListener("click", useArrow);
     // USE_WASD_BUTTON.addEventListener("click", useWASD);
 }

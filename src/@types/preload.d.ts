@@ -8,6 +8,11 @@ declare const S_MINO: number;
 declare const Z_MINO: number;
 
 declare const INIT_FIELD: number[][];
+declare const DRAW_FIELD_TOP = 20;
+declare const DRAW_FIELD_HEIGHT = 20;
+declare const DRAW_FIELD_WITDH = 10;
+declare const DRAW_FIELD_LEFT = 1;
+
 declare const MINO_POS: number[][][][];
 
 declare const MINO_COLORS: string[];
