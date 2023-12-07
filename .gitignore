@@ -2,4 +2,4 @@
 *.map
 renderer.js
 settings.js
-# config.json
+config.json
