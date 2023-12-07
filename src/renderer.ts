@@ -46,6 +46,13 @@ class Mino {
         this.idxMino = idxMino;
         this.field = field;
         for (let i = 0; i < 4; i++) {
+            const x = MINO_POS[this.idxMino][this.angle % 4][i][0] + this.x;
+            const y = MINO_POS[this.idxMino][this.angle % 4][i][1] + this.y;
+            // console.log(String(x) + "," + String(y));
+            if (this.field.isFilled(x, y)) {
+                console.log("gameover");
+                return;
+            }
             this.blocks.push(
                 new Block(
                     MINO_POS[this.idxMino][this.angle % 4][i][0],
@@ -516,7 +523,7 @@ class Tetris {
                     BLOCK_SIZE,
                     BLOCK_SIZE
                 );
-                console.log("draw:" + i + "," + j);
+                // console.log("draw:" + i + "," + j);
             }
         }
         this.currentMino.drawGhostMino();
@@ -534,6 +541,12 @@ class Tetris {
             this.field,
             this.nextMinos.pop() as number
         );
+        if (this.currentMino.blocks.length !== 4) {
+            //おわり
+            this.currentMino = undefined;
+            this.isMainloop = false;
+            return;
+        }
         // console.log(this.nextMinos);
         // console.log(this.afterNextMinos);
         this.draw();
