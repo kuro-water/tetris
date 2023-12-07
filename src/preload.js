@@ -38,8 +38,37 @@ const INIT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
+// xを増やすと右、yを増やすと下になる
+// 0が空白、1が壁または設置済みミノ
+// 内部座標では0,0が左上、11,40が右下
+// 描画上でミノが動かせる範囲は1,20が左上、10,39が右下
+// 内部座標にDRAW_FIELD_TOP, DRAW_FIELD_LEFTを足すと描画上の座標になる
+const DRAW_FIELD_TOP = 20;
+const DRAW_FIELD_HEIGHT = 20;
+const DRAW_FIELD_WITDH = 10;
+const DRAW_FIELD_LEFT = 1;
 
 // 参考：https://tetris.wiki/Super_Rotation_System
 // 画像を見ながら座標をベタ打ちした。こうでないとSRSの動作が難しい
@@ -186,6 +215,10 @@ contextBridge.exposeInMainWorld("S_MINO", S_MINO);
 contextBridge.exposeInMainWorld("Z_MINO", Z_MINO);
 
 contextBridge.exposeInMainWorld("INIT_FIELD", INIT_FIELD);
+contextBridge.exposeInMainWorld("DRAW_FIELD_TOP", DRAW_FIELD_TOP);
+contextBridge.exposeInMainWorld("DRAW_FIELD_HEIGHT", DRAW_FIELD_HEIGHT);
+contextBridge.exposeInMainWorld("DRAW_FIELD_WITDH", DRAW_FIELD_WITDH);
+contextBridge.exposeInMainWorld("DRAW_FIELD_LEFT", DRAW_FIELD_LEFT);
 
 contextBridge.exposeInMainWorld("MINO_POS", MINO_POS);
 
