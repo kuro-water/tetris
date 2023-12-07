@@ -380,6 +380,7 @@ class Tetris {
     keyMap: Record<string, string> = {};
     idInterval: Record<string, NodeJS.Timeout> = {};
     isKeyDown: Record<string, boolean> = {};
+    isUsedHold = false;
 
     score = 0;
     ren = 0;
@@ -601,6 +602,7 @@ class Tetris {
         // console.log("release")
         this.makeNewMino();
         this.draw();
+        this.isUsedHold = false;
         this.labelScore.innerText = String("score:" + this.score);
         this.labelRen.innerText = String("ren:" + this.ren);
     };
@@ -697,6 +699,8 @@ class Tetris {
     }
 
     hold() {
+        if (this.isUsedHold) return;
+        this.isUsedHold = true;
         if (this.holdMino !== undefined) this.nextMinos.push(this.holdMino);
         this.holdMino = this.currentMino.idxMino;
         this.currentMino.drawHoldMino(this.contextHold);
