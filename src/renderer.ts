@@ -395,7 +395,7 @@ class Tetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloop = false; // debug
+    isMainloop = true; // debug
 
     constructor() {
         console.log("tetris constructor started.");
