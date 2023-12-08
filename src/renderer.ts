@@ -255,6 +255,14 @@ class Mino {
         // console.log("miniかも");
 
         // console.log("angle:" + (this.angle % 4));
+
+        //prettier-ignore
+        const TSM_POS = [
+            [[1, -1], [-1, -1]],
+            [[1, 1], [1, -1]],
+            [[1, -1], [1, 1]],
+            [[-1, -1], [1, -1]]
+        ];
         const [x1, x2] = TSM_POS[this.angle % 4][0];
         const [y1, y2] = TSM_POS[this.angle % 4][1];
         if (!this.field.isFilled(this.x + x1, this.y + y1)) {

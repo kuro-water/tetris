@@ -21,8 +21,6 @@ declare const GHOST_COLORS: string[];
 declare const SRS_TLJSZ: number[][][][];
 declare const SRS_I: number[][][][];
 
-declare const TSM_POS: number[][][];
-
 declare const DAS: number;
 declare const ARR: number;
 declare const LOCK_DOWN_DELAY: number;
