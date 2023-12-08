@@ -621,7 +621,9 @@ class Tetris {
         this.draw();
         this.isUsedHold = false;
         this.labelScore.innerText = String("score:" + this.score);
-        this.labelRen.innerText = String("ren:" + this.ren);
+        let ren = this.ren;
+        if (ren < 0) ren = 0;
+        this.labelRen.innerText = String("ren:" + ren);
     };
 
     /**
