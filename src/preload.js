@@ -174,6 +174,13 @@ const SRS_I = [
     ],
 ];
 
+const TSM_POS = [
+    [[1, -1], [-1, -1]],
+    [[1, 1], [1, -1]],
+    [[1, -1], [1, 1]],
+    [[-1, -1], [1, -1]]
+];
+
 const MINO_COLORS = ["#0F9BD7", "#AF298A", "#E39F02", "#E35B02", "#2141C6", "#59B101", "#D70F37"];
 const GHOST_COLORS = ["#074D6B", "#571445", "#714F01", "#712D01", "#102063", "#2C5800", "#6B071B"];
 
@@ -224,6 +231,8 @@ contextBridge.exposeInMainWorld("MINO_POS", MINO_POS);
 
 contextBridge.exposeInMainWorld("SRS_TLJSZ", SRS_TLJSZ);
 contextBridge.exposeInMainWorld("SRS_I", SRS_I);
+
+contextBridge.exposeInMainWorld("TSM_POS", TSM_POS);
 
 contextBridge.exposeInMainWorld("MINO_COLORS", MINO_COLORS);
 contextBridge.exposeInMainWorld("GHOST_COLORS", GHOST_COLORS);

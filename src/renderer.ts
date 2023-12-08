@@ -237,7 +237,7 @@ class Mino {
      * miniの判定：
      * ・T-Spinの条件を満たしていること。
      * ・SRSのにおける回転補正の4番目(SRS_DATA[3])でないこと。
-     * ・ミノ固定時のＴミノ4隅のうち、凸側の1つが空いていること。
+     * ・ミノ固定時のＴミノ4隅のうち、凸側の2つのうちどちらかが空いていること。
      * 参考：https://tetris-matome.com/judgment/
      * @returns 1:Tspin, 2:Tspin mini
      */
@@ -253,25 +253,10 @@ class Mino {
 
         if (this.lastSRS === 3) return 1;
         // console.log("miniかも");
-        // console.log("angle:" + (this.angle % 4));
 
-        let x1 = 0,
-            x2 = 0,
-            y1 = 0,
-            y2 = 0;
-        if (this.angle % 4 === 0) {
-            (x1 = 1), (x2 = -1);
-            (y1 = -1), (y2 = -1);
-        } else if (this.angle % 4 === 1) {
-            (x1 = 1), (x2 = 1);
-            (y1 = 1), (y2 = -1);
-        } else if (this.angle % 4 === 2) {
-            (x1 = 1), (x2 = -1);
-            (y1 = 1), (y2 = 1);
-        } else if (this.angle % 4 === 3) {
-            (x1 = -1), (x2 = -1);
-            (y1 = 1), (y2 = -1);
-        }
+        // console.log("angle:" + (this.angle % 4));
+        const [x1, x2] = TSM_POS[this.angle % 4][0];
+        const [y1, y2] = TSM_POS[this.angle % 4][1];
         if (!this.field.isFilled(this.x + x1, this.y + y1)) {
             // console.log("(x, y) = (" + (this.x + x1) + ", " + (this.y + y1) + ")");
             return 2;
@@ -606,6 +591,7 @@ class Tetris {
 
         settingMino.setMino();
         modeTspin = settingMino.getModeTspin();
+        console.log("modeTspin:" + modeTspin);
         lines = this.field.deleteLines();
         if (lines) {
             this.ren += 1;
