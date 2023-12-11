@@ -11,14 +11,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="./bulma.min.css" />
         <link rel="stylesheet" href="./tetris.css" />
+        <link rel="stylesheet" href="./buttons.css" />
     </head>
 
     <body>
-        <a class="button" href="index.html">back</a>
-        <button class="button" id="buttonPrint">print</button>
-        <button class="button" id="buttonDraw">draw</button>
-        <!-- <button class="button" id="buttonUseArrow">矢印操作</button>
-        <button class="button" id="buttonUseWASD">WASD操作</button> -->
+        <div id="divButtons">
+            <a class="button" href="index.html">戻る</a>
+            <!-- <button class="button" id="buttonPrint">print</button>
+            <button class="button" id="buttonDraw">draw</button> -->
+            <!-- <button class="button" id="buttonUseArrow">矢印操作</button>
+            <button class="button" id="buttonUseWASD">WASD操作</button> -->
+        </div>
         <div>
             <canvas id="canvasHold" width="80" height="420"></canvas>
             <canvas id="canvasField" width="240" height="420"></canvas>

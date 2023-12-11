@@ -11,3 +11,11 @@
     clear: both;
     background-color: black;
 }
+#divkeyConfig {
+    margin-top: 10px;
+    margin-left: 20px;
+    justify-content: left;
+}
+input {
+    margin-left: 10px;
+}
