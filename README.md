@@ -16,3 +16,4 @@ https://github.com/kuro-water/tetris/releases/tag/release
 -   Z: 左回転
 -   X: 右回転
 -   C:ホールド
+    キーコンフィグは変更できます
