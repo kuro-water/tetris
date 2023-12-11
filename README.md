@@ -1,5 +1,9 @@
 # Tetris
 
+## ダウンロード
+
+https://github.com/kuro-water/tetris/releases/tag/release
+
 ## 概要
 
 ふつうのテトリス
