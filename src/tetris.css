@@ -1,0 +1,19 @@
+div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 100vh; */
+}
+
+canvas {
+    /* border: 1px solid #000; */
+    margin: 10px;
+}
+
+#labelScore,
+#labelRen {
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    margin-top: 10px;
+}

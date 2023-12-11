@@ -621,7 +621,9 @@ class Tetris {
         this.draw();
         this.isUsedHold = false;
         this.labelScore.innerText = String("score:" + this.score);
-        this.labelRen.innerText = String("ren:" + this.ren);
+        let ren = this.ren;
+        if (ren < 0) ren = 0;
+        this.labelRen.innerText = String("ren:" + ren);
     };
 
     /**
@@ -838,13 +840,13 @@ function debug() {
     // function useWASD() {
     //     keymode = 1;
     // }
-    const PRINT_BUTTON = document.getElementById("buttonPrint") as HTMLButtonElement;
-    const DRAW_BUTTON = document.getElementById("buttonDraw") as HTMLButtonElement;
+    // const PRINT_BUTTON = document.getElementById("buttonPrint") as HTMLButtonElement;
+    // const DRAW_BUTTON = document.getElementById("buttonDraw") as HTMLButtonElement;
     // const USE_ARROW_BUTTON = document.getElementById("buttonUseArrow") as HTMLButtonElement;
     // const USE_WASD_BUTTON = document.getElementById("buttonUseWASD") as HTMLButtonElement;
-    PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
-    DRAW_BUTTON.addEventListener("click", mainTetris.draw);
+    // PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
+    // DRAW_BUTTON.addEventListener("click", mainTetris.draw);
     // USE_ARROW_BUTTON.addEventListener("click", useArrow);
     // USE_WASD_BUTTON.addEventListener("click", useWASD);
 }
-debug();
+// debug();
