@@ -4,10 +4,6 @@
 
 https://github.com/kuro-water/wetris/releases/tag/release
 
-## 概要
-
-ふつうのテトリス
-
 ## 操作方法
 
 -   左右矢印 : 移動
