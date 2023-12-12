@@ -87,8 +87,9 @@ class Mino {
     /**
      * 下まで当たり判定を調べ、ゴーストを描画する
      * 同時に現在地にも描画する
+     * return:ゴーストのy座標(内部座標)
      */
-    drawGhostMino() {
+    drawGhostMino(): number {
         for (let i = 1; ; i++) {
             for (const block of this.blocks) {
                 if (this.field.isFilled(this.x + block.x, this.y + block.y + i)) {
@@ -101,7 +102,7 @@ class Mino {
                     );
                     // ミノの方が上のレイヤーにいてほしいので再描画
                     this.drawMino();
-                    return;
+                    return this.y + i - 1; // 内部座標
                 }
             }
         }
@@ -382,6 +383,7 @@ class Wetris {
     idInterval: Record<string, NodeJS.Timeout> = {};
     isKeyDown: Record<string, boolean> = {};
     isUsedHold = false;
+    countKSKS = 0;
 
     score = 0;
     ren = 0;
@@ -489,6 +491,7 @@ class Wetris {
                 this.lockDown();
             } else {
                 this.isLocking = false;
+                this.countKSKS = 0;
             }
         }
     };
@@ -572,6 +575,31 @@ class Wetris {
         // console.log("---------- end draw next ----------")
     }
 
+    /**
+     * カサカサの処理
+     * return true:接地した false:接地していない
+     */
+    checkKSKS(): boolean {
+        // console.log("checkKSKS");
+        if (KSKS_LIMIT < this.countKSKS) {
+            // 空中にいるときは接地しない
+            console.log(this.currentMino.y);
+            console.log(this.currentMino.drawGhostMino());
+            if (this.currentMino.y !== this.currentMino.drawGhostMino()) {
+                return false;
+            }
+            this.set();
+            this.countKSKS = 0;
+            return true;
+        }
+        // console.log("plus");
+        this.countKSKS += 1;
+        return false;
+    }
+
+    /**
+     * 接地硬直の処理
+     */
     lockDown() {
         if (!this.isLocking) {
             this.latestTime = Date.now();
@@ -671,6 +699,7 @@ class Wetris {
     }
 
     rotate(angle = 1) {
+        if (this.checkKSKS()) return;
         if (this.currentMino.rotateMino(angle)) {
             // console.log("cannot move!");
         } else {
@@ -680,6 +709,7 @@ class Wetris {
     }
 
     moveLeft() {
+        if (this.checkKSKS()) return;
         if (this.currentMino.moveMino(-1, 0)) {
             // console.log("cannot move!");
         } else {
@@ -689,6 +719,7 @@ class Wetris {
     }
 
     moveRight() {
+        if (this.checkKSKS()) return;
         if (this.currentMino.moveMino(1, 0)) {
             // console.log("cannot move!");
         } else {
@@ -704,6 +735,7 @@ class Wetris {
             return true;
         } else {
             this.isLocking = false;
+            this.countKSKS = 0;
             this.score += 1;
             this.labelScore.innerText = String("score:" + this.score);
             return false;

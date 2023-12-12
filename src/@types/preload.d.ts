@@ -48,3 +48,5 @@ declare const PLACED_MINO_COLOR: string;
 declare const BACKGROUND_COLOR: string;
 
 declare const CONFIG_PATH: string;
+
+declare const KSKS_LIMIT: number;

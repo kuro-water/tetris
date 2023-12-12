@@ -223,6 +223,8 @@ contextBridge.exposeInMainWorld('SET_DELAY', SET_DELAY);
 const DEL_DELAY = 100; // ライン消去時の硬直
 contextBridge.exposeInMainWorld('DEL_DELAY', DEL_DELAY);
 
+const KSKS_LIMIT = 12;
+contextBridge.exposeInMainWorld('KSKS_LIMIT', KSKS_LIMIT);
 
 const INIT_KEY_MAP = {
     moveLeft: "ArrowLeft",
