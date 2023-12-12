@@ -2,7 +2,7 @@
 
 ## ダウンロード
 
-https://github.com/kuro-water/tetris/releases/tag/release
+https://github.com/kuro-water/wetris/releases/tag/release
 
 ## 概要
 
