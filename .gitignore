@@ -4,3 +4,5 @@ renderer.js
 settings.js
 config.json
 /dist
+/get_srs_data
+/src/backup

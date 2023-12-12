@@ -358,7 +358,7 @@ class Field {
     }
 }
 
-class Tetris {
+class Wetris {
     contextField: CanvasRenderingContext2D;
     contextHold: CanvasRenderingContext2D;
     contextNext: CanvasRenderingContext2D;
@@ -391,7 +391,7 @@ class Tetris {
     isMainloop = true; // debug
 
     constructor() {
-        console.log("tetris constructor started.");
+        console.log("wetris constructor started.");
 
         const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
         const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
@@ -419,7 +419,7 @@ class Tetris {
         this.makeNewMino();
         this.mainloop();
         this.keyListener(this);
-        console.log("tetris constructor ended.");
+        console.log("wetris constructor ended.");
     }
 
     /**
@@ -629,8 +629,8 @@ class Tetris {
     /**
      * 基礎得点 ： line*100 + 10*(ren+2)^2+60
      * T-spin   ： line*1000
-     * Tetris   ： +2000
-     * BtB      ： 1.5 * (基礎得点+T-spin+Tetris)
+     * Wetris   ： +2000
+     * BtB      ： 1.5 * (基礎得点+T-spin+Wetris)
      * PC       ： +4000
      */
     addScore(lines: number, ren: number, modeTspin: number, isBtB: boolean) {
@@ -643,7 +643,7 @@ class Tetris {
         score = Math.floor(score);
 
         if (lines === 4) {
-            // console.log("Tetris");
+            // console.log("Wetris");
             score += 2000;
         } else if (modeTspin === 1) {
             console.log("T-spin");
@@ -727,8 +727,8 @@ class Tetris {
     }
 
     onButtonPrint() {
-        for (let i = 0; i < mainTetris.field.field.length; i++)
-            console.log(String(i) + ":" + String(mainTetris.field.field[i]));
+        for (let i = 0; i < mainWetris.field.field.length; i++)
+            console.log(String(i) + ":" + String(mainWetris.field.field[i]));
     }
 
     getTurn(): number[] {
@@ -750,7 +750,7 @@ class Tetris {
         return turn;
     }
 
-    keyListener(this_: Tetris) {
+    keyListener(this_: Wetris) {
         document.onkeydown = async (event) => {
             // console.log("down:" + event.code);
             if (this_.isKeyDown[event.code]) return;
@@ -830,7 +830,7 @@ class Tetris {
     }
 }
 
-let mainTetris = new Tetris();
+let mainWetris = new Wetris();
 
 function debug() {
     // var keymode = 1;
@@ -844,8 +844,8 @@ function debug() {
     // const DRAW_BUTTON = document.getElementById("buttonDraw") as HTMLButtonElement;
     // const USE_ARROW_BUTTON = document.getElementById("buttonUseArrow") as HTMLButtonElement;
     // const USE_WASD_BUTTON = document.getElementById("buttonUseWASD") as HTMLButtonElement;
-    // PRINT_BUTTON.addEventListener("click", mainTetris.onButtonPrint);
-    // DRAW_BUTTON.addEventListener("click", mainTetris.draw);
+    // PRINT_BUTTON.addEventListener("click", mainWetris.onButtonPrint);
+    // DRAW_BUTTON.addEventListener("click", mainWetris.draw);
     // USE_ARROW_BUTTON.addEventListener("click", useArrow);
     // USE_WASD_BUTTON.addEventListener("click", useWASD);
 }
