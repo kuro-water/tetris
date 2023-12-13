@@ -785,14 +785,20 @@ class Wetris {
     keyListener(this_: Wetris) {
         document.onkeydown = async (event) => {
             // console.log("down:" + event.code);
+            // 押下中ならreturn
             if (this_.isKeyDown[event.code]) return;
 
             this_.isKeyDown[event.code] = true;
             this_.keyEvent(event);
             await this.sleep(DAS);
 
+            // ハードドロップは長押し無効
+            if (event.code === this.keyMap.hardDrop) return;
+
+            // 離されていたらreturn
             if (!this_.isKeyDown[event.code]) return;
 
+            // 既にsetIntervalが動いていたらreturn
             if (this_.idInterval[event.code] != undefined) return;
 
             this_.idInterval[event.code] = setInterval(() => {
