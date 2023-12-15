@@ -49,7 +49,7 @@ class Block {
         this.sender = sender;
     }
 
-    send(x: number, y: number, color: string) {
+    drawBlock(x: number, y: number, color: string) {
         this.sender.send("drawBlock", this.x + x, this.y + y, color);
     }
 
@@ -107,12 +107,18 @@ class Mino {
                 )
             );
         }
-        // this.drawMino();
+        this.drawMino();
     }
 
-    sendM() {
+    clearMino() {
         for (const block of this.blocks) {
-            block.send(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
+            block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, BACKGROUND_COLOR);
+        }
+    }
+
+    drawMino() {
+        for (const block of this.blocks) {
+            block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
         }
     }
     /**
@@ -185,10 +191,10 @@ class Mino {
                 return true;
             }
 
-        // this.clearMino();
+        this.clearMino();
         this.x = toX;
         this.y = toY;
-        // this.drawMino();
+        this.drawMino();
         return false;
     }
 
@@ -215,7 +221,7 @@ class Mino {
         }
         if (this.checkRotation(dif, rotated, move)) return true; // 回転不可
 
-        // this.clearMino();
+        this.clearMino();
         this.angle += dif;
         this.x += move[0];
         this.y += move[1];
@@ -223,7 +229,7 @@ class Mino {
             this.blocks[i].x = rotated[0][i];
             this.blocks[i].y = rotated[1][i];
         }
-        // this.drawMino();
+        this.drawMino();
         return false;
     }
 
@@ -549,11 +555,6 @@ class Wetris {
                 this.isLocking = false;
                 this.countKSKS = 0;
             }
-            try {
-                this.currentMino.sendM();
-            } catch (e) {
-                console.log(e);
-            }
         }
     };
 
@@ -586,6 +587,10 @@ class Wetris {
     //     this.currentMino.drawGhostMino();
     // }
 
+    draw() {
+        this.sender.send("draw", this.field);
+    }
+
     makeNewMino() {
         if (!this.nextMinos.length) {
             this.nextMinos = this.afterNextMinos;
@@ -607,7 +612,7 @@ class Wetris {
         }
         // console.log(this.nextMinos);
         // console.log(this.afterNextMinos);
-        // this.draw();
+        this.draw();
         // this.drawNext();
     }
 
@@ -710,7 +715,7 @@ class Wetris {
         }
         // console.log("release")
         this.makeNewMino();
-        // this.draw();
+        this.draw();
         this.isUsedHold = false;
         // this.labelScore.innerText = String("score:" + this.score);
         let ren = this.ren;
@@ -767,7 +772,7 @@ class Wetris {
         if (this.currentMino.rotateMino(angle)) {
             // console.log("cannot move!");
         } else {
-            // this.draw();
+            this.draw();
             this.isLocking = false;
         }
     }
@@ -777,7 +782,7 @@ class Wetris {
         if (this.currentMino.moveMino(-1, 0)) {
             // console.log("cannot move!");
         } else {
-            // this.draw();
+            this.draw();
             this.isLocking = false;
         }
     }
@@ -787,7 +792,7 @@ class Wetris {
         if (this.currentMino.moveMino(1, 0)) {
             // console.log("cannot move!");
         } else {
-            // this.draw();
+            this.draw();
             this.isLocking = false;
         }
     }

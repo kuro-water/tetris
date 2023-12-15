@@ -41,7 +41,7 @@
 //         field: Field,
 //         idxMino: number
 //     ) {
-//         this.contextField = contextField;
+//         CANVAS_FIELD_CONTEXT = contextField;
 //         this.contextHold = contextHold;
 //         this.idxMino = idxMino;
 //         this.field = field;
@@ -67,7 +67,7 @@
 //      * 初期値では現在地をクリア
 //      */
 //     clearMino(x = this.x, y = this.y - DRAW_FIELD_TOP) {
-//         for (const block of this.blocks) block.drawBlock(x, y, BACKGROUND_COLOR, this.contextField);
+//         for (const block of this.blocks) block.drawBlock(x, y, BACKGROUND_COLOR, CANVAS_FIELD_CONTEXT);
 //     }
 
 //     /**
@@ -77,7 +77,7 @@
 //         x = this.x,
 //         y = this.y - DRAW_FIELD_TOP,
 //         color = MINO_COLORS[this.idxMino],
-//         context = this.contextField
+//         context = CANVAS_FIELD_CONTEXT
 //     ) {
 //         for (const block of this.blocks) {
 //             block.drawBlock(x, y, color, context);
@@ -98,7 +98,7 @@
 //                         this.x,
 //                         this.y + i - DRAW_FIELD_TOP - 1,
 //                         GHOST_COLORS[this.idxMino],
-//                         this.contextField
+//                         CANVAS_FIELD_CONTEXT
 //                     );
 //                     // ミノの方が上のレイヤーにいてほしいので再描画
 //                     this.drawMino();
@@ -399,7 +399,7 @@
 //         const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
 //         const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
 
-//         this.contextField = CANVAS_FIELD.getContext("2d");
+//         CANVAS_FIELD_CONTEXT = CANVAS_FIELD.getContext("2d");
 //         this.contextHold = CANVAS_HOLD.getContext("2d");
 //         this.contextNext = CANVAS_NEXT.getContext("2d");
 
@@ -434,24 +434,24 @@
 //     }
 
 //     clearFieldContext() {
-//         this.contextField.fillStyle = FRAME_COLOR;
-//         this.contextField.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
-//         this.contextField.fillRect(
+//         CANVAS_FIELD_CONTEXT.fillStyle = FRAME_COLOR;
+//         CANVAS_FIELD_CONTEXT.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
+//         CANVAS_FIELD_CONTEXT.fillRect(
 //             FIELD_CANVAS_SIZE[2] - BLOCK_SIZE,
 //             0,
 //             BLOCK_SIZE,
 //             FIELD_CANVAS_SIZE[3]
 //         );
-//         this.contextField.fillRect(
+//         CANVAS_FIELD_CONTEXT.fillRect(
 //             0,
 //             FIELD_CANVAS_SIZE[3] - BLOCK_SIZE,
 //             FIELD_CANVAS_SIZE[2],
 //             BLOCK_SIZE
 //         );
 //         // 行っているのは以下と同等の操作
-//         // this.contextField.fillRect(0, 0, 20, 420);
-//         // this.contextField.fillRect(220, 0, 20, 420);
-//         // this.contextField.fillRect(0, 400, 220, 20);
+//         // CANVAS_FIELD_CONTEXT.fillRect(0, 0, 20, 420);
+//         // CANVAS_FIELD_CONTEXT.fillRect(220, 0, 20, 420);
+//         // CANVAS_FIELD_CONTEXT.fillRect(0, 400, 220, 20);
 //     }
 
 //     clearHoldContext() {
@@ -507,13 +507,13 @@
 //             // console.log(this.field.field[i])
 //             for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
 //                 if (this.field.field[i][j]) {
-//                     this.contextField.fillStyle = PLACED_MINO_COLOR;
-//                     // this.contextField.fillStyle = BACKGROUND_COLOR;
-//                     // this.contextField.fillStyle = MINO_COLORS[this.currentMino.idxMino];
+//                     CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
+//                     // CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+//                     // CANVAS_FIELD_CONTEXT.fillStyle = MINO_COLORS[this.currentMino.idxMino];
 //                 } else {
-//                     this.contextField.fillStyle = BACKGROUND_COLOR;
+//                     CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
 //                 }
-//                 this.contextField.fillRect(
+//                 CANVAS_FIELD_CONTEXT.fillRect(
 //                     j * BLOCK_SIZE,
 //                     (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
 //                     BLOCK_SIZE,
@@ -532,7 +532,7 @@
 //         }
 //         // インスタンスの消去はガベージコレクションが勝手にやってくれる 手動ではできないらしい
 //         this.currentMino = new Mino(
-//             this.contextField,
+//             CANVAS_FIELD_CONTEXT,
 //             this.contextHold,
 //             this.field,
 //             this.nextMinos.pop() as number
@@ -885,13 +885,45 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
 wetris();
 
 function drawBlock(x: number, y: number, color: string) {
-    console.log("draw");
+    console.log("drawBlock");
     CANVAS_FIELD_CONTEXT.fillStyle = color;
     CANVAS_FIELD_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
     drawBlock(x, y, color);
+});
+
+function draw(field: Field) {
+    // const DRAW_FIELD_TOP = 20;
+    // const DRAW_FIELD_HEIGHT = 20;
+    // const DRAW_FIELD_WITDH = 10;
+    // const DRAW_FIELD_LEFT = 1;
+    // console.log("i:" + this.field.field.length);
+    // console.log("j:" + this.field.field[0].length);
+    for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
+        // console.log(this.field.field[i])
+        for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
+            if (field.field[i][j]) {
+                CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
+                // CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+                // CANVAS_FIELD_CONTEXT.fillStyle = MINO_COLORS[this.currentMino.idxMino];
+            } else {
+                CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+            }
+            CANVAS_FIELD_CONTEXT.fillRect(
+                j * BLOCK_SIZE,
+                (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
+                BLOCK_SIZE,
+                BLOCK_SIZE
+            );
+            // console.log("draw:" + i + "," + j);
+        }
+    }
+}
+
+ipcRenderer.on("draw", (field: Field) => {
+    draw(field);
 });
 
 ipcRenderer.on("recv", (arg1: string, arg2: string) => {
