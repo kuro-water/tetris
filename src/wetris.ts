@@ -39,12 +39,18 @@ const {
  * @param  y 基準ブロックを0とした相対座標
  */
 class Block {
+    sender: any;
     x: number;
     y: number;
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number, sender: any) {
         this.x = x;
         this.y = y;
+        this.sender = sender;
+    }
+
+    send(x: number, y: number, color: string) {
+        this.sender.send("drawBlock", this.x + x, this.y + y, color);
     }
 
     // drawBlock(x: number, y: number, color: string, context: CanvasRenderingContext2D) {
@@ -59,6 +65,8 @@ class Block {
 }
 
 class Mino {
+    sender: any;
+
     // contextField: CanvasRenderingContext2D;
     // contextHold: CanvasRenderingContext2D;
     field: Field;
@@ -75,8 +83,10 @@ class Mino {
         // contextField: CanvasRenderingContext2D,
         // contextHold: CanvasRenderingContext2D,
         field: Field,
-        idxMino: number
+        idxMino: number,
+        sender: any
     ) {
+        this.sender = sender;
         // this.contextField = contextField;
         // this.contextHold = contextHold;
         this.idxMino = idxMino;
@@ -92,13 +102,19 @@ class Mino {
             this.blocks.push(
                 new Block(
                     MINO_POS[this.idxMino][this.angle % 4][i][0],
-                    MINO_POS[this.idxMino][this.angle % 4][i][1]
+                    MINO_POS[this.idxMino][this.angle % 4][i][1],
+                    this.sender
                 )
             );
         }
         // this.drawMino();
     }
 
+    sendM() {
+        for (const block of this.blocks) {
+            block.send(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
+        }
+    }
     /**
      * 初期値では現在地をクリア
      */
@@ -403,6 +419,8 @@ class Wetris {
     // labelScore: HTMLLabelElement;
     // labelRen: HTMLLabelElement;
 
+    sender: any;
+
     currentMino: Mino;
     nextMinos: Number[] = [];
     afterNextMinos: Number[] = [];
@@ -428,7 +446,9 @@ class Wetris {
 
     isMainloop = true; // debug
 
-    constructor() {
+    constructor(sender: any) {
+        this.sender = sender;
+        sender.send("recv", "arg1", "arg2");
         // labelRen: HTMLLabelElement // labelScore: HTMLLabelElement, // canvasNext: HTMLCanvasElement, // canvasHold: HTMLCanvasElement, // canvasField: HTMLCanvasElement,
         console.log("wetris constructor started.");
         // const CANVAS_FIELD = canvasField;
@@ -452,11 +472,11 @@ class Wetris {
         this.nextMinos = this.getTurn();
         this.afterNextMinos = this.getTurn();
 
-        this.getConfig();
+        // this.getConfig();
 
         this.makeNewMino();
         this.mainloop();
-        this.keyListener(this);
+        // this.keyListener(this);
         console.log("wetris constructor ended.");
     }
 
@@ -529,6 +549,11 @@ class Wetris {
                 this.isLocking = false;
                 this.countKSKS = 0;
             }
+            try {
+                this.currentMino.sendM();
+            } catch (e) {
+                console.log(e);
+            }
         }
     };
 
@@ -571,7 +596,8 @@ class Wetris {
             // this.contextField,
             // this.contextHold,
             this.field,
-            this.nextMinos.pop() as number
+            this.nextMinos.pop() as number,
+            this.sender
         );
         if (this.currentMino.blocks.length !== 4) {
             //おわり
@@ -690,7 +716,6 @@ class Wetris {
         let ren = this.ren;
         if (ren < 0) ren = 0;
         // this.labelRen.innerText = String("ren:" + ren);
-        this.field.printField();
     };
 
     /**
@@ -821,90 +846,90 @@ class Wetris {
         return turn;
     }
 
-    keyListener(this_: Wetris) {
-        document.onkeydown = async (event) => {
-            // console.log("down:" + event.code);
-            // 押下中ならreturn
-            if (this_.isKeyDown[event.code]) return;
+    // keyListener(this_: Wetris) {
+    //     document.onkeydown = async (event) => {
+    //         // console.log("down:" + event.code);
+    //         // 押下中ならreturn
+    //         if (this_.isKeyDown[event.code]) return;
 
-            this_.isKeyDown[event.code] = true;
-            this_.keyEvent(event);
-            await this.sleep(DAS);
+    //         this_.isKeyDown[event.code] = true;
+    //         this_.keyEvent(event);
+    //         await this.sleep(DAS);
 
-            // ハードドロップは長押し無効
-            if (event.code === this.keyMap.hardDrop) return;
+    //         // ハードドロップは長押し無効
+    //         if (event.code === this.keyMap.hardDrop) return;
 
-            // 離されていたらreturn
-            if (!this_.isKeyDown[event.code]) return;
+    //         // 離されていたらreturn
+    //         if (!this_.isKeyDown[event.code]) return;
 
-            // 既にsetIntervalが動いていたらreturn
-            if (this_.idInterval[event.code] != undefined) return;
+    //         // 既にsetIntervalが動いていたらreturn
+    //         if (this_.idInterval[event.code] != undefined) return;
 
-            this_.idInterval[event.code] = setInterval(() => {
-                this_.keyEvent(event);
-            }, ARR); // 33ms毎にループ実行する、非同期
-        };
+    //         this_.idInterval[event.code] = setInterval(() => {
+    //             this_.keyEvent(event);
+    //         }, ARR); // 33ms毎にループ実行する、非同期
+    //     };
 
-        document.onkeyup = (event) => {
-            clearInterval(this_.idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
-            this_.idInterval[event.code] = null;
-            this_.isKeyDown[event.code] = false;
-            // console.log("up:" + event.code);
-        };
-    }
+    //     document.onkeyup = (event) => {
+    //         clearInterval(this_.idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
+    //         this_.idInterval[event.code] = null;
+    //         this_.isKeyDown[event.code] = false;
+    //         // console.log("up:" + event.code);
+    //     };
+    // }
 
-    keyEvent(event: KeyboardEvent) {
-        if (!this.isKeyDown[event.code]) {
-            // たまにキーを離しても入力されっぱなしになることがある。
-            // ガチで原因も対処法もわからん。
-            // 対話実行でthis.idIntervalの中身を見ても全部nullなのに。
-            // clearIntervalが上手くいってないんかね　発生条件すらわからんのでお手上げ
+    // keyEvent(event: KeyboardEvent) {
+    //     if (!this.isKeyDown[event.code]) {
+    //         // たまにキーを離しても入力されっぱなしになることがある。
+    //         // ガチで原因も対処法もわからん。
+    //         // 対話実行でthis.idIntervalの中身を見ても全部nullなのに。
+    //         // clearIntervalが上手くいってないんかね　発生条件すらわからんのでお手上げ
 
-            // ここでclearすればよくね？→だめだった。clear発動してるしエラー吐かないのに直らない
+    //         // ここでclearすればよくね？→だめだった。clear発動してるしエラー吐かないのに直らない
 
-            // for (let id of this.idInterval[event.code]) {
-            //     clearInterval(id);
-            // }
-            // id全部保存しといてclearしまくれば？
-            // →上手くいってはいるけど動作が不安定な気がする。重いのかclearが間に合ってなくて複数入力されてるっぽい感じ
+    //         // for (let id of this.idInterval[event.code]) {
+    //         //     clearInterval(id);
+    //         // }
+    //         // id全部保存しといてclearしまくれば？
+    //         // →上手くいってはいるけど動作が不安定な気がする。重いのかclearが間に合ってなくて複数入力されてるっぽい感じ
 
-            // 直った！！！ setIntervalする前に、既にsetされてたらreturnすればいい。
-            // ということはつまり、連打か何かで二重にkeyDownイベントが起きていた？
-            // console.logでは二重じゃなかったんだけどなあ。わからん
+    //         // 直った！！！ setIntervalする前に、既にsetされてたらreturnすればいい。
+    //         // ということはつまり、連打か何かで二重にkeyDownイベントが起きていた？
+    //         // console.logでは二重じゃなかったんだけどなあ。わからん
 
-            console.log("なんで長押しされてるんだエラー");
-            // clearInterval(this.idInterval[event.code]);
-            // return;
-        }
-        if (!this.currentMino) return; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        // if (keymode) {
-        //     if (event.code === "KeyA") this.moveLeft();
-        //     if (event.code === "KeyD") this.moveRight();
-        //     if (event.code === "KeyW") this.hardDrop();
-        //     if (event.code === "KeyS") this.softDrop();
-        //     if (event.code === "ArrowLeft") this.rotate(-1);
-        //     if (event.code === "ArrowRight") this.rotate();
-        //     if (event.code === "ArrowUp") this.hold();
-        // } else {
-        //     if (event.code === "ArrowLeft") this.moveLeft();
-        //     if (event.code === "ArrowRight") this.moveRight();
-        //     if (event.code === "Space") this.hardDrop();
-        //     if (event.code === "ArrowDown") this.softDrop();
-        //     if (event.code === "ShiftLeft") this.rotate(-1);
-        //     if (event.code === "ControlRight") this.rotate();
-        //     if (event.code === "KeyZ") this.rotate(-1);
-        //     if (event.code === "KeyX") this.rotate();
-        //     if (event.code === "KeyC") this.hold();
-        // }
+    //         console.log("なんで長押しされてるんだエラー");
+    //         // clearInterval(this.idInterval[event.code]);
+    //         // return;
+    //     }
+    //     if (!this.currentMino) return; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+    //     // if (keymode) {
+    //     //     if (event.code === "KeyA") this.moveLeft();
+    //     //     if (event.code === "KeyD") this.moveRight();
+    //     //     if (event.code === "KeyW") this.hardDrop();
+    //     //     if (event.code === "KeyS") this.softDrop();
+    //     //     if (event.code === "ArrowLeft") this.rotate(-1);
+    //     //     if (event.code === "ArrowRight") this.rotate();
+    //     //     if (event.code === "ArrowUp") this.hold();
+    //     // } else {
+    //     //     if (event.code === "ArrowLeft") this.moveLeft();
+    //     //     if (event.code === "ArrowRight") this.moveRight();
+    //     //     if (event.code === "Space") this.hardDrop();
+    //     //     if (event.code === "ArrowDown") this.softDrop();
+    //     //     if (event.code === "ShiftLeft") this.rotate(-1);
+    //     //     if (event.code === "ControlRight") this.rotate();
+    //     //     if (event.code === "KeyZ") this.rotate(-1);
+    //     //     if (event.code === "KeyX") this.rotate();
+    //     //     if (event.code === "KeyC") this.hold();
+    //     // }
 
-        if (event.code === this.keyMap.moveLeft) this.moveLeft();
-        if (event.code === this.keyMap.moveRight) this.moveRight();
-        if (event.code === this.keyMap.hardDrop) this.hardDrop();
-        if (event.code === this.keyMap.softDrop) this.softDrop();
-        if (event.code === this.keyMap.rotateLeft) this.rotate(-1);
-        if (event.code === this.keyMap.rotateRight) this.rotate();
-        if (event.code === this.keyMap.hold) this.hold();
-    }
+    //     if (event.code === this.keyMap.moveLeft) this.moveLeft();
+    //     if (event.code === this.keyMap.moveRight) this.moveRight();
+    //     if (event.code === this.keyMap.hardDrop) this.hardDrop();
+    //     if (event.code === this.keyMap.softDrop) this.softDrop();
+    //     if (event.code === this.keyMap.rotateLeft) this.rotate(-1);
+    //     if (event.code === this.keyMap.rotateRight) this.rotate();
+    //     if (event.code === this.keyMap.hold) this.hold();
+    // }
 }
 
 let mainWetris: Wetris;
@@ -922,9 +947,11 @@ function handleWetris() {
         ) => {
             console.log("wetris starting...");
             // new Wetris(canvasField, canvasHold, canvasNext, labelScore, labelRen);
-            mainWetris = new Wetris();
+            console.log(event);
+            console.log(event.sender);
+            mainWetris = new Wetris(event.sender);
         }
     );
 }
 
-module.exports = { handleWetris, Wetris };
+module.exports = { handleWetris };

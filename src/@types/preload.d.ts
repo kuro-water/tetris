@@ -1,4 +1,5 @@
 declare var electronAPI: any;
+declare var ipcRenderer: any;
 
 // declare function wetris(
 //     canvasField: HTMLCanvasElement,

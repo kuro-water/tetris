@@ -1,5 +1,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+contextBridge.exposeInMainWorld('ipcRenderer', {
+    on: (channel, func) => {
+        ipcRenderer.on(channel, (event, ...args) => func(...args));
+    },
+});
+
 contextBridge.exposeInMainWorld("wetris",
     (canvasField, canvasHold, canvasNext, labelScore, labelRen) => {
         console.log("preload.js");

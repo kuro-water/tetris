@@ -874,11 +874,29 @@ const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement
 const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
 const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
 
+const CANVAS_FIELD_CONTEXT = CANVAS_FIELD.getContext("2d") as CanvasRenderingContext2D;
+const CANVAS_HOLD_CONTEXT = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
+const CANVAS_NEXT_CONTEXT = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
+
 const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
 const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
 
 // wetris(CANVAS_FIELD, CANVAS_HOLD, CANVAS_NEXT, LABEL_SCORE, LABEL_REN);
 wetris();
+
+function drawBlock(x: number, y: number, color: string) {
+    console.log("draw");
+    CANVAS_FIELD_CONTEXT.fillStyle = color;
+    CANVAS_FIELD_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+}
+
+ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
+    drawBlock(x, y, color);
+});
+
+ipcRenderer.on("recv", (arg1: string, arg2: string) => {
+    console.log("received" + arg1 + arg2);
+});
 
 function debug() {
     // var keymode = 1;
