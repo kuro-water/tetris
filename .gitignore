@@ -2,6 +2,7 @@
 *.map
 renderer.js
 settings.js
+wetris.js
 config.json
 /dist
 /get_srs_data

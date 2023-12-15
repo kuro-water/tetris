@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require("fs");
+const { handleWetris, Wetris } = require("./wetris.js");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -18,11 +19,30 @@ ipcMain.handle('writeJson', async (event, jsonPath, data) => {
 	return;
 });
 
+ipcMain.handle(
+	"wetris",
+	(
+		event,
+		canvasField,
+		canvasHold,
+		canvasNext,
+		labelScore,
+		labelRen
+	) => {
+		console.log("wetris starting...");
+		new Wetris(canvasField, canvasHold, canvasNext, labelScore, labelRen);
+	}
+);
+
+// handleWetris();
+
 const createWindow = () => {
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
-		width: 512,
-		height: 768,
+		// width: 512,
+		// height: 768,
+		width: 1280,
+		height: 720,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),
 		},
@@ -32,7 +52,7 @@ const createWindow = () => {
 	mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
 	// Open the DevTools.
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
