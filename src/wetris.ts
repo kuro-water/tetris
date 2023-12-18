@@ -86,6 +86,7 @@ class Mino {
         idxMino: number,
         sender: any
     ) {
+        console.log("mino constructor started.");
         this.sender = sender;
         // this.contextField = contextField;
         // this.contextHold = contextHold;
@@ -108,18 +109,33 @@ class Mino {
             );
         }
         this.drawMino();
+        console.log("mino constructor ended.");
     }
 
     clearMino() {
         for (const block of this.blocks) {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, BACKGROUND_COLOR);
         }
+        // this.sender.send(
+        //     "drawMino",
+        //     this.x,
+        //     this.y - DRAW_FIELD_TOP,
+        //     this.blocks,
+        //     BACKGROUND_COLOR
+        // );
     }
 
     drawMino() {
         for (const block of this.blocks) {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
         }
+        // this.sender.send(
+        //     "drawMino",
+        //     this.x,
+        //     this.y - DRAW_FIELD_TOP,
+        //     this.blocks,
+        //     MINO_COLORS[this.idxMino]
+        // );
     }
     /**
      * 初期値では現在地をクリア
@@ -181,20 +197,34 @@ class Mino {
      * @return {bool} true:移動不可 false:移動済
      */
     moveMino(dx: number, dy: number): boolean {
+        let block_pos: number[][] = [[], [], [], []]; // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let toX: number, toY: number;
         toX = this.x + dx;
         toY = this.y + dy;
 
         // 移動先の検証
-        for (const block of this.blocks)
+        for (const [i, block] of this.blocks.entries()) {
             if (this.field.isFilled(toX + block.x, toY + block.y)) {
                 return true;
             }
+            block_pos[i].push(block.x);
+            block_pos[i].push(block.y);
+        }
 
-        this.clearMino();
+        // this.clearMino();
+        this.sender.send(
+            "moveMino",
+            block_pos,
+            this.x,
+            this.y - DRAW_FIELD_TOP,
+            BACKGROUND_COLOR,
+            toX,
+            toY - DRAW_FIELD_TOP,
+            MINO_COLORS[this.idxMino]
+        );
         this.x = toX;
         this.y = toY;
-        this.drawMino();
+        // this.drawMino();
         return false;
     }
 
@@ -454,7 +484,7 @@ class Wetris {
 
     constructor(sender: any) {
         this.sender = sender;
-        sender.send("recv", "arg1", "arg2");
+        sender.send("test", "arg1", "arg2");
         // labelRen: HTMLLabelElement // labelScore: HTMLLabelElement, // canvasNext: HTMLCanvasElement, // canvasHold: HTMLCanvasElement, // canvasField: HTMLCanvasElement,
         console.log("wetris constructor started.");
         // const CANVAS_FIELD = canvasField;
@@ -465,7 +495,7 @@ class Wetris {
         // this.contextHold = CANVAS_HOLD.getContext("2d");
         // this.contextNext = CANVAS_NEXT.getContext("2d");
 
-        // this.clearFieldContext();
+        this.clearFieldContext();
         // this.clearHoldContext();
         // this.clearNextContext();
 
@@ -493,6 +523,10 @@ class Wetris {
      */
     sleep(waitTime: number) {
         return new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
+
+    clearFieldContext() {
+        this.sender.send("clearFieldContext");
     }
 
     // clearFieldContext() {
@@ -548,6 +582,7 @@ class Wetris {
             if (!this.isMainloop) return;
             await this.sleep(1000);
             console.log("mainloop");
+            // this.sender.send("test", "mainloop");
             if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
             if (this.currentMino.moveMino(0, 1)) {
                 this.lockDown();
@@ -589,6 +624,8 @@ class Wetris {
 
     draw() {
         this.sender.send("draw", this.field);
+        this.currentMino.drawMino();
+        //this.currentMino.drawGhostMino();
     }
 
     makeNewMino() {
@@ -714,8 +751,8 @@ class Wetris {
             await this.sleep(SET_DELAY);
         }
         // console.log("release")
+        // this.draw();
         this.makeNewMino();
-        this.draw();
         this.isUsedHold = false;
         // this.labelScore.innerText = String("score:" + this.score);
         let ren = this.ren;
@@ -952,8 +989,8 @@ function handleWetris() {
         ) => {
             console.log("wetris starting...");
             // new Wetris(canvasField, canvasHold, canvasNext, labelScore, labelRen);
-            console.log(event);
-            console.log(event.sender);
+            // console.log(event);
+            // console.log(event.sender);
             mainWetris = new Wetris(event.sender);
         }
     );

@@ -868,6 +868,25 @@
 //     }
 // }
 
+// function debug() {
+// var keymode = 1;
+// function useArrow() {
+//     keymode = 0;
+// }
+// function useWASD() {
+//     keymode = 1;
+// }
+// const PRINT_BUTTON = document.getElementById("buttonPrint") as HTMLButtonElement;
+// const DRAW_BUTTON = document.getElementById("buttonDraw") as HTMLButtonElement;
+// const USE_ARROW_BUTTON = document.getElementById("buttonUseArrow") as HTMLButtonElement;
+// const USE_WASD_BUTTON = document.getElementById("buttonUseWASD") as HTMLButtonElement;
+// PRINT_BUTTON.addEventListener("click", mainWetris.onButtonPrint);
+// DRAW_BUTTON.addEventListener("click", mainWetris.draw);
+// USE_ARROW_BUTTON.addEventListener("click", useArrow);
+// USE_WASD_BUTTON.addEventListener("click", useWASD);
+// }
+// debug();
+
 console.log("renderer started.");
 
 const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
@@ -885,20 +904,47 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
 wetris();
 
 function drawBlock(x: number, y: number, color: string) {
-    console.log("drawBlock");
+    console.log("draw block");
+    console.log("x:" + x + ",y:" + y + ",color:" + color);
     CANVAS_FIELD_CONTEXT.fillStyle = color;
     CANVAS_FIELD_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
-
 ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
     drawBlock(x, y, color);
 });
 
+function drawMino(x: number, y: number, blocks: Block[], color: string) {
+    console.log("draw mino");
+    for (const block of blocks) {
+        drawBlock(x + block.x, y + block.y, color);
+    }
+}
+ipcRenderer.on("drawMino", (x: number, y: number, blocks: Block[], color: string) => {
+    drawMino(x, y, blocks, color);
+});
+
+ipcRenderer.on(
+    "moveMino",
+    (
+        block_pos: number[][],
+        x: number,
+        y: number,
+        backgrondColor: string,
+        tox: number,
+        toy: number,
+        color: string
+    ) => {
+        for (const pos of block_pos) {
+            drawBlock(x + pos[0], y + pos[1], backgrondColor);
+        }
+        for (const pos of block_pos) {
+            drawBlock(tox + pos[0], toy + pos[1], color);
+        }
+    }
+);
+
 function draw(field: Field) {
-    // const DRAW_FIELD_TOP = 20;
-    // const DRAW_FIELD_HEIGHT = 20;
-    // const DRAW_FIELD_WITDH = 10;
-    // const DRAW_FIELD_LEFT = 1;
+    console.log("draw field");
     // console.log("i:" + this.field.field.length);
     // console.log("j:" + this.field.field[0].length);
     for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
@@ -906,8 +952,6 @@ function draw(field: Field) {
         for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
             if (field.field[i][j]) {
                 CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
-                // CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
-                // CANVAS_FIELD_CONTEXT.fillStyle = MINO_COLORS[this.currentMino.idxMino];
             } else {
                 CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
             }
@@ -921,30 +965,45 @@ function draw(field: Field) {
         }
     }
 }
-
 ipcRenderer.on("draw", (field: Field) => {
     draw(field);
 });
 
-ipcRenderer.on("recv", (arg1: string, arg2: string) => {
-    console.log("received" + arg1 + arg2);
+ipcRenderer.on("test", (arg1: string, arg2: string) => {
+    console.log("received:" + arg1 + "," + arg2);
 });
 
-function debug() {
-    // var keymode = 1;
-    // function useArrow() {
-    //     keymode = 0;
-    // }
-    // function useWASD() {
-    //     keymode = 1;
-    // }
-    // const PRINT_BUTTON = document.getElementById("buttonPrint") as HTMLButtonElement;
-    // const DRAW_BUTTON = document.getElementById("buttonDraw") as HTMLButtonElement;
-    // const USE_ARROW_BUTTON = document.getElementById("buttonUseArrow") as HTMLButtonElement;
-    // const USE_WASD_BUTTON = document.getElementById("buttonUseWASD") as HTMLButtonElement;
-    // PRINT_BUTTON.addEventListener("click", mainWetris.onButtonPrint);
-    // DRAW_BUTTON.addEventListener("click", mainWetris.draw);
-    // USE_ARROW_BUTTON.addEventListener("click", useArrow);
-    // USE_WASD_BUTTON.addEventListener("click", useWASD);
+function clearFieldContext() {
+    console.log("clearFieldContext");
+    CANVAS_FIELD_CONTEXT.fillStyle = FRAME_COLOR;
+    CANVAS_FIELD_CONTEXT.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
+    CANVAS_FIELD_CONTEXT.fillRect(
+        FIELD_CANVAS_SIZE[2] - BLOCK_SIZE,
+        0,
+        BLOCK_SIZE,
+        FIELD_CANVAS_SIZE[3]
+    );
+    CANVAS_FIELD_CONTEXT.fillRect(
+        0,
+        FIELD_CANVAS_SIZE[3] - BLOCK_SIZE,
+        FIELD_CANVAS_SIZE[2],
+        BLOCK_SIZE
+    );
+    // 行っているのは以下と同等の操作
+    // CANVAS_FIELD_CONTEXT.fillRect(0, 0, 20, 420);
+    // CANVAS_FIELD_CONTEXT.fillRect(220, 0, 20, 420);
+    // CANVAS_FIELD_CONTEXT.fillRect(0, 400, 220, 20);
 }
-// debug();
+ipcRenderer.on("clearFieldContext", () => {
+    clearFieldContext();
+});
+
+// clearHoldContext() {
+//     this.contextHold.fillStyle = BACKGROUND_COLOR;
+//     this.contextHold.fillRect(...HOLD_CANVAS_SIZE);
+// }
+
+// clearNextContext() {
+//     this.contextNext.fillStyle = BACKGROUND_COLOR;
+//     this.contextNext.fillRect(...NEXT_CANVAS_SIZE);
+// }
