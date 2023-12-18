@@ -903,78 +903,10 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
 // wetris(CANVAS_FIELD, CANVAS_HOLD, CANVAS_NEXT, LABEL_SCORE, LABEL_REN);
 wetris();
 
-function drawBlock(x: number, y: number, color: string) {
-    console.log("draw block");
-    console.log("x:" + x + ",y:" + y + ",color:" + color);
-    CANVAS_FIELD_CONTEXT.fillStyle = color;
-    CANVAS_FIELD_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-}
-ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
-    drawBlock(x, y, color);
-});
-
-function drawMino(x: number, y: number, blocks: Block[], color: string) {
-    console.log("draw mino");
-    for (const block of blocks) {
-        drawBlock(x + block.x, y + block.y, color);
-    }
-}
-ipcRenderer.on("drawMino", (x: number, y: number, blocks: Block[], color: string) => {
-    drawMino(x, y, blocks, color);
-});
-
-ipcRenderer.on(
-    "moveMino",
-    (
-        block_pos: number[][],
-        x: number,
-        y: number,
-        backgrondColor: string,
-        tox: number,
-        toy: number,
-        color: string
-    ) => {
-        for (const pos of block_pos) {
-            drawBlock(x + pos[0], y + pos[1], backgrondColor);
-        }
-        for (const pos of block_pos) {
-            drawBlock(tox + pos[0], toy + pos[1], color);
-        }
-    }
-);
-
-function draw(field: Field) {
-    console.log("draw field");
-    // console.log("i:" + this.field.field.length);
-    // console.log("j:" + this.field.field[0].length);
-    for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
-        // console.log(this.field.field[i])
-        for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
-            if (field.field[i][j]) {
-                CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
-            } else {
-                CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
-            }
-            CANVAS_FIELD_CONTEXT.fillRect(
-                j * BLOCK_SIZE,
-                (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
-                BLOCK_SIZE,
-                BLOCK_SIZE
-            );
-            // console.log("draw:" + i + "," + j);
-        }
-    }
-}
-ipcRenderer.on("draw", (field: Field) => {
-    draw(field);
-});
-
-ipcRenderer.on("test", (arg1: string, arg2: string) => {
-    console.log("received:" + arg1 + "," + arg2);
-});
-
 function clearFieldContext() {
     console.log("clearFieldContext");
+    draw(INIT_FIELD);
+
     CANVAS_FIELD_CONTEXT.fillStyle = FRAME_COLOR;
     CANVAS_FIELD_CONTEXT.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
     CANVAS_FIELD_CONTEXT.fillRect(
@@ -998,12 +930,113 @@ ipcRenderer.on("clearFieldContext", () => {
     clearFieldContext();
 });
 
-// clearHoldContext() {
-//     this.contextHold.fillStyle = BACKGROUND_COLOR;
-//     this.contextHold.fillRect(...HOLD_CANVAS_SIZE);
-// }
+function clearHoldContext() {
+    console.log("clearHoldContext");
+    CANVAS_HOLD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+    CANVAS_HOLD_CONTEXT.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
+}
+ipcRenderer.on("clearHoldContext", () => {
+    clearHoldContext();
+});
 
-// clearNextContext() {
-//     this.contextNext.fillStyle = BACKGROUND_COLOR;
-//     this.contextNext.fillRect(...NEXT_CANVAS_SIZE);
-// }
+function clearNextContext() {
+    CANVAS_NEXT_CONTEXT.fillStyle = BACKGROUND_COLOR;
+    CANVAS_NEXT_CONTEXT.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
+}
+ipcRenderer.on("clearNextContext", () => {
+    clearNextContext();
+});
+
+function drawBlock(x: number, y: number, color: string) {
+    // console.log("draw block");
+    // console.log("x:" + x + ",y:" + y + ",color:" + color);
+    CANVAS_FIELD_CONTEXT.fillStyle = color;
+    CANVAS_FIELD_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+}
+ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
+    drawBlock(x, y, color);
+});
+
+function drawMino(x: number, y: number, blocks: Block[], color: string) {
+    // console.log("draw mino");
+    for (const block of blocks) {
+        drawBlock(x + block.x, y + block.y, color);
+    }
+}
+ipcRenderer.on("drawMino", (x: number, y: number, blocks: Block[], color: string) => {
+    drawMino(x, y, blocks, color);
+});
+
+// メインプロセスから起動するとラグでチカチカするのでこちらで処理
+ipcRenderer.on(
+    "moveMino",
+    (
+        block_pos: number[][],
+        x: number,
+        y: number,
+        backgrondColor: string,
+        tox: number,
+        toy: number,
+        color: string
+    ) => {
+        for (const pos of block_pos) {
+            drawBlock(x + pos[0], y + pos[1], backgrondColor);
+        }
+        for (const pos of block_pos) {
+            drawBlock(tox + pos[0], toy + pos[1], color);
+        }
+    }
+);
+
+function drawNextBlock(x: number, y: number, color: string) {
+    CANVAS_NEXT_CONTEXT.fillStyle = color;
+    CANVAS_NEXT_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+}
+ipcRenderer.on("drawNextBlock", (x: number, y: number, color: string) => {
+    drawNextBlock(x, y, color);
+});
+
+function drawHoldBlock(x: number, y: number, color: string) {
+    // console.log("draw hold block");
+    // console.log("x:" + x + ",y:" + y + ",color:" + color);
+    CANVAS_HOLD_CONTEXT.fillStyle = color;
+    CANVAS_HOLD_CONTEXT.fillRect(
+        (1 + x) * BLOCK_SIZE,
+        (1 + y) * BLOCK_SIZE,
+        BLOCK_SIZE,
+        BLOCK_SIZE
+    );
+}
+ipcRenderer.on("drawHoldBlock", (x: number, y: number, color: string) => {
+    drawHoldBlock(x, y, color);
+});
+
+function draw(field: number[][]) {
+    // console.log("draw field");
+    // console.log("i:" + this.field.length);
+    // console.log("j:" + this.field[0].length);
+    for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
+        // console.log(this.field[i])
+        for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
+            if (field[i][j]) {
+                CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
+            } else {
+                CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+            }
+            CANVAS_FIELD_CONTEXT.fillRect(
+                j * BLOCK_SIZE,
+                (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
+                BLOCK_SIZE,
+                BLOCK_SIZE
+            );
+            // console.log("draw:" + i + "," + j);
+        }
+    }
+}
+ipcRenderer.on("draw", (field: number[][]) => {
+    draw(field);
+});
+
+ipcRenderer.on("test", (arg1: string, arg2: string) => {
+    console.log("received:" + arg1 + "," + arg2);
+});

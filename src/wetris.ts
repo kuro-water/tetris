@@ -53,6 +53,14 @@ class Block {
         this.sender.send("drawBlock", this.x + x, this.y + y, color);
     }
 
+    drawNextBlock(x: number, y: number, color: string) {
+        this.sender.send("drawNextBlock", this.x + x, this.y + y, color);
+    }
+
+    drawHoldBlock(color: string) {
+        this.sender.send("drawHoldBlock", this.x, this.y, color);
+    }
+
     // drawBlock(x: number, y: number, color: string, context: CanvasRenderingContext2D) {
     //     context.fillStyle = color;
     //     context.fillRect(
@@ -182,6 +190,22 @@ class Mino {
     //     }
     // }
 
+    getGhostY(): number {
+        for (let i = 1; ; i++) {
+            for (const block of this.blocks) {
+                if (this.field.isFilled(this.x + block.x, this.y + block.y + i)) {
+                    return this.y + i - 1; // 内部座標
+                }
+            }
+        }
+    }
+
+    drawGhostMino() {
+        for (const block of this.blocks) {
+            block.drawBlock(this.x, this.getGhostY() - DRAW_FIELD_TOP, GHOST_COLORS[this.idxMino]);
+        }
+    }
+
     /**
      * ホールドを描画
      */
@@ -190,6 +214,14 @@ class Mino {
     //     contextHold.fillRect(...HOLD_CANVAS_SIZE);
     //     this.drawMino(1, 1, MINO_COLORS[this.idxMino], contextHold);
     // }
+
+    drawHoldMino() {
+        console.log("drawHoldMino");
+        this.sender.send("clearHoldContext");
+        for (const block of this.blocks) {
+            block.drawHoldBlock(MINO_COLORS[this.idxMino]);
+        }
+    }
 
     /**
      * ミノを移動させる
@@ -496,8 +528,8 @@ class Wetris {
         // this.contextNext = CANVAS_NEXT.getContext("2d");
 
         this.clearFieldContext();
-        // this.clearHoldContext();
-        // this.clearNextContext();
+        this.clearHoldContext();
+        this.clearNextContext();
 
         // this.labelScore = labelScore;
         // this.labelRen = labelRen;
@@ -527,6 +559,14 @@ class Wetris {
 
     clearFieldContext() {
         this.sender.send("clearFieldContext");
+    }
+
+    clearHoldContext() {
+        this.sender.send("clearHoldContext");
+    }
+
+    clearNextContext() {
+        this.sender.send("clearNextContext");
     }
 
     // clearFieldContext() {
@@ -580,8 +620,8 @@ class Wetris {
     mainloop = async () => {
         while (" ω ") {
             if (!this.isMainloop) return;
-            await this.sleep(1000);
-            console.log("mainloop");
+            await this.sleep(100);
+            // console.log("mainloop");
             // this.sender.send("test", "mainloop");
             if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
             if (this.currentMino.moveMino(0, 1)) {
@@ -590,6 +630,8 @@ class Wetris {
                 this.isLocking = false;
                 this.countKSKS = 0;
             }
+            //debug
+            this.hold();
         }
     };
 
@@ -623,9 +665,9 @@ class Wetris {
     // }
 
     draw() {
-        this.sender.send("draw", this.field);
+        this.sender.send("draw", this.field.field);
         this.currentMino.drawMino();
-        //this.currentMino.drawGhostMino();
+        this.currentMino.drawGhostMino();
     }
 
     makeNewMino() {
@@ -650,34 +692,36 @@ class Wetris {
         // console.log(this.nextMinos);
         // console.log(this.afterNextMinos);
         this.draw();
-        // this.drawNext();
+        this.drawNext();
     }
 
-    // drawNext() {
-    //     // console.log("---------- draw next ----------")
-    //     this.clearNextContext();
-    //     // ネクスト配列のコピーを作り、popで取り出す
-    //     let nextMinos = [...this.nextMinos];
-    //     let afterNextMinos = [...this.afterNextMinos];
-    //     for (let i = 0; i < 5; i++) {
-    //         let blocks: Block[] = [];
+    drawNext() {
+        // console.log("---------- draw next ----------")
+        this.clearNextContext();
+        // ネクスト配列のコピーを作り、popで取り出す
+        let nextMinos = [...this.nextMinos];
+        let afterNextMinos = [...this.afterNextMinos];
+        for (let i = 0; i < 5; i++) {
+            let blocks: Block[] = [];
 
-    //         if (!nextMinos.length) {
-    //             nextMinos = afterNextMinos;
-    //             // console.log("入れ替えた");
-    //         }
-    //         // console.log(nextMinos);
-    //         // console.log(afterNextMinos);
-    //         // console.log("");
-    //         let idxMino = nextMinos.pop() as number;
+            if (!nextMinos.length) {
+                nextMinos = afterNextMinos;
+                // console.log("入れ替えた");
+            }
+            // console.log(nextMinos);
+            // console.log(afterNextMinos);
+            // console.log("");
+            let idxMino = nextMinos.pop() as number;
 
-    //         for (let j = 0; j < 4; j++) {
-    //             blocks.push(new Block(MINO_POS[idxMino][0][j][0], MINO_POS[idxMino][0][j][1]));
-    //             blocks[j].drawBlock(1, 1 + i * 4, MINO_COLORS[idxMino], this.contextNext);
-    //         }
-    //     }
-    //     // console.log("---------- end draw next ----------")
-    // }
+            for (let j = 0; j < 4; j++) {
+                blocks.push(
+                    new Block(MINO_POS[idxMino][0][j][0], MINO_POS[idxMino][0][j][1], this.sender)
+                );
+                blocks[j].drawNextBlock(1, 1 + i * 4, MINO_COLORS[idxMino]);
+            }
+        }
+        // console.log("---------- end draw next ----------")
+    }
 
     /**
      * カサカサの処理
@@ -860,8 +904,9 @@ class Wetris {
         this.isUsedHold = true;
         if (this.holdMino !== undefined) this.nextMinos.push(this.holdMino);
         this.holdMino = this.currentMino.idxMino;
-        // this.currentMino.drawHoldMino(this.contextHold);
+        this.currentMino.drawHoldMino();
         this.makeNewMino();
+        console.log("hold");
     }
 
     // onButtonPrint() {
@@ -881,10 +926,11 @@ class Wetris {
         let idxArr = [...Array(7).keys()]; // 0~6を配列に展開
         let turn: number[] = [];
         for (let i = 0; i < 7; i++) {
-            let random = getRandomInt(0, 6 - i);
+            let random = getRandomInt(0, 7 - i);
             turn.push(idxArr[random]);
             idxArr.splice(random, 1);
         }
+        console.log(turn);
         return turn;
     }
 
