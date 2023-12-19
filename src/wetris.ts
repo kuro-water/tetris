@@ -75,8 +75,6 @@ class Block {
 class Mino {
     sender: any;
 
-    // contextField: CanvasRenderingContext2D;
-    // contextHold: CanvasRenderingContext2D;
     field: Field;
 
     //基準ブロックの絶対座標(内部座標)
@@ -87,17 +85,9 @@ class Mino {
     blocks: Block[] = [];
     lastSRS: number;
 
-    constructor(
-        // contextField: CanvasRenderingContext2D,
-        // contextHold: CanvasRenderingContext2D,
-        field: Field,
-        idxMino: number,
-        sender: any
-    ) {
+    constructor(field: Field, idxMino: number, sender: any) {
         console.log("mino constructor started.");
         this.sender = sender;
-        // this.contextField = contextField;
-        // this.contextHold = contextHold;
         this.idxMino = idxMino;
         this.field = field;
         for (let i = 0; i < 4; i++) {
@@ -124,26 +114,12 @@ class Mino {
         for (const block of this.blocks) {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, BACKGROUND_COLOR);
         }
-        // this.sender.send(
-        //     "drawMino",
-        //     this.x,
-        //     this.y - DRAW_FIELD_TOP,
-        //     this.blocks,
-        //     BACKGROUND_COLOR
-        // );
     }
 
     drawMino() {
         for (const block of this.blocks) {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
         }
-        // this.sender.send(
-        //     "drawMino",
-        //     this.x,
-        //     this.y - DRAW_FIELD_TOP,
-        //     this.blocks,
-        //     MINO_COLORS[this.idxMino]
-        // );
     }
     /**
      * 初期値では現在地をクリア
@@ -191,15 +167,20 @@ class Mino {
     // }
 
     getGhostY(): number {
-        for (let i = 1; ; i++) {
+        for (let i = 1; INIT_FIELD.length; i++) {
             for (const block of this.blocks) {
                 if (this.field.isFilled(this.x + block.x, this.y + block.y + i)) {
                     return this.y + i - 1; // 内部座標
                 }
             }
         }
+        return -1; // error
     }
 
+    /**
+     * ゴーストを描画する
+     * 別途現在地にも描画しないと上書きされる
+     */
     drawGhostMino() {
         for (const block of this.blocks) {
             block.drawBlock(this.x, this.getGhostY() - DRAW_FIELD_TOP, GHOST_COLORS[this.idxMino]);
@@ -216,7 +197,7 @@ class Mino {
     // }
 
     drawHoldMino() {
-        console.log("drawHoldMino");
+        // console.log("drawHoldMino");
         this.sender.send("clearHoldContext");
         for (const block of this.blocks) {
             block.drawHoldBlock(MINO_COLORS[this.idxMino]);
@@ -229,21 +210,22 @@ class Mino {
      * @return {bool} true:移動不可 false:移動済
      */
     moveMino(dx: number, dy: number): boolean {
-        let block_pos: number[][] = [[], [], [], []]; // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
+        // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
+        let block_pos: number[][] = [[], [], [], []];
         let toX: number, toY: number;
         toX = this.x + dx;
         toY = this.y + dy;
 
-        // 移動先の検証
         for (const [i, block] of this.blocks.entries()) {
+            // 移動先の検証
             if (this.field.isFilled(toX + block.x, toY + block.y)) {
                 return true;
             }
+            // 移動前の座標を格納
             block_pos[i].push(block.x);
             block_pos[i].push(block.y);
         }
 
-        // this.clearMino();
         this.sender.send(
             "moveMino",
             block_pos,
@@ -254,9 +236,9 @@ class Mino {
             toY - DRAW_FIELD_TOP,
             MINO_COLORS[this.idxMino]
         );
+
         this.x = toX;
         this.y = toY;
-        // this.drawMino();
         return false;
     }
 
@@ -272,7 +254,10 @@ class Mino {
             [0, 0, 0, 0],
         ];
         let move = [0, 0]; // SRSにより移動する座標(x,y)
-        while (this.angle <= 0) this.angle += 4; // mode4の-1は3ではなく-1と出てしまうため、正数にする
+        while (this.angle <= 0) {
+            // mode4の-1は3ではなく-1と出てしまうため、正の数にする
+            this.angle += 4;
+        }
 
         for (let i = 0; i < 4; i++) {
             // 基本回転
@@ -281,7 +266,10 @@ class Mino {
             // console.log("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
             // console.log("x:" + rotatedX + "y:" + rotatedY);
         }
-        if (this.checkRotation(dif, rotated, move)) return true; // 回転不可
+        if (this.checkRotation(dif, rotated, move)) {
+            // 回転不可
+            return true;
+        }
 
         this.clearMino();
         this.angle += dif;
@@ -480,13 +468,6 @@ class Field {
 }
 
 class Wetris {
-    // contextField: CanvasRenderingContext2D;
-    // contextHold: CanvasRenderingContext2D;
-    // contextNext: CanvasRenderingContext2D;
-
-    // labelScore: HTMLLabelElement;
-    // labelRen: HTMLLabelElement;
-
     sender: any;
 
     currentMino: Mino;
@@ -512,20 +493,11 @@ class Wetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloop = true; // debug
+    isMainloop = true;
 
     constructor(sender: any) {
         this.sender = sender;
-        sender.send("test", "arg1", "arg2");
-        // labelRen: HTMLLabelElement // labelScore: HTMLLabelElement, // canvasNext: HTMLCanvasElement, // canvasHold: HTMLCanvasElement, // canvasField: HTMLCanvasElement,
         console.log("wetris constructor started.");
-        // const CANVAS_FIELD = canvasField;
-        // const CANVAS_HOLD = canvasHold;
-        // const CANVAS_NEXT = canvasNext;
-
-        // this.contextField = CANVAS_FIELD.getContext("2d");
-        // this.contextHold = CANVAS_HOLD.getContext("2d");
-        // this.contextNext = CANVAS_NEXT.getContext("2d");
 
         this.clearFieldContext();
         this.clearHoldContext();
@@ -569,37 +541,6 @@ class Wetris {
         this.sender.send("clearNextContext");
     }
 
-    // clearFieldContext() {
-    //     this.contextField.fillStyle = FRAME_COLOR;
-    //     this.contextField.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
-    //     this.contextField.fillRect(
-    //         FIELD_CANVAS_SIZE[2] - BLOCK_SIZE,
-    //         0,
-    //         BLOCK_SIZE,
-    //         FIELD_CANVAS_SIZE[3]
-    //     );
-    //     this.contextField.fillRect(
-    //         0,
-    //         FIELD_CANVAS_SIZE[3] - BLOCK_SIZE,
-    //         FIELD_CANVAS_SIZE[2],
-    //         BLOCK_SIZE
-    //     );
-    //     // 行っているのは以下と同等の操作
-    //     // this.contextField.fillRect(0, 0, 20, 420);
-    //     // this.contextField.fillRect(220, 0, 20, 420);
-    //     // this.contextField.fillRect(0, 400, 220, 20);
-    // }
-
-    // clearHoldContext() {
-    //     this.contextHold.fillStyle = BACKGROUND_COLOR;
-    //     this.contextHold.fillRect(...HOLD_CANVAS_SIZE);
-    // }
-
-    // clearNextContext() {
-    //     this.contextNext.fillStyle = BACKGROUND_COLOR;
-    //     this.contextNext.fillRect(...NEXT_CANVAS_SIZE);
-    // }
-
     getConfig = async () => {
         const config = await window.electronAPI.readJson(CONFIG_PATH);
         // if (config.keyMode == "default") {
@@ -620,49 +561,21 @@ class Wetris {
     mainloop = async () => {
         while (" ω ") {
             if (!this.isMainloop) return;
-            await this.sleep(100);
+            await this.sleep(1000);
             // console.log("mainloop");
             // this.sender.send("test", "mainloop");
-            if (!this.currentMino) continue; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+            if (!this.currentMino) {
+                // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
+                continue;
+            }
             if (this.currentMino.moveMino(0, 1)) {
                 this.lockDown();
             } else {
                 this.isLocking = false;
                 this.countKSKS = 0;
             }
-            //debug
-            this.hold();
         }
     };
-
-    // draw() {
-    //     // const DRAW_FIELD_TOP = 20;
-    //     // const DRAW_FIELD_HEIGHT = 20;
-    //     // const DRAW_FIELD_WITDH = 10;
-    //     // const DRAW_FIELD_LEFT = 1;
-    //     // console.log("i:" + this.field.field.length);
-    //     // console.log("j:" + this.field.field[0].length);
-    //     for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
-    //         // console.log(this.field.field[i])
-    //         for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
-    //             if (this.field.field[i][j]) {
-    //                 this.contextField.fillStyle = PLACED_MINO_COLOR;
-    //                 // this.contextField.fillStyle = BACKGROUND_COLOR;
-    //                 // this.contextField.fillStyle = MINO_COLORS[this.currentMino.idxMino];
-    //             } else {
-    //                 this.contextField.fillStyle = BACKGROUND_COLOR;
-    //             }
-    //             this.contextField.fillRect(
-    //                 j * BLOCK_SIZE,
-    //                 (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
-    //                 BLOCK_SIZE,
-    //                 BLOCK_SIZE
-    //             );
-    //             // console.log("draw:" + i + "," + j);
-    //         }
-    //     }
-    //     this.currentMino.drawGhostMino();
-    // }
 
     draw() {
         this.sender.send("draw", this.field.field);
@@ -672,20 +585,16 @@ class Wetris {
 
     makeNewMino() {
         if (!this.nextMinos.length) {
+            // ネクストが空なら生成
             this.nextMinos = this.afterNextMinos;
             this.afterNextMinos = this.getTurn();
         }
-        // インスタンスの消去はガベージコレクションが勝手にやってくれる 手動ではできないらしい
-        this.currentMino = new Mino(
-            // this.contextField,
-            // this.contextHold,
-            this.field,
-            this.nextMinos.pop() as number,
-            this.sender
-        );
+
+        this.currentMino = new Mino(this.field, this.nextMinos.pop() as number, this.sender);
+
         if (this.currentMino.blocks.length !== 4) {
-            //おわり
-            this.currentMino = undefined;
+            // gameover
+            this.currentMino = null;
             this.isMainloop = false;
             return;
         }
@@ -693,6 +602,26 @@ class Wetris {
         // console.log(this.afterNextMinos);
         this.draw();
         this.drawNext();
+    }
+
+    getTurn(): number[] {
+        const getRandomInt = (min: number, max: number): number => {
+            //整数の乱数を生成 https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min) + min);
+        };
+
+        //七種一巡を生成
+        let idxArr = [...Array(7).keys()]; // 0~6を配列に展開
+        let turn: number[] = [];
+        for (let i = 0; i < 7; i++) {
+            let random = getRandomInt(0, 7 - i);
+            turn.push(idxArr[random]);
+            idxArr.splice(random, 1);
+        }
+        // console.log(turn);
+        return turn;
     }
 
     drawNext() {
@@ -817,7 +746,7 @@ class Wetris {
         // 適当にいい感じの二次関数 0renで0, 1renで100, 20renで4800くらい
         score += 10 * (ren + 2) * (ren + 2) - 40;
 
-        // このタイミングで整数にしないと（多分）情報落ちで計算がおかしくなる
+        // このタイミング一旦で整数にしないと（多分）情報落ちで計算がおかしくなる
         score = Math.floor(score);
 
         if (lines === 4) {
@@ -900,9 +829,15 @@ class Wetris {
     }
 
     hold() {
-        if (this.isUsedHold) return;
+        if (this.isUsedHold) {
+            return;
+        }
         this.isUsedHold = true;
-        if (this.holdMino !== undefined) this.nextMinos.push(this.holdMino);
+
+        if (this.holdMino !== undefined) {
+            this.nextMinos.push(this.holdMino);
+        }
+
         this.holdMino = this.currentMino.idxMino;
         this.currentMino.drawHoldMino();
         this.makeNewMino();
@@ -913,26 +848,6 @@ class Wetris {
     //     for (let i = 0; i < mainWetris.field.field.length; i++)
     //         console.log(String(i) + ":" + String(mainWetris.field.field[i]));
     // }
-
-    getTurn(): number[] {
-        const getRandomInt = (min: number, max: number): number => {
-            //整数の乱数を生成 https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min) + min);
-        };
-
-        //七種一巡を生成
-        let idxArr = [...Array(7).keys()]; // 0~6を配列に展開
-        let turn: number[] = [];
-        for (let i = 0; i < 7; i++) {
-            let random = getRandomInt(0, 7 - i);
-            turn.push(idxArr[random]);
-            idxArr.splice(random, 1);
-        }
-        console.log(turn);
-        return turn;
-    }
 
     // keyListener(this_: Wetris) {
     //     document.onkeydown = async (event) => {
@@ -1020,26 +935,11 @@ class Wetris {
     // }
 }
 
-let mainWetris: Wetris;
-
 function handleWetris() {
-    ipcMain.handle(
-        "wetris",
-        (
-            event: any
-            // canvasField: HTMLCanvasElement,
-            // canvasHold: HTMLCanvasElement,
-            // canvasNext: HTMLCanvasElement,
-            // labelScore: HTMLLabelElement,
-            // labelRen: HTMLLabelElement
-        ) => {
-            console.log("wetris starting...");
-            // new Wetris(canvasField, canvasHold, canvasNext, labelScore, labelRen);
-            // console.log(event);
-            // console.log(event.sender);
-            mainWetris = new Wetris(event.sender);
-        }
-    );
+    ipcMain.handle("wetris", (event: any) => {
+        console.log("wetris starting...");
+        let mainWetris = new Wetris(event.sender);
+    });
 }
 
 module.exports = { handleWetris };
