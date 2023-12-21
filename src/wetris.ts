@@ -935,10 +935,22 @@ class Wetris {
     // }
 }
 
+let listWetris: Wetris[] = [];
+
 function handleWetris() {
-    ipcMain.handle("wetris", (event: any) => {
+    ipcMain.handle("start", (event: any): number => {
         console.log("wetris starting...");
-        let mainWetris = new Wetris(event.sender);
+        listWetris.push(new Wetris(event.sender));
+        // console.log(listWetris);
+
+        // console.log(listWetris.length - 1); // idx
+        return listWetris.length - 1; // idx
+    });
+
+    ipcMain.handle("rotate", (event: any, idx: number, angle: number = 1) => {
+        // console.log(idx);
+        // console.log(listWetris[idx]);
+        listWetris[idx].rotate(angle);
     });
 }
 

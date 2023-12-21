@@ -7,9 +7,9 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 });
 
 contextBridge.exposeInMainWorld("wetris",
-    (canvasField, canvasHold, canvasNext, labelScore, labelRen) => {
-        console.log("preload.js");
-        ipcRenderer.invoke("wetris")
+    {
+        start: () => ipcRenderer.invoke("start"),
+        rotate: (idx, angle = 1) => ipcRenderer.invoke("rotate", idx, angle = 1)
     });
 
 contextBridge.exposeInMainWorld('electronAPI', {

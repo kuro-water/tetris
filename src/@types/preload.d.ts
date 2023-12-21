@@ -8,7 +8,21 @@ declare var ipcRenderer: any;
 //     labelScore: HTMLLabelElement,
 //     labelRen: HTMLLabelElement
 // ): void;
-declare function wetris(): void;
+declare function start(): number;
+
+declare class wetris {
+    static start(): Promise<number>;
+    static rotate(idx: number, angle: number = 1): null;
+}
+
+// interface Window {
+//     wetris: {
+//         create: () => number;
+//     };
+// }
+// interface wetris {
+//     create: () => number;
+// }
 
 // declare const I_MINO: number;
 // declare const T_MINO: number;

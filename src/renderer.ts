@@ -888,6 +888,86 @@
 // debug();
 
 console.log("renderer started.");
+let idxWetris: number;
+
+(async () => {
+    idxWetris = await wetris.start();
+    // console.log(idxWetris);
+})();
+
+// (async () => {
+//     idxWetris = await start();
+//     console.log(idxWetris);
+// })();
+
+document.onkeydown = (event) => {
+    if (event.code === "ArrowRight") {
+        wetris.rotate(idxWetris);
+    }
+};
+
+//     keyListener(this_: Wetris) {
+//         document.onkeydown = async (event) => {
+//             // console.log("down:" + event.code);
+//             // 押下中ならreturn
+//             if (this_.isKeyDown[event.code]) return;
+
+//             this_.isKeyDown[event.code] = true;
+//             this_.keyEvent(event);
+//             await this.sleep(DAS);
+
+//             // ハードドロップは長押し無効
+//             if (event.code === this.keyMap.hardDrop) return;
+
+//             // 離されていたらreturn
+//             if (!this_.isKeyDown[event.code]) return;
+
+//             // 既にsetIntervalが動いていたらreturn
+//             if (this_.idInterval[event.code] != undefined) return;
+
+//             this_.idInterval[event.code] = setInterval(() => {
+//                 this_.keyEvent(event);
+//             }, ARR); // 33ms毎にループ実行する、非同期
+//         };
+
+//         document.onkeyup = (event) => {
+//             clearInterval(this_.idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
+//             this_.idInterval[event.code] = null;
+//             this_.isKeyDown[event.code] = false;
+//             // console.log("up:" + event.code);
+//         };
+//     }
+
+//     keyEvent(event: KeyboardEvent) {
+//         if (!this.currentMino) return; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+//         // if (keymode) {
+//         //     if (event.code === "KeyA") this.moveLeft();
+//         //     if (event.code === "KeyD") this.moveRight();
+//         //     if (event.code === "KeyW") this.hardDrop();
+//         //     if (event.code === "KeyS") this.softDrop();
+//         //     if (event.code === "ArrowLeft") this.rotate(-1);
+//         //     if (event.code === "ArrowRight") this.rotate();
+//         //     if (event.code === "ArrowUp") this.hold();
+//         // } else {
+//         //     if (event.code === "ArrowLeft") this.moveLeft();
+//         //     if (event.code === "ArrowRight") this.moveRight();
+//         //     if (event.code === "Space") this.hardDrop();
+//         //     if (event.code === "ArrowDown") this.softDrop();
+//         //     if (event.code === "ShiftLeft") this.rotate(-1);
+//         //     if (event.code === "ControlRight") this.rotate();
+//         //     if (event.code === "KeyZ") this.rotate(-1);
+//         //     if (event.code === "KeyX") this.rotate();
+//         //     if (event.code === "KeyC") this.hold();
+//         // }
+
+//         if (event.code === this.keyMap.moveLeft) this.moveLeft();
+//         if (event.code === this.keyMap.moveRight) this.moveRight();
+//         if (event.code === this.keyMap.hardDrop) this.hardDrop();
+//         if (event.code === this.keyMap.softDrop) this.softDrop();
+//         if (event.code === this.keyMap.rotateLeft) this.rotate(-1);
+//         if (event.code === this.keyMap.rotateRight) this.rotate();
+//         if (event.code === this.keyMap.hold) this.hold();
+//     }
 
 const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
 const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
@@ -899,9 +979,6 @@ const CANVAS_NEXT_CONTEXT = CANVAS_NEXT.getContext("2d") as CanvasRenderingConte
 
 const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
 const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
-
-// wetris(CANVAS_FIELD, CANVAS_HOLD, CANVAS_NEXT, LABEL_SCORE, LABEL_REN);
-wetris();
 
 function clearFieldContext() {
     console.log("clearFieldContext");
