@@ -11,9 +11,10 @@ contextBridge.exposeInMainWorld("wetris",
         start: () => ipcRenderer.invoke("start"),
         moveLeft: (idx) => ipcRenderer.invoke("moveLeft", idx),
         moveRight: (idx) => ipcRenderer.invoke("moveRight", idx),
-        hardDrop: (idx) => ipcRenderer.invoke("hardDrop", idx),
         softDrop: (idx) => ipcRenderer.invoke("softDrop", idx),
-        rotate: (idx, angle = 1) => ipcRenderer.invoke("rotate", idx, angle),
+        hardDrop: (idx) => ipcRenderer.invoke("hardDrop", idx),
+        rotateLeft: (idx) => ipcRenderer.invoke("rotateLeft", idx),
+        rotateRight: (idx) => ipcRenderer.invoke("rotateRight", idx),
         hold: (idx) => ipcRenderer.invoke("hold", idx),
     });
 

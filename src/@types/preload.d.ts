@@ -16,7 +16,8 @@ declare class wetris {
     static moveRight(idx: number): null;
     static hardDrop(idx: number): null;
     static softDrop(idx: number): null;
-    static rotate(idx: number, angle: number = 1): null;
+    static rotateLeft(idx: number): null;
+    static rotateRight(idx: number): null;
     static hold(idx: number): null;
 }
 

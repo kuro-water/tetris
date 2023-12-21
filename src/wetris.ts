@@ -777,17 +777,10 @@ class Wetris {
         this.score += score;
     }
 
-    rotate(angle = 1) {
-        if (this.checkKSKS()) return;
-        if (this.currentMino.rotateMino(angle)) {
-            // console.log("cannot move!");
-        } else {
-            this.draw();
-            this.isLocking = false;
-        }
-    }
-
     moveLeft() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
         if (this.checkKSKS()) return;
         if (this.currentMino.moveMino(-1, 0)) {
             // console.log("cannot move!");
@@ -798,6 +791,9 @@ class Wetris {
     }
 
     moveRight() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
         if (this.checkKSKS()) return;
         if (this.currentMino.moveMino(1, 0)) {
             // console.log("cannot move!");
@@ -807,7 +803,40 @@ class Wetris {
         }
     }
 
+    rotateLeft() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
+        if (this.checkKSKS()) return;
+        if (this.currentMino.rotateMino(-1)) {
+            // console.log("cannot move!");
+        } else {
+            this.draw();
+            this.isLocking = false;
+        }
+    }
+
+    rotateRight() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
+        if (this.checkKSKS()) return;
+        if (this.currentMino.rotateMino(1)) {
+            // console.log("cannot move!");
+        } else {
+            this.draw();
+            this.isLocking = false;
+        }
+    }
+
+    /**
+     *
+     * @returns true:接地した false:接地していない
+     */
     softDrop(): boolean {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return true;
+
         // 下へ動かせなければ接地
         if (this.currentMino.moveMino(0, 1)) {
             this.lockDown();
@@ -822,6 +851,9 @@ class Wetris {
     }
 
     hardDrop() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
         // 接地まで下へ動かす
         while (!this.softDrop());
         this.score += 10;
@@ -829,6 +861,9 @@ class Wetris {
     }
 
     hold() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
         if (this.isUsedHold) {
             return;
         }
@@ -955,16 +990,20 @@ function handleWetris() {
         listWetris[idx].moveRight();
     });
 
-    ipcMain.handle("hardDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
-        listWetris[idx].hardDrop();
-    });
-
     ipcMain.handle("softDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].softDrop();
     });
 
-    ipcMain.handle("rotate", (event: typeof IpcMainInvokeEvent, idx: number, angle: number = 1) => {
-        listWetris[idx].rotate(angle);
+    ipcMain.handle("hardDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].hardDrop();
+    });
+
+    ipcMain.handle("rotateLeft", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].rotateLeft();
+    });
+
+    ipcMain.handle("rotateRight", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].rotateRight();
     });
 
     ipcMain.handle("hold", (event: typeof IpcMainInvokeEvent, idx: number) => {
