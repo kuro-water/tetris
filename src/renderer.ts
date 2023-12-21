@@ -887,6 +887,15 @@
 // }
 // debug();
 
+/**
+ *  よくわからんけどスリープできるようになる。Promiseてなんやねん
+ * @param waitTime  ミリ秒
+ * @return Promise
+ */
+function sleep(waitTime: number) {
+    return new Promise((resolve) => setTimeout(resolve, waitTime));
+}
+
 console.log("renderer started.");
 let idxWetris: number;
 
@@ -895,79 +904,68 @@ let idxWetris: number;
     // console.log(idxWetris);
 })();
 
-// (async () => {
-//     idxWetris = await start();
-//     console.log(idxWetris);
-// })();
+// document.onkeydown = (event) => {
+//     if (event.code === "ArrowRight") {
+//         wetris.rotate(idxWetris);
+//     }
+// };
 
-document.onkeydown = (event) => {
-    if (event.code === "ArrowRight") {
-        wetris.rotate(idxWetris);
-    }
+let keyMap = {
+    moveLeft: "KeyA",
+    moveRight: "KeyD",
+    softDrop: "KeyS",
+    hardDrop: "KeyW",
+    rotateLeft: "ArrowLeft",
+    rotateRight: "ArrowRight",
+    hold: "ArrowUp",
 };
 
-//     keyListener(this_: Wetris) {
-//         document.onkeydown = async (event) => {
-//             // console.log("down:" + event.code);
-//             // 押下中ならreturn
-//             if (this_.isKeyDown[event.code]) return;
+// Record<key, value>
+let idInterval: Record<string, NodeJS.Timeout> = {};
+let isKeyDown: Record<string, boolean> = {};
 
-//             this_.isKeyDown[event.code] = true;
-//             this_.keyEvent(event);
-//             await this.sleep(DAS);
+document.onkeydown = async (event) => {
+    // console.log("down:" + event.code);
 
-//             // ハードドロップは長押し無効
-//             if (event.code === this.keyMap.hardDrop) return;
+    // 押下中ならreturn
+    if (isKeyDown[event.code]) return;
+    isKeyDown[event.code] = true;
 
-//             // 離されていたらreturn
-//             if (!this_.isKeyDown[event.code]) return;
+    keyEvent(event);
+    await sleep(DAS);
 
-//             // 既にsetIntervalが動いていたらreturn
-//             if (this_.idInterval[event.code] != undefined) return;
+    // ハードドロップは長押し無効
+    if (event.code === keyMap.hardDrop) return;
 
-//             this_.idInterval[event.code] = setInterval(() => {
-//                 this_.keyEvent(event);
-//             }, ARR); // 33ms毎にループ実行する、非同期
-//         };
+    // 離されていたらreturn
+    if (!isKeyDown[event.code]) return;
 
-//         document.onkeyup = (event) => {
-//             clearInterval(this_.idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
-//             this_.idInterval[event.code] = null;
-//             this_.isKeyDown[event.code] = false;
-//             // console.log("up:" + event.code);
-//         };
-//     }
+    // 既にsetIntervalが動いていたらreturn
+    if (idInterval[event.code] !== undefined) return;
 
-//     keyEvent(event: KeyboardEvent) {
-//         if (!this.currentMino) return; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-//         // if (keymode) {
-//         //     if (event.code === "KeyA") this.moveLeft();
-//         //     if (event.code === "KeyD") this.moveRight();
-//         //     if (event.code === "KeyW") this.hardDrop();
-//         //     if (event.code === "KeyS") this.softDrop();
-//         //     if (event.code === "ArrowLeft") this.rotate(-1);
-//         //     if (event.code === "ArrowRight") this.rotate();
-//         //     if (event.code === "ArrowUp") this.hold();
-//         // } else {
-//         //     if (event.code === "ArrowLeft") this.moveLeft();
-//         //     if (event.code === "ArrowRight") this.moveRight();
-//         //     if (event.code === "Space") this.hardDrop();
-//         //     if (event.code === "ArrowDown") this.softDrop();
-//         //     if (event.code === "ShiftLeft") this.rotate(-1);
-//         //     if (event.code === "ControlRight") this.rotate();
-//         //     if (event.code === "KeyZ") this.rotate(-1);
-//         //     if (event.code === "KeyX") this.rotate();
-//         //     if (event.code === "KeyC") this.hold();
-//         // }
+    idInterval[event.code] = setInterval(() => {
+        keyEvent(event);
+    }, ARR); // 33ms毎にループ実行する、非同期
+};
 
-//         if (event.code === this.keyMap.moveLeft) this.moveLeft();
-//         if (event.code === this.keyMap.moveRight) this.moveRight();
-//         if (event.code === this.keyMap.hardDrop) this.hardDrop();
-//         if (event.code === this.keyMap.softDrop) this.softDrop();
-//         if (event.code === this.keyMap.rotateLeft) this.rotate(-1);
-//         if (event.code === this.keyMap.rotateRight) this.rotate();
-//         if (event.code === this.keyMap.hold) this.hold();
-//     }
+document.onkeyup = (event) => {
+    clearInterval(idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
+    idInterval[event.code] = undefined;
+    isKeyDown[event.code] = false;
+    // console.log("up:" + event.code);
+};
+
+function keyEvent(event: KeyboardEvent) {
+    // if (!currentMino) return; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+
+    if (event.code === keyMap.moveLeft) wetris.moveLeft(idxWetris);
+    if (event.code === keyMap.moveRight) wetris.moveRight(idxWetris);
+    if (event.code === keyMap.hardDrop) wetris.hardDrop(idxWetris);
+    if (event.code === keyMap.softDrop) wetris.softDrop(idxWetris);
+    if (event.code === keyMap.rotateLeft) wetris.rotate(idxWetris, -1);
+    if (event.code === keyMap.rotateRight) wetris.rotate(idxWetris);
+    if (event.code === keyMap.hold) wetris.hold(idxWetris);
+}
 
 const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
 const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
@@ -1044,7 +1042,7 @@ ipcRenderer.on("drawMino", (x: number, y: number, blocks: Block[], color: string
     drawMino(x, y, blocks, color);
 });
 
-// メインプロセスから起動するとラグでチカチカするのでこちらで処理
+// メインプロセスから二回起動するとラグでチカチカするのでこちらで処理
 ipcRenderer.on(
     "moveMino",
     (

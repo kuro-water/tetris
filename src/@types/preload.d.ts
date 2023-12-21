@@ -12,7 +12,12 @@ declare function start(): number;
 
 declare class wetris {
     static start(): Promise<number>;
+    static moveLeft(idx: number): null;
+    static moveRight(idx: number): null;
+    static hardDrop(idx: number): null;
+    static softDrop(idx: number): null;
     static rotate(idx: number, angle: number = 1): null;
+    static hold(idx: number): null;
 }
 
 // interface Window {

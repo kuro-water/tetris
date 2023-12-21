@@ -1,4 +1,4 @@
-const { ipcMain } = require("electron");
+const { ipcMain, IpcMainInvokeEvent } = require("electron");
 const {
     CONFIG_PATH,
     I_MINO,
@@ -39,11 +39,11 @@ const {
  * @param  y 基準ブロックを0とした相対座標
  */
 class Block {
-    sender: any;
+    sender: typeof IpcMainInvokeEvent.sender;
     x: number;
     y: number;
 
-    constructor(x: number, y: number, sender: any) {
+    constructor(x: number, y: number, sender: typeof IpcMainInvokeEvent.sender) {
         this.x = x;
         this.y = y;
         this.sender = sender;
@@ -73,7 +73,7 @@ class Block {
 }
 
 class Mino {
-    sender: any;
+    sender: typeof IpcMainInvokeEvent.sender;
 
     field: Field;
 
@@ -85,7 +85,7 @@ class Mino {
     blocks: Block[] = [];
     lastSRS: number;
 
-    constructor(field: Field, idxMino: number, sender: any) {
+    constructor(field: Field, idxMino: number, sender: typeof IpcMainInvokeEvent.sender) {
         console.log("mino constructor started.");
         this.sender = sender;
         this.idxMino = idxMino;
@@ -468,7 +468,7 @@ class Field {
 }
 
 class Wetris {
-    sender: any;
+    sender: typeof IpcMainInvokeEvent.sender;
 
     currentMino: Mino;
     nextMinos: Number[] = [];
@@ -495,7 +495,7 @@ class Wetris {
 
     isMainloop = true;
 
-    constructor(sender: any) {
+    constructor(sender: typeof IpcMainInvokeEvent.sender) {
         this.sender = sender;
         console.log("wetris constructor started.");
 
@@ -938,7 +938,7 @@ class Wetris {
 let listWetris: Wetris[] = [];
 
 function handleWetris() {
-    ipcMain.handle("start", (event: any): number => {
+    ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
         console.log("wetris starting...");
         listWetris.push(new Wetris(event.sender));
         // console.log(listWetris);
@@ -947,10 +947,32 @@ function handleWetris() {
         return listWetris.length - 1; // idx
     });
 
-    ipcMain.handle("rotate", (event: any, idx: number, angle: number = 1) => {
-        // console.log(idx);
-        // console.log(listWetris[idx]);
+    ipcMain.handle("moveLeft", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].moveLeft();
+    });
+
+    ipcMain.handle("moveRight", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].moveRight();
+    });
+
+    ipcMain.handle("hardDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].hardDrop();
+    });
+
+    ipcMain.handle("softDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].softDrop();
+    });
+
+    ipcMain.handle("rotate", (event: typeof IpcMainInvokeEvent, idx: number, angle: number = 1) => {
         listWetris[idx].rotate(angle);
+    });
+
+    ipcMain.handle("hold", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].hold();
+    });
+
+    ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        // listWetris[idx].isMainloop = false;
     });
 }
 
