@@ -86,7 +86,7 @@ class Mino {
     lastSRS: number;
 
     constructor(field: Field, idxMino: number, sender: typeof IpcMainInvokeEvent.sender) {
-        console.log("mino constructor started.");
+        // console.log("mino constructor start.");
         this.sender = sender;
         this.idxMino = idxMino;
         this.field = field;
@@ -107,7 +107,7 @@ class Mino {
             );
         }
         this.drawMino();
-        console.log("mino constructor ended.");
+        // console.log("mino constructor end.");
     }
 
     clearMino() {
@@ -121,56 +121,12 @@ class Mino {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
         }
     }
-    /**
-     * 初期値では現在地をクリア
-     */
-    // clearMino(x = this.x, y = this.y - DRAW_FIELD_TOP) {
-    //     for (const block of this.blocks) block.drawBlock(x, y, BACKGROUND_COLOR, this.contextField);
-    // }
-
-    /**
-     * 初期値では現在地にデフォルトの色で描画
-     */
-    // drawMino(
-    //     x = this.x,
-    //     y = this.y - DRAW_FIELD_TOP,
-    //     color = MINO_COLORS[this.idxMino],
-    //     context = this.contextField
-    // ) {
-    //     for (const block of this.blocks) {
-    //         block.drawBlock(x, y, color, context);
-    //     }
-    // }
-
-    /**
-     * 下まで当たり判定を調べ、ゴーストを描画する
-     * 同時に現在地にも描画する
-     * return:ゴーストのy座標(内部座標)
-     */
-    // drawGhostMino(): number {
-    //     for (let i = 1; ; i++) {
-    //         for (const block of this.blocks) {
-    //             if (this.field.isFilled(this.x + block.x, this.y + block.y + i)) {
-    //                 // ゴーストの描画
-    //                 this.drawMino(
-    //                     this.x,
-    //                     this.y + i - DRAW_FIELD_TOP - 1,
-    //                     GHOST_COLORS[this.idxMino],
-    //                     this.contextField
-    //                 );
-    //                 // ミノの方が上のレイヤーにいてほしいので再描画
-    //                 this.drawMino();
-    //                 return this.y + i - 1; // 内部座標
-    //             }
-    //         }
-    //     }
-    // }
 
     getGhostY(): number {
         for (let i = 1; INIT_FIELD.length; i++) {
             for (const block of this.blocks) {
                 if (this.field.isFilled(this.x + block.x, this.y + block.y + i)) {
-                    return this.y + i - 1; // 内部座標
+                    return this.y + i - 1; // ぶつかる1つ手前がゴーストの位置
                 }
             }
         }
@@ -186,15 +142,6 @@ class Mino {
             block.drawBlock(this.x, this.getGhostY() - DRAW_FIELD_TOP, GHOST_COLORS[this.idxMino]);
         }
     }
-
-    /**
-     * ホールドを描画
-     */
-    // drawHoldMino(contextHold: CanvasRenderingContext2D) {
-    //     contextHold.fillStyle = "whitesmoke";
-    //     contextHold.fillRect(...HOLD_CANVAS_SIZE);
-    //     this.drawMino(1, 1, MINO_COLORS[this.idxMino], contextHold);
-    // }
 
     drawHoldMino() {
         // console.log("drawHoldMino");
@@ -389,7 +336,7 @@ class Mino {
 
 /**
  * field配列は[y][x]であることに注意
- * そのため原則メソッドからアクセスすること
+ * 事故防止のため原則メソッドからアクセスすること
  */
 class Field {
     field: number[][];
@@ -421,18 +368,27 @@ class Field {
     }
 
     setField(x: number, y: number) {
-        if (this.field[y][x]) console.log("もうあるよ");
+        // if (this.field[y][x]) {
+        //     console.log("もうあるよ");
+        // }
         this.field[y][x] = 1;
     }
 
     removeField(x: number, y: number) {
-        if (!this.field[y][x]) console.log("もうないよ");
+        // if (!this.field[y][x]) {
+        //     console.log("もうないよ");
+        // }
         this.field[y][x] = 0;
     }
 
     isPerfectClear(): boolean {
-        for (let i = 0; i < this.field.length; i++)
-            for (let j = 0; j < 11; j++) if (this.field[i][j] !== INIT_FIELD[i][j]) return false;
+        for (let i = 0; i < this.field.length; i++) {
+            for (let j = 0; j < 11; j++) {
+                if (this.field[i][j] !== INIT_FIELD[i][j]) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -657,23 +613,25 @@ class Wetris {
      * return true:接地した false:接地していない
      */
     checkKSKS(): boolean {
-        return false;
+        console.log("checkKSKS");
+        // console.log(this.currentMino.y);
+        // console.log(this.currentMino.getGhostY());
 
-        // console.log("checkKSKS");
-        if (KSKS_LIMIT < this.countKSKS) {
-            // 空中にいるときは接地しない
-            console.log(this.currentMino.y);
-            // console.log(this.currentMino.drawGhostMino());
-            // if (this.currentMino.y !== this.currentMino.drawGhostMino()) {
-            //     return false;
-            // }
-            this.set();
-            this.countKSKS = 0;
-            return true;
+        // 空中にいるときは接地しない
+        if (this.currentMino.y !== this.currentMino.getGhostY()) {
+            return false;
         }
-        // console.log("plus");
-        this.countKSKS += 1;
-        return false;
+
+        // まだカサカサできる
+        if (this.countKSKS < KSKS_LIMIT) {
+            // console.log("plus");
+            this.countKSKS += 1;
+            return false;
+        }
+
+        this.set();
+        this.countKSKS = 0;
+        return true;
     }
 
     /**
@@ -750,7 +708,7 @@ class Wetris {
         score = Math.floor(score);
 
         if (lines === 4) {
-            // console.log("Wetris");
+            console.log("Wetris");
             score += 2000;
         } else if (modeTspin === 1) {
             console.log("T-spin");
@@ -864,9 +822,7 @@ class Wetris {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
-        if (this.isUsedHold) {
-            return;
-        }
+        if (this.isUsedHold) return;
         this.isUsedHold = true;
 
         if (this.holdMino !== undefined) {

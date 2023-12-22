@@ -6,17 +6,16 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     },
 });
 
-contextBridge.exposeInMainWorld("wetris",
-    {
-        start: () => ipcRenderer.invoke("start"),
-        moveLeft: (idx) => ipcRenderer.invoke("moveLeft", idx),
-        moveRight: (idx) => ipcRenderer.invoke("moveRight", idx),
-        softDrop: (idx) => ipcRenderer.invoke("softDrop", idx),
-        hardDrop: (idx) => ipcRenderer.invoke("hardDrop", idx),
-        rotateLeft: (idx) => ipcRenderer.invoke("rotateLeft", idx),
-        rotateRight: (idx) => ipcRenderer.invoke("rotateRight", idx),
-        hold: (idx) => ipcRenderer.invoke("hold", idx),
-    });
+contextBridge.exposeInMainWorld("wetris", {
+    start: () => ipcRenderer.invoke("start"),
+    moveLeft: (idx) => ipcRenderer.invoke("moveLeft", idx),
+    moveRight: (idx) => ipcRenderer.invoke("moveRight", idx),
+    softDrop: (idx) => ipcRenderer.invoke("softDrop", idx),
+    hardDrop: (idx) => ipcRenderer.invoke("hardDrop", idx),
+    rotateLeft: (idx) => ipcRenderer.invoke("rotateLeft", idx),
+    rotateRight: (idx) => ipcRenderer.invoke("rotateRight", idx),
+    hold: (idx) => ipcRenderer.invoke("hold", idx),
+});
 
 contextBridge.exposeInMainWorld('electronAPI', {
     readJson: (jsonPath) => ipcRenderer.invoke('readJson', jsonPath),
