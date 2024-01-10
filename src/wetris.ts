@@ -154,7 +154,7 @@ class Mino {
     /**
      * ミノを移動させる
      * 座標は 1/BLOCK_SIZE
-     * @return {bool} true:移動不可 false:移動済
+     * @return {bool} true:移動可(移動済) false:移動不可
      */
     moveMino(dx: number, dy: number): boolean {
         let toX: number, toY: number;
@@ -164,16 +164,16 @@ class Mino {
         for (const block of this.blocks) {
             // 移動先の検証
             if (this.field.isFilled(toX + block.x, toY + block.y)) {
-                return true;
+                return false;
             }
         }
 
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let blockPos: number[][] = [[], [], [], []];
-        for (const [i, block] of this.blocks.entries()) {
+        for (let i = 0; i < 4; i++) {
             // 移動前の座標を格納しておく
-            blockPos[i].push(block.x);
-            blockPos[i].push(block.y);
+            blockPos[i].push(this.blocks[i].x);
+            blockPos[i].push(this.blocks[i].y);
         }
         // console.log("form:" + this.x + "," + this.getGhostY());
         // console.log("to:" + toX + "," + this.getGhostY(toX));
@@ -203,7 +203,7 @@ class Mino {
 
         this.x = toX;
         this.y = toY;
-        return false;
+        return true;
     }
 
     /**
@@ -212,12 +212,11 @@ class Mino {
      * @return {bool} true:移動不可 false:移動済
      */
     rotateMino(dif = 1): boolean {
-        let rotated = [
-            // 回転後の Block.x,y を格納(x[],y[])
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-        ];
-        let move = [0, 0]; // SRSにより移動する座標(x,y)
+        // 回転後の Block.x,y を格納([x,y],[x,y],[x,y],[x,y])
+        let postBlockPos: number[][] = [[], [], [], []];
+        // SRSにより移動する座標(x,y)
+        let move = [0, 0];
+
         while (this.angle <= 0) {
             // mode4の-1は3ではなく-1と出てしまうため、正の数にする
             this.angle += 4;
@@ -225,59 +224,45 @@ class Mino {
 
         for (let i = 0; i < 4; i++) {
             // 基本回転
-            rotated[0][i] = MINO_POS[this.idxMino][(this.angle + dif) % 4][i][0];
-            rotated[1][i] = MINO_POS[this.idxMino][(this.angle + dif) % 4][i][1];
+            postBlockPos[i].push(MINO_POS[this.idxMino][(this.angle + dif) % 4][i][0]);
+            postBlockPos[i].push(MINO_POS[this.idxMino][(this.angle + dif) % 4][i][1]);
             // console.log("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
             // console.log("x:" + rotatedX + "y:" + rotatedY);
         }
-        if (this.checkRotation(dif, rotated, move)) {
+
+        if (!this.canRotate(dif, postBlockPos, move)) {
             // 回転不可
             return true;
         }
 
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let preBlockPos: number[][] = [[], [], [], []];
-        let postBlockPos: number[][] = [[], [], [], []];
-        for (const [i, block] of this.blocks.entries()) {
-            // 移動前の座標を格納しておく
-            preBlockPos[i].push(block.x);
-            preBlockPos[i].push(block.y);
-        }
         for (let i = 0; i < 4; i++) {
-            postBlockPos[i].push(rotated[0][i]);
-            postBlockPos[i].push(rotated[1][i]);
+            // 移動前の座標を格納しておく
+            preBlockPos[i].push(this.blocks[i].x);
+            preBlockPos[i].push(this.blocks[i].y);
         }
 
-        let prePos = [this.x, this.y, this.getGhostY()];
+        // 回転前の座標を格納しておく
+        const preX = this.x;
+        const preY = this.y;
+        const preGhostY = this.getGhostY();
 
-        // let preMino = new Mino(this.field, this.idxMino, this.sender);
-        // for (const [i, block] of this.blocks.entries()) {
-        //     // 移動前の座標を格納しておく
-        //     preMino.blocks[i].x = block.x;
-        //     preMino.blocks[i].y = block.y;
-        // }
-        // preMino.x = this.x;
-        // preMino.y = this.y;
-        // preMino.angle = this.angle;
-        // preMino.idxMino = this.idxMino;
-
+        // 回転処理を反映
         this.angle += dif;
         this.x += move[0];
         this.y += move[1];
         for (let i = 0; i < 4; i++) {
-            this.blocks[i].x = rotated[0][i];
-            this.blocks[i].y = rotated[1][i];
+            this.blocks[i].x = postBlockPos[i][0];
+            this.blocks[i].y = postBlockPos[i][1];
         }
-
-        // console.log("from:" + preMino.blocks[0].x + "," + preMino.blocks[0].y);
-        // console.log("to:" + this.blocks[0].x + "," + this.blocks[0].y);
 
         // ゴーストの再描画
         this.sender.send(
             "rotateMino",
             preBlockPos,
-            prePos[0],
-            prePos[2] - DRAW_FIELD_TOP,
+            preX,
+            preGhostY - DRAW_FIELD_TOP,
             BACKGROUND_COLOR,
             postBlockPos,
             this.x,
@@ -285,20 +270,12 @@ class Mino {
             GHOST_COLORS[this.idxMino]
         );
 
-        // for (const block of preBlockPos) {
-        //     console.log(block);
-        // }
-        // console.log("");
-        // for (const block of postBlockPos) {
-        //     console.log(block);
-        // }
-
         // ミノの再描画
         this.sender.send(
             "rotateMino",
             preBlockPos,
-            prePos[0],
-            prePos[1] - DRAW_FIELD_TOP,
+            preX,
+            preY - DRAW_FIELD_TOP,
             BACKGROUND_COLOR,
             postBlockPos,
             this.x,
@@ -311,18 +288,24 @@ class Mino {
 
     /**
      *  returnが使いたいので別関数に分けた
-     * @returns {bool} true:移動不可 false:移動済
+     * @returns {bool} true:移動可 false:移動不可
      */
-    checkRotation(dif: number, rotated: number[][], move: number[]): boolean {
+    canRotate(dif: number, postBlockPos: number[][], move: number[]): boolean {
         let wallKickData: number[][][][];
 
         for (let i = 0; i < 4; i++) {
             // 基本回転の検証
-            if (this.field.isFilled(this.x + rotated[0][i], this.y + rotated[1][i])) break;
-            if (i === 3) return false;
+            if (this.field.isFilled(this.x + postBlockPos[i][0], this.y + postBlockPos[i][1])) {
+                // 埋まっているブロックがあればSRSを試す
+                break;
+            }
+            if (i === 3) {
+                // 埋まってなければ回転可能
+                return true;
+            }
         }
 
-        if (this.idxMino === O_MINO) return true; // OミノにSRSは存在しない
+        if (this.idxMino === O_MINO) return false; // OミノにSRSは存在しない
         if (this.idxMino === I_MINO) wallKickData = SRS_I; // Iミノは独自のSRS判定を使用する
         else wallKickData = SRS_TLJSZ;
 
@@ -335,12 +318,12 @@ class Mino {
                 // 移動先の検証
                 if (
                     this.field.isFilled(
-                        this.x + rotated[0][j] + move[0],
-                        this.y + rotated[1][j] + move[1]
+                        this.x + postBlockPos[j][0] + move[0],
+                        this.y + postBlockPos[j][1] + move[1]
                     )
                 ) {
                     // console.log("braek:" + i);
-                    // console.log((this.x + rotated[0][j] + move[0]) + "," + (this.y + rotated[1][j] + move[1]))
+                    // console.log((this.x + postBlockPos[0][j] + move[0]) + "," + (this.y + postBlockPos[1][j] + move[1]))
                     break;
                 }
                 if (j === 3) {
@@ -349,11 +332,11 @@ class Mino {
                     //     console.log("T-spin");
                     // }
                     this.lastSRS = i;
-                    return false;
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     /**
@@ -604,10 +587,10 @@ class Wetris {
                 continue;
             }
             if (this.currentMino.moveMino(0, 1)) {
-                this.lockDown();
-            } else {
                 this.isLocking = false;
                 this.countKSKS = 0;
+            } else {
+                this.lockDown();
             }
         }
     };
@@ -820,11 +803,6 @@ class Wetris {
 
         if (this.checkKSKS()) return;
         if (this.currentMino.moveMino(-1, 0)) {
-            // console.log("cannot move!");
-        } else {
-            // this.draw();
-            // this.currentMino.drawGhostMino();
-            // this.currentMino.drawMino();
             this.isLocking = false;
         }
     }
@@ -835,11 +813,6 @@ class Wetris {
 
         if (this.checkKSKS()) return;
         if (this.currentMino.moveMino(1, 0)) {
-            // console.log("cannot move!");
-        } else {
-            // this.draw();
-            // this.currentMino.drawGhostMino();
-            // this.currentMino.drawMino();
             this.isLocking = false;
         }
     }
@@ -880,14 +853,14 @@ class Wetris {
 
         // 下へ動かせなければ接地
         if (this.currentMino.moveMino(0, 1)) {
-            this.lockDown();
-            return true;
-        } else {
             this.isLocking = false;
             this.countKSKS = 0;
             this.score += 1;
             // this.labelScore.innerText = String("score:" + this.score);
             return false;
+        } else {
+            this.lockDown();
+            return true;
         }
     }
 

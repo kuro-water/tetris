@@ -1056,9 +1056,10 @@ ipcRenderer.on(
     }
 );
 
+// メインプロセスから起動するとラグでチカチカするのでこちらで処理
 ipcRenderer.on(
     "rotateMino",
-    async function (
+    function (
         fromBlocks: number[][],
         x: number,
         y: number,
@@ -1068,15 +1069,14 @@ ipcRenderer.on(
         toy: number,
         color: string
     ) {
-        console.log("from:" + fromBlocks, "," + x + "," + y);
+        // console.log("from:" + fromBlocks, "," + x + "," + y);
         for (const pos of fromBlocks) {
             console.log(pos);
             drawBlock(x + pos[0], y + pos[1], backgrondColor);
         }
 
         // await sleep(1000);
-        console.log("to:" + toBlocks, "," + tox + "," + toy);
-
+        // console.log("to:" + toBlocks, "," + tox + "," + toy);
         for (const pos of toBlocks) {
             console.log(pos);
             drawBlock(tox + pos[0], toy + pos[1], color);
