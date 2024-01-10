@@ -122,10 +122,10 @@ class Mino {
         }
     }
 
-    getGhostY(): number {
+    getGhostY(x = this.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
             for (const block of this.blocks) {
-                if (this.field.isFilled(this.x + block.x, this.y + block.y + i)) {
+                if (this.field.isFilled(x + block.x, this.y + block.y + i)) {
                     return this.y + i - 1; // ぶつかる1つ手前がゴーストの位置
                 }
             }
@@ -157,25 +157,42 @@ class Mino {
      * @return {bool} true:移動不可 false:移動済
      */
     moveMino(dx: number, dy: number): boolean {
-        // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
-        let block_pos: number[][] = [[], [], [], []];
         let toX: number, toY: number;
         toX = this.x + dx;
         toY = this.y + dy;
 
-        for (const [i, block] of this.blocks.entries()) {
+        for (const block of this.blocks) {
             // 移動先の検証
             if (this.field.isFilled(toX + block.x, toY + block.y)) {
                 return true;
             }
-            // 移動前の座標を格納
-            block_pos[i].push(block.x);
-            block_pos[i].push(block.y);
         }
 
+        // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
+        let blockPos: number[][] = [[], [], [], []];
+        for (const [i, block] of this.blocks.entries()) {
+            // 移動前の座標を格納しておく
+            blockPos[i].push(block.x);
+            blockPos[i].push(block.y);
+        }
+        // console.log("form:" + this.x + "," + this.getGhostY());
+        // console.log("to:" + toX + "," + this.getGhostY(toX));
+        // ゴーストの再描画
         this.sender.send(
             "moveMino",
-            block_pos,
+            blockPos,
+            this.x,
+            this.getGhostY() - DRAW_FIELD_TOP,
+            BACKGROUND_COLOR,
+            toX,
+            this.getGhostY(toX) - DRAW_FIELD_TOP,
+            GHOST_COLORS[this.idxMino]
+        );
+
+        // ミノの再描画
+        this.sender.send(
+            "moveMino",
+            blockPos,
             this.x,
             this.y - DRAW_FIELD_TOP,
             BACKGROUND_COLOR,
@@ -218,7 +235,32 @@ class Mino {
             return true;
         }
 
-        this.clearMino();
+        // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
+        let preBlockPos: number[][] = [[], [], [], []];
+        let postBlockPos: number[][] = [[], [], [], []];
+        for (const [i, block] of this.blocks.entries()) {
+            // 移動前の座標を格納しておく
+            preBlockPos[i].push(block.x);
+            preBlockPos[i].push(block.y);
+        }
+        for (let i = 0; i < 4; i++) {
+            postBlockPos[i].push(rotated[0][i]);
+            postBlockPos[i].push(rotated[1][i]);
+        }
+
+        let prePos = [this.x, this.y, this.getGhostY()];
+
+        // let preMino = new Mino(this.field, this.idxMino, this.sender);
+        // for (const [i, block] of this.blocks.entries()) {
+        //     // 移動前の座標を格納しておく
+        //     preMino.blocks[i].x = block.x;
+        //     preMino.blocks[i].y = block.y;
+        // }
+        // preMino.x = this.x;
+        // preMino.y = this.y;
+        // preMino.angle = this.angle;
+        // preMino.idxMino = this.idxMino;
+
         this.angle += dif;
         this.x += move[0];
         this.y += move[1];
@@ -226,7 +268,44 @@ class Mino {
             this.blocks[i].x = rotated[0][i];
             this.blocks[i].y = rotated[1][i];
         }
-        this.drawMino();
+
+        // console.log("from:" + preMino.blocks[0].x + "," + preMino.blocks[0].y);
+        // console.log("to:" + this.blocks[0].x + "," + this.blocks[0].y);
+
+        // ゴーストの再描画
+        this.sender.send(
+            "rotateMino",
+            preBlockPos,
+            prePos[0],
+            prePos[2] - DRAW_FIELD_TOP,
+            BACKGROUND_COLOR,
+            postBlockPos,
+            this.x,
+            this.getGhostY() - DRAW_FIELD_TOP,
+            GHOST_COLORS[this.idxMino]
+        );
+
+        // for (const block of preBlockPos) {
+        //     console.log(block);
+        // }
+        // console.log("");
+        // for (const block of postBlockPos) {
+        //     console.log(block);
+        // }
+
+        // ミノの再描画
+        this.sender.send(
+            "rotateMino",
+            preBlockPos,
+            prePos[0],
+            prePos[1] - DRAW_FIELD_TOP,
+            BACKGROUND_COLOR,
+            postBlockPos,
+            this.x,
+            this.y - DRAW_FIELD_TOP,
+            MINO_COLORS[this.idxMino]
+        );
+
         return false;
     }
 
@@ -449,7 +528,7 @@ class Wetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloop = true;
+    isMainloop = false;
 
     constructor(sender: typeof IpcMainInvokeEvent.sender) {
         this.sender = sender;
@@ -535,8 +614,8 @@ class Wetris {
 
     draw() {
         this.sender.send("draw", this.field.field);
-        this.currentMino.drawMino();
         this.currentMino.drawGhostMino();
+        this.currentMino.drawMino();
     }
 
     makeNewMino() {
@@ -617,7 +696,7 @@ class Wetris {
         // console.log(this.currentMino.y);
         // console.log(this.currentMino.getGhostY());
 
-        // 空中にいるときは接地しない
+        // 空中にいるなら何もしない
         if (this.currentMino.y !== this.currentMino.getGhostY()) {
             return false;
         }
@@ -743,7 +822,9 @@ class Wetris {
         if (this.currentMino.moveMino(-1, 0)) {
             // console.log("cannot move!");
         } else {
-            this.draw();
+            // this.draw();
+            // this.currentMino.drawGhostMino();
+            // this.currentMino.drawMino();
             this.isLocking = false;
         }
     }
@@ -756,7 +837,9 @@ class Wetris {
         if (this.currentMino.moveMino(1, 0)) {
             // console.log("cannot move!");
         } else {
-            this.draw();
+            // this.draw();
+            // this.currentMino.drawGhostMino();
+            // this.currentMino.drawMino();
             this.isLocking = false;
         }
     }
@@ -769,7 +852,7 @@ class Wetris {
         if (this.currentMino.rotateMino(-1)) {
             // console.log("cannot move!");
         } else {
-            this.draw();
+            // this.draw();
             this.isLocking = false;
         }
     }
@@ -782,7 +865,7 @@ class Wetris {
         if (this.currentMino.rotateMino(1)) {
             // console.log("cannot move!");
         } else {
-            this.draw();
+            // this.draw();
             this.isLocking = false;
         }
     }

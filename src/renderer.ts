@@ -1025,7 +1025,7 @@ ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
 });
 
 function drawMino(x: number, y: number, blocks: Block[], color: string) {
-    // console.log("draw mino");
+    console.log("draw mino");
     for (const block of blocks) {
         drawBlock(x + block.x, y + block.y, color);
     }
@@ -1034,11 +1034,11 @@ ipcRenderer.on("drawMino", (x: number, y: number, blocks: Block[], color: string
     drawMino(x, y, blocks, color);
 });
 
-// メインプロセスから二回起動するとラグでチカチカするのでこちらで処理
+// メインプロセスから起動するとラグでチカチカするのでこちらで処理
 ipcRenderer.on(
     "moveMino",
     (
-        block_pos: number[][],
+        blockPos: number[][],
         x: number,
         y: number,
         backgrondColor: string,
@@ -1046,10 +1046,39 @@ ipcRenderer.on(
         toy: number,
         color: string
     ) => {
-        for (const pos of block_pos) {
+        console.log("move");
+        for (const pos of blockPos) {
             drawBlock(x + pos[0], y + pos[1], backgrondColor);
         }
-        for (const pos of block_pos) {
+        for (const pos of blockPos) {
+            drawBlock(tox + pos[0], toy + pos[1], color);
+        }
+    }
+);
+
+ipcRenderer.on(
+    "rotateMino",
+    async function (
+        fromBlocks: number[][],
+        x: number,
+        y: number,
+        backgrondColor: string,
+        toBlocks: number[][],
+        tox: number,
+        toy: number,
+        color: string
+    ) {
+        console.log("from:" + fromBlocks, "," + x + "," + y);
+        for (const pos of fromBlocks) {
+            console.log(pos);
+            drawBlock(x + pos[0], y + pos[1], backgrondColor);
+        }
+
+        // await sleep(1000);
+        console.log("to:" + toBlocks, "," + tox + "," + toy);
+
+        for (const pos of toBlocks) {
+            console.log(pos);
             drawBlock(tox + pos[0], toy + pos[1], color);
         }
     }
@@ -1079,7 +1108,7 @@ ipcRenderer.on("drawHoldBlock", (x: number, y: number, color: string) => {
 });
 
 function draw(field: number[][]) {
-    // console.log("draw field");
+    console.log("draw field");
     // console.log("i:" + this.field.length);
     // console.log("j:" + this.field[0].length);
     for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
