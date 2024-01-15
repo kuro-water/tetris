@@ -8,6 +8,9 @@ export const J_MINO = 4;
 export const S_MINO = 5;
 export const Z_MINO = 6;
 
+export const EMPTY_ROW = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+export const FULL_ROW = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
 export const INIT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],

@@ -8,6 +8,8 @@ const {
     J_MINO,
     S_MINO,
     Z_MINO,
+    EMPTY_ROW,
+    FULL_ROW,
     INIT_FIELD,
     DRAW_FIELD_TOP,
     DRAW_FIELD_HEIGHT,
@@ -60,16 +62,6 @@ class Block {
     drawHoldBlock(color: string) {
         this.sender.send("drawHoldBlock", this.x, this.y, color);
     }
-
-    // drawBlock(x: number, y: number, color: string, context: CanvasRenderingContext2D) {
-    //     context.fillStyle = color;
-    //     context.fillRect(
-    //         (this.x + x) * BLOCK_SIZE,
-    //         (this.y + y) * BLOCK_SIZE,
-    //         BLOCK_SIZE,
-    //         BLOCK_SIZE
-    //     );
-    // }
 }
 
 class Mino {
@@ -90,38 +82,36 @@ class Mino {
         this.sender = sender;
         this.idxMino = idxMino;
         this.field = field;
-        for (let i = 0; i < 4; i++) {
-            const x = MINO_POS[this.idxMino][this.angle % 4][i][0] + this.x;
-            const y = MINO_POS[this.idxMino][this.angle % 4][i][1] + this.y;
+        for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
+            const x = minoPos[0] + this.x;
+            const y = minoPos[1] + this.y;
             // console.log(String(x) + "," + String(y));
             if (this.field.isFilled(x, y)) {
                 console.log("gameover");
                 return;
             }
-            this.blocks.push(
-                new Block(
-                    MINO_POS[this.idxMino][this.angle % 4][i][0],
-                    MINO_POS[this.idxMino][this.angle % 4][i][1],
-                    this.sender
-                )
-            );
+            this.blocks.push(new Block(minoPos[0], minoPos[1], this.sender));
         }
         this.drawMino();
         // console.log("mino constructor end.");
     }
 
     clearMino() {
-        for (const block of this.blocks) {
+        this.blocks.forEach((block) => {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, BACKGROUND_COLOR);
-        }
+        });
     }
 
     drawMino() {
-        for (const block of this.blocks) {
+        this.blocks.forEach((block) => {
             block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
-        }
+        });
     }
 
+    /**
+     * ゴーストのy座標を返す
+     * @param x 指定したx座標のゴーストを返す デフォルトでは現在地
+     * */
     getGhostY(x = this.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
             for (const block of this.blocks) {
@@ -138,17 +128,17 @@ class Mino {
      * 別途現在地にも描画しないと上書きされる
      */
     drawGhostMino() {
-        for (const block of this.blocks) {
+        this.blocks.forEach((block) => {
             block.drawBlock(this.x, this.getGhostY() - DRAW_FIELD_TOP, GHOST_COLORS[this.idxMino]);
-        }
+        });
     }
 
     drawHoldMino() {
         // console.log("drawHoldMino");
         this.sender.send("clearHoldContext");
-        for (const block of this.blocks) {
+        this.blocks.forEach((block) => {
             block.drawHoldBlock(MINO_COLORS[this.idxMino]);
-        }
+        });
     }
 
     /**
@@ -157,24 +147,21 @@ class Mino {
      * @return {bool} true:移動可(移動済) false:移動不可
      */
     moveMino(dx: number, dy: number): boolean {
-        let toX: number, toY: number;
-        toX = this.x + dx;
-        toY = this.y + dy;
-
-        for (const block of this.blocks) {
-            // 移動先の検証
-            if (this.field.isFilled(toX + block.x, toY + block.y)) {
-                return false;
-            }
-        }
-
+        const toX = this.x + dx;
+        const toY = this.y + dy;
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let blockPos: number[][] = [[], [], [], []];
+
         for (let i = 0; i < 4; i++) {
-            // 移動前の座標を格納しておく
+            // 移動先の検証
+            if (this.field.isFilled(toX + this.blocks[i].x, toY + this.blocks[i].y)) {
+                return false;
+            }
+            // ブロックの座標を格納(send用)
             blockPos[i].push(this.blocks[i].x);
             blockPos[i].push(this.blocks[i].y);
         }
+
         // console.log("form:" + this.x + "," + this.getGhostY());
         // console.log("to:" + toX + "," + this.getGhostY(toX));
         // ゴーストの再描画
@@ -209,7 +196,7 @@ class Mino {
     /**
      * ミノを回転させる
      * @param dif この値だけ右回転する 負なら左回転
-     * @return {bool} true:移動不可 false:移動済
+     * @return {bool} true:移動可(移動済) false:移動不可
      */
     rotateMino(dif = 1): boolean {
         // 回転後の Block.x,y を格納([x,y],[x,y],[x,y],[x,y])
@@ -218,7 +205,7 @@ class Mino {
         let move = [0, 0];
 
         while (this.angle <= 0) {
-            // mode4の-1は3ではなく-1と出てしまうため、正の数にする
+            // -1%4は3ではなく-1と出てしまうため、正の数にする
             this.angle += 4;
         }
 
@@ -232,16 +219,16 @@ class Mino {
 
         if (!this.canRotate(dif, postBlockPos, move)) {
             // 回転不可
-            return true;
+            return false;
         }
 
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let preBlockPos: number[][] = [[], [], [], []];
-        for (let i = 0; i < 4; i++) {
+        this.blocks.forEach((block, i) => {
             // 移動前の座標を格納しておく
-            preBlockPos[i].push(this.blocks[i].x);
-            preBlockPos[i].push(this.blocks[i].y);
-        }
+            preBlockPos[i].push(block.x);
+            preBlockPos[i].push(block.y);
+        });
 
         // 回転前の座標を格納しておく
         const preX = this.x;
@@ -252,10 +239,10 @@ class Mino {
         this.angle += dif;
         this.x += move[0];
         this.y += move[1];
-        for (let i = 0; i < 4; i++) {
-            this.blocks[i].x = postBlockPos[i][0];
-            this.blocks[i].y = postBlockPos[i][1];
-        }
+        postBlockPos.forEach((pos, i) => {
+            this.blocks[i].x = pos[0];
+            this.blocks[i].y = pos[1];
+        });
 
         // ゴーストの再描画
         this.sender.send(
@@ -283,7 +270,7 @@ class Mino {
             MINO_COLORS[this.idxMino]
         );
 
-        return false;
+        return true;
     }
 
     /**
@@ -344,17 +331,15 @@ class Mino {
      * 接地の可不の判定等は無いので注意
      */
     setMino() {
-        for (const block of this.blocks) {
-            this.field.setField(this.x + block.x, this.y + block.y);
-        }
-        console.log("set.");
+        this.blocks.forEach((block) => this.field.setBlock(this.x + block.x, this.y + block.y));
+        console.log("set");
     }
 
     /**
-     * 基準ブロックを中心とした9*9の四隅のうち、三か所以上埋まっているとTspin
+     * 基準ブロックを中心とした3*3の四隅のうち、三か所以上埋まっているとTspin
      * miniの判定：
      * ・T-Spinの条件を満たしていること。
-     * ・SRSのにおける回転補正の4番目(SRS_DATA[3])でないこと。
+     * ・SRSにおける回転補正の4番目(SRS_DATA[3])でないこと。
      * ・ミノ固定時のＴミノ4隅のうち、凸側の2つのうちどちらかが空いていること。
      * 参考：https://tetris-matome.com/judgment/
      * @returns 1:Tspin, 2:Tspin mini
@@ -414,9 +399,7 @@ class Field {
      * debug
      */
     printField() {
-        for (const row of this.field) {
-            console.log(row);
-        }
+        this.field.forEach((row) => console.log(row));
     }
 
     /**
@@ -429,23 +412,17 @@ class Field {
         return !!this.field[y][x]; //number to boolean
     }
 
-    setField(x: number, y: number) {
-        // if (this.field[y][x]) {
-        //     console.log("もうあるよ");
-        // }
+    setBlock(x: number, y: number) {
         this.field[y][x] = 1;
     }
 
-    removeField(x: number, y: number) {
-        // if (!this.field[y][x]) {
-        //     console.log("もうないよ");
-        // }
+    removeBlock(x: number, y: number) {
         this.field[y][x] = 0;
     }
 
     isPerfectClear(): boolean {
         for (let i = 0; i < this.field.length; i++) {
-            for (let j = 0; j < 11; j++) {
+            for (let j = 0; j < this.field[i].length; j++) {
                 if (this.field[i][j] !== INIT_FIELD[i][j]) {
                     return false;
                 }
@@ -458,30 +435,21 @@ class Field {
      * 一列埋まっているラインがあれば消去し、下詰めする
      * @returns 消去したライン数
      */
-    deleteLines(): number {
-        let count = 0;
+    clearLines(): number {
+        let clearedLineCount = 0;
         // 一番下の行は消さない
         for (let y = 0; y < this.field.length - 1; y++) {
-            // console.log("checking:" + y)
-            // console.log(this.field.field[y]);
-            let x: number;
-            for (x = 1; x <= 10; x++) {
-                // console.log("y,x:" + y + "," + x + ":" + this.field.field[y][x])
-                if (!this.isFilled(x, y)) {
-                    break;
-                }
+            // 一列埋まっているかチェック
+            if (this.field[y].findIndex((block) => block === 0) !== -1) {
+                continue;
             }
-            // console.log(x)
-            if (x == 11) {
-                console.log("delete:" + y);
-                // deleteだと中身を消すだけでundifinedが残るのでspliceを使う
-                // delete this.field.field[y];
-                this.field.splice(y, 1);
-                this.field.unshift([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
-                count++;
-            }
+            console.log("clear:" + y);
+            // 一列消去
+            this.field.splice(y, 1);
+            this.field.unshift(EMPTY_ROW);
+            clearedLineCount++;
         }
-        return count;
+        return clearedLineCount;
     }
 }
 
@@ -511,7 +479,7 @@ class Wetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloop = false;
+    isMainloopActive = false;
 
     constructor(sender: typeof IpcMainInvokeEvent.sender) {
         this.sender = sender;
@@ -534,7 +502,7 @@ class Wetris {
 
         this.makeNewMino();
         this.mainloop();
-        // this.keyListener(this);
+
         console.log("wetris constructor ended.");
     }
 
@@ -578,8 +546,8 @@ class Wetris {
 
     mainloop = async () => {
         while (" ω ") {
-            if (!this.isMainloop) return;
             await this.sleep(1000);
+            if (!this.isMainloopActive) continue;
             // console.log("mainloop");
             // this.sender.send("test", "mainloop");
             if (!this.currentMino) {
@@ -613,7 +581,7 @@ class Wetris {
         if (this.currentMino.blocks.length !== 4) {
             // gameover
             this.currentMino = null;
-            this.isMainloop = false;
+            this.isMainloopActive = false;
             return;
         }
         // console.log(this.nextMinos);
@@ -648,7 +616,8 @@ class Wetris {
         // ネクスト配列のコピーを作り、popで取り出す
         let nextMinos = [...this.nextMinos];
         let afterNextMinos = [...this.afterNextMinos];
-        for (let i = 0; i < 5; i++) {
+        const NUM_OF_NEXT = 5;
+        for (let i = 0; i < NUM_OF_NEXT; i++) {
             let blocks: Block[] = [];
 
             if (!nextMinos.length) {
@@ -660,7 +629,7 @@ class Wetris {
             // console.log("");
             let idxMino = nextMinos.pop() as number;
 
-            for (let j = 0; j < 4; j++) {
+            for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
                 blocks.push(
                     new Block(MINO_POS[idxMino][0][j][0], MINO_POS[idxMino][0][j][1], this.sender)
                 );
@@ -672,13 +641,9 @@ class Wetris {
 
     /**
      * カサカサの処理
-     * return true:接地した false:接地していない
+     * @return true:接地した false:接地していない
      */
     checkKSKS(): boolean {
-        console.log("checkKSKS");
-        // console.log(this.currentMino.y);
-        // console.log(this.currentMino.getGhostY());
-
         // 空中にいるなら何もしない
         if (this.currentMino.y !== this.currentMino.getGhostY()) {
             return false;
@@ -717,7 +682,7 @@ class Wetris {
         let modeTspin, lines;
 
         // debug
-        if (this.currentMino.idxMino === T_MINO) console.log(this.currentMino.lastSRS);
+        // if (this.currentMino.idxMino === T_MINO) console.log(this.currentMino.lastSRS);
 
         // 接地硬直中操作不能にする
         let settingMino = this.currentMino;
@@ -726,8 +691,8 @@ class Wetris {
 
         settingMino.setMino();
         modeTspin = settingMino.getModeTspin();
-        console.log("modeTspin:" + modeTspin);
-        lines = this.field.deleteLines();
+        // console.log("modeTspin:" + modeTspin);
+        lines = this.field.clearLines();
         if (lines) {
             this.ren += 1;
             // 今回がTspinかどうか、前回がTspinかどうかの4パターン存在する。いい感じにした
@@ -823,9 +788,6 @@ class Wetris {
 
         if (this.checkKSKS()) return;
         if (this.currentMino.rotateMino(-1)) {
-            // console.log("cannot move!");
-        } else {
-            // this.draw();
             this.isLocking = false;
         }
     }
@@ -836,9 +798,6 @@ class Wetris {
 
         if (this.checkKSKS()) return;
         if (this.currentMino.rotateMino(1)) {
-            // console.log("cannot move!");
-        } else {
-            // this.draw();
             this.isLocking = false;
         }
     }
@@ -888,98 +847,8 @@ class Wetris {
         this.holdMino = this.currentMino.idxMino;
         this.currentMino.drawHoldMino();
         this.makeNewMino();
-        console.log("hold");
+        // console.log("hold");
     }
-
-    // onButtonPrint() {
-    //     for (let i = 0; i < mainWetris.field.field.length; i++)
-    //         console.log(String(i) + ":" + String(mainWetris.field.field[i]));
-    // }
-
-    // keyListener(this_: Wetris) {
-    //     document.onkeydown = async (event) => {
-    //         // console.log("down:" + event.code);
-    //         // 押下中ならreturn
-    //         if (this_.isKeyDown[event.code]) return;
-
-    //         this_.isKeyDown[event.code] = true;
-    //         this_.keyEvent(event);
-    //         await this.sleep(DAS);
-
-    //         // ハードドロップは長押し無効
-    //         if (event.code === this.keyMap.hardDrop) return;
-
-    //         // 離されていたらreturn
-    //         if (!this_.isKeyDown[event.code]) return;
-
-    //         // 既にsetIntervalが動いていたらreturn
-    //         if (this_.idInterval[event.code] != undefined) return;
-
-    //         this_.idInterval[event.code] = setInterval(() => {
-    //             this_.keyEvent(event);
-    //         }, ARR); // 33ms毎にループ実行する、非同期
-    //     };
-
-    //     document.onkeyup = (event) => {
-    //         clearInterval(this_.idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
-    //         this_.idInterval[event.code] = null;
-    //         this_.isKeyDown[event.code] = false;
-    //         // console.log("up:" + event.code);
-    //     };
-    // }
-
-    // keyEvent(event: KeyboardEvent) {
-    //     if (!this.isKeyDown[event.code]) {
-    //         // たまにキーを離しても入力されっぱなしになることがある。
-    //         // ガチで原因も対処法もわからん。
-    //         // 対話実行でthis.idIntervalの中身を見ても全部nullなのに。
-    //         // clearIntervalが上手くいってないんかね　発生条件すらわからんのでお手上げ
-
-    //         // ここでclearすればよくね？→だめだった。clear発動してるしエラー吐かないのに直らない
-
-    //         // for (let id of this.idInterval[event.code]) {
-    //         //     clearInterval(id);
-    //         // }
-    //         // id全部保存しといてclearしまくれば？
-    //         // →上手くいってはいるけど動作が不安定な気がする。重いのかclearが間に合ってなくて複数入力されてるっぽい感じ
-
-    //         // 直った！！！ setIntervalする前に、既にsetされてたらreturnすればいい。
-    //         // ということはつまり、連打か何かで二重にkeyDownイベントが起きていた？
-    //         // console.logでは二重じゃなかったんだけどなあ。わからん
-
-    //         console.log("なんで長押しされてるんだエラー");
-    //         // clearInterval(this.idInterval[event.code]);
-    //         // return;
-    //     }
-    //     if (!this.currentMino) return; // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-    //     // if (keymode) {
-    //     //     if (event.code === "KeyA") this.moveLeft();
-    //     //     if (event.code === "KeyD") this.moveRight();
-    //     //     if (event.code === "KeyW") this.hardDrop();
-    //     //     if (event.code === "KeyS") this.softDrop();
-    //     //     if (event.code === "ArrowLeft") this.rotate(-1);
-    //     //     if (event.code === "ArrowRight") this.rotate();
-    //     //     if (event.code === "ArrowUp") this.hold();
-    //     // } else {
-    //     //     if (event.code === "ArrowLeft") this.moveLeft();
-    //     //     if (event.code === "ArrowRight") this.moveRight();
-    //     //     if (event.code === "Space") this.hardDrop();
-    //     //     if (event.code === "ArrowDown") this.softDrop();
-    //     //     if (event.code === "ShiftLeft") this.rotate(-1);
-    //     //     if (event.code === "ControlRight") this.rotate();
-    //     //     if (event.code === "KeyZ") this.rotate(-1);
-    //     //     if (event.code === "KeyX") this.rotate();
-    //     //     if (event.code === "KeyC") this.hold();
-    //     // }
-
-    //     if (event.code === this.keyMap.moveLeft) this.moveLeft();
-    //     if (event.code === this.keyMap.moveRight) this.moveRight();
-    //     if (event.code === this.keyMap.hardDrop) this.hardDrop();
-    //     if (event.code === this.keyMap.softDrop) this.softDrop();
-    //     if (event.code === this.keyMap.rotateLeft) this.rotate(-1);
-    //     if (event.code === this.keyMap.rotateRight) this.rotate();
-    //     if (event.code === this.keyMap.hold) this.hold();
-    // }
 }
 
 let listWetris: Wetris[] = [];
@@ -1023,7 +892,7 @@ function handleWetris() {
     });
 
     ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
-        // listWetris[idx].isMainloop = false;
+        listWetris[idx].isMainloopActive = false;
     });
 }
 

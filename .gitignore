@@ -3,6 +3,7 @@
 renderer.js
 settings.js
 wetris.js
+constant.js
 config.json
 /dist
 /get_srs_data
