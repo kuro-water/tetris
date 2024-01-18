@@ -913,6 +913,15 @@ let keyMap = {
     rotateRight: "ArrowRight",
     hold: "ArrowUp",
 };
+// let keyMap = {
+//     moveLeft: "ArrowLeft",
+//     moveRight: "ArrowRight",
+//     softDrop: "ArrowDown",
+//     hardDrop: "Space",
+//     rotateLeft: "KeyZ",
+//     rotateRight: "ArrowUp",
+//     hold: "KeyV",
+// };
 
 // Record<key, value>
 let idInterval: Record<string, NodeJS.Timeout> = {};
@@ -952,7 +961,10 @@ document.onkeyup = (event) => {
 function keyEvent(event: KeyboardEvent) {
     if (event.code === keyMap.moveLeft) wetris.moveLeft(idxWetris);
     if (event.code === keyMap.moveRight) wetris.moveRight(idxWetris);
-    if (event.code === keyMap.hardDrop) wetris.hardDrop(idxWetris);
+    if (event.code === keyMap.hardDrop) {
+        wetris.hardDrop(idxWetris);
+        console.log(wetris.getField(idxWetris));
+    }
     if (event.code === keyMap.softDrop) wetris.softDrop(idxWetris);
     if (event.code === keyMap.rotateLeft) wetris.rotateLeft(idxWetris);
     if (event.code === keyMap.rotateRight) wetris.rotateRight(idxWetris);
@@ -1024,62 +1036,36 @@ ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
     drawBlock(x, y, color);
 });
 
-function drawMino(x: number, y: number, blocks: Block[], color: string) {
+function drawMino(x: number, y: number, blocks: number[][], color: string) {
     console.log("draw mino");
     for (const block of blocks) {
-        drawBlock(x + block.x, y + block.y, color);
+        drawBlock(x + block[0], y + block[1], color);
     }
 }
-ipcRenderer.on("drawMino", (x: number, y: number, blocks: Block[], color: string) => {
+ipcRenderer.on("drawMino", (x: number, y: number, blocks: number[][], color: string) => {
     drawMino(x, y, blocks, color);
 });
 
 // メインプロセスから起動するとラグでチカチカするのでこちらで処理
 ipcRenderer.on(
-    "moveMino",
+    "reDrawMino",
     (
-        blockPos: number[][],
-        x: number,
-        y: number,
-        backgrondColor: string,
-        tox: number,
-        toy: number,
-        color: string
+        preBlockPos: number[][],
+        preMinoPos: number[],
+        preGhostPos: number[],
+        postBlockPos: number[][],
+        postMinoPos: number[],
+        postGhostPos: number[],
+        idxMino: number
     ) => {
         console.log("move");
-        for (const pos of blockPos) {
-            drawBlock(x + pos[0], y + pos[1], backgrondColor);
+        for (const pos of preBlockPos) {
+            drawBlock(preGhostPos[0] + pos[0], preGhostPos[1] + pos[1], BACKGROUND_COLOR);
+            drawBlock(preMinoPos[0] + pos[0], preMinoPos[1] + pos[1], BACKGROUND_COLOR);
         }
-        for (const pos of blockPos) {
-            drawBlock(tox + pos[0], toy + pos[1], color);
-        }
-    }
-);
-
-// メインプロセスから起動するとラグでチカチカするのでこちらで処理
-ipcRenderer.on(
-    "rotateMino",
-    function (
-        fromBlocks: number[][],
-        x: number,
-        y: number,
-        backgrondColor: string,
-        toBlocks: number[][],
-        tox: number,
-        toy: number,
-        color: string
-    ) {
-        // console.log("from:" + fromBlocks, "," + x + "," + y);
-        for (const pos of fromBlocks) {
-            console.log(pos);
-            drawBlock(x + pos[0], y + pos[1], backgrondColor);
-        }
-
-        // await sleep(1000);
-        // console.log("to:" + toBlocks, "," + tox + "," + toy);
-        for (const pos of toBlocks) {
-            console.log(pos);
-            drawBlock(tox + pos[0], toy + pos[1], color);
+        for (const pos of postBlockPos) {
+            drawBlock(postGhostPos[0] + pos[0], postGhostPos[1] + pos[1], GHOST_COLORS[idxMino]);
+            drawBlock(postMinoPos[0] + pos[0], postMinoPos[1] + pos[1], MINO_COLORS[idxMino]);
         }
     }
 );

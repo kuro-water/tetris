@@ -19,6 +19,8 @@ declare class wetris {
     static rotateLeft(idx: number): null;
     static rotateRight(idx: number): null;
     static hold(idx: number): null;
+    static getField(idx: number): number[][];
+    static stop(idx: number): null;
 }
 
 // interface Window {

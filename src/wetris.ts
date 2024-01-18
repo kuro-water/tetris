@@ -85,9 +85,12 @@ class Mino {
         for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
             const x = minoPos[0] + this.x;
             const y = minoPos[1] + this.y;
-            // console.log(String(x) + "," + String(y));
             if (this.field.isFilled(x, y)) {
-                console.log("gameover");
+                for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
+                    console.log("gameover");
+                    console.log(minoPos[0] + this.x, minoPos[1] + this.y);
+                }
+                console.log("out:", x + this.x, y + this.y);
                 return;
             }
             this.blocks.push(new Block(minoPos[0], minoPos[1], this.sender));
@@ -162,34 +165,23 @@ class Mino {
             blockPos[i].push(this.blocks[i].y);
         }
 
-        // console.log("form:" + this.x + "," + this.getGhostY());
-        // console.log("to:" + toX + "," + this.getGhostY(toX));
-        // ゴーストの再描画
-        this.sender.send(
-            "moveMino",
-            blockPos,
-            this.x,
-            this.getGhostY() - DRAW_FIELD_TOP,
-            BACKGROUND_COLOR,
-            toX,
-            this.getGhostY(toX) - DRAW_FIELD_TOP,
-            GHOST_COLORS[this.idxMino]
-        );
-
-        // ミノの再描画
-        this.sender.send(
-            "moveMino",
-            blockPos,
-            this.x,
-            this.y - DRAW_FIELD_TOP,
-            BACKGROUND_COLOR,
-            toX,
-            toY - DRAW_FIELD_TOP,
-            MINO_COLORS[this.idxMino]
-        );
-
+        const preX = this.x;
+        const preY = this.y;
+        const preGhostY = this.getGhostY();
         this.x = toX;
         this.y = toY;
+
+        this.sender.send(
+            "reDrawMino",
+            blockPos,
+            [preX, preY - DRAW_FIELD_TOP],
+            [preX, preGhostY - DRAW_FIELD_TOP],
+            blockPos,
+            [this.x, this.y - DRAW_FIELD_TOP],
+            [this.x, this.getGhostY() - DRAW_FIELD_TOP],
+            this.idxMino
+        );
+
         return true;
     }
 
@@ -244,30 +236,15 @@ class Mino {
             this.blocks[i].y = pos[1];
         });
 
-        // ゴーストの再描画
         this.sender.send(
-            "rotateMino",
+            "reDrawMino",
             preBlockPos,
-            preX,
-            preGhostY - DRAW_FIELD_TOP,
-            BACKGROUND_COLOR,
+            [preX, preY - DRAW_FIELD_TOP],
+            [preX, preGhostY - DRAW_FIELD_TOP],
             postBlockPos,
-            this.x,
-            this.getGhostY() - DRAW_FIELD_TOP,
-            GHOST_COLORS[this.idxMino]
-        );
-
-        // ミノの再描画
-        this.sender.send(
-            "rotateMino",
-            preBlockPos,
-            preX,
-            preY - DRAW_FIELD_TOP,
-            BACKGROUND_COLOR,
-            postBlockPos,
-            this.x,
-            this.y - DRAW_FIELD_TOP,
-            MINO_COLORS[this.idxMino]
+            [this.x, this.y - DRAW_FIELD_TOP],
+            [this.x, this.getGhostY() - DRAW_FIELD_TOP],
+            this.idxMino
         );
 
         return true;
@@ -331,8 +308,10 @@ class Mino {
      * 接地の可不の判定等は無いので注意
      */
     setMino() {
-        this.blocks.forEach((block) => this.field.setBlock(this.x + block.x, this.y + block.y));
-        console.log("set");
+        this.blocks.forEach((block) => {
+            // console.log("set:", this.x + block.x, this.y + block.y);
+            this.field.setBlock(this.x + block.x, this.y + block.y);
+        });
     }
 
     /**
@@ -446,7 +425,7 @@ class Field {
             console.log("clear:" + y);
             // 一列消去
             this.field.splice(y, 1);
-            this.field.unshift(EMPTY_ROW);
+            this.field.unshift([...EMPTY_ROW]);
             clearedLineCount++;
         }
         return clearedLineCount;
@@ -479,7 +458,9 @@ class Wetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloopActive = false;
+    isMainloopActive = true;
+
+    lines = 0; // debug
 
     constructor(sender: typeof IpcMainInvokeEvent.sender) {
         this.sender = sender;
@@ -693,6 +674,8 @@ class Wetris {
         modeTspin = settingMino.getModeTspin();
         // console.log("modeTspin:" + modeTspin);
         lines = this.field.clearLines();
+        console.log("l:", this.lines);
+        this.lines += lines;
         if (lines) {
             this.ren += 1;
             // 今回がTspinかどうか、前回がTspinかどうかの4パターン存在する。いい感じにした
@@ -827,8 +810,9 @@ class Wetris {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
-        // 接地まで下へ動かす
-        while (!this.softDrop());
+        // ゴーストのy座標まで移動(接地)
+        this.currentMino.moveMino(0, this.currentMino.getGhostY() - this.currentMino.y);
+
         this.score += 10;
         this.set();
     }
@@ -889,6 +873,14 @@ function handleWetris() {
 
     ipcMain.handle("hold", (event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].hold();
+    });
+
+    ipcMain.handle("printField", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].field.printField();
+    });
+
+    ipcMain.handle("getField", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        return listWetris[idx].field.field;
     });
 
     ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
