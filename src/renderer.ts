@@ -893,24 +893,24 @@ ipcRenderer.on("test", (arg1: string, arg2: string) => {
 
 let idxWetris: number;
 
-let keyMap = {
-    moveLeft: "KeyA",
-    moveRight: "KeyD",
-    softDrop: "KeyS",
-    hardDrop: "KeyW",
-    rotateLeft: "ArrowLeft",
-    rotateRight: "ArrowRight",
-    hold: "ArrowUp",
-};
 // let keyMap = {
-//     moveLeft: "ArrowLeft",
-//     moveRight: "ArrowRight",
-//     softDrop: "ArrowDown",
-//     hardDrop: "Space",
-//     rotateLeft: "KeyZ",
-//     rotateRight: "ArrowUp",
-//     hold: "KeyV",
+//     moveLeft: "KeyA",
+//     moveRight: "KeyD",
+//     softDrop: "KeyS",
+//     hardDrop: "KeyW",
+//     rotateLeft: "ArrowLeft",
+//     rotateRight: "ArrowRight",
+//     hold: "ArrowUp",
 // };
+let keyMap = {
+    moveLeft: "ArrowLeft",
+    moveRight: "ArrowRight",
+    softDrop: "ArrowDown",
+    hardDrop: "Space",
+    rotateLeft: "KeyZ",
+    rotateRight: "ArrowUp",
+    hold: "KeyV",
+};
 
 // Record<key, value>
 let idInterval: Record<string, NodeJS.Timeout> = {};
@@ -930,9 +930,14 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
 (async function constructor() {
     console.log("renderer started.");
 
+    await getConfig();
     idxWetris = await wetris.start();
     // console.log(idxWetris);
 })();
+
+window.addEventListener("beforeunload", (event) => {
+    wetris.stop(idxWetris);
+});
 
 /**
  *  よくわからんけどスリープできるようになる。Promiseてなんやねん
@@ -941,6 +946,12 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
  */
 function sleep(waitTime: number) {
     return new Promise((resolve) => setTimeout(resolve, waitTime));
+}
+
+async function getConfig() {
+    const config = await window.electronAPI.readJson(CONFIG_PATH);
+    keyMap = config.keyMap;
+    console.log("read:config");
 }
 
 document.onkeydown = async (event) => {
@@ -968,23 +979,56 @@ document.onkeydown = async (event) => {
 };
 
 document.onkeyup = (event) => {
-    clearInterval(idInterval[event.code]); // 変数はただのIDであり、clearしないと止まらない
+    clearInterval(idInterval[event.code]); // 変数の中身はただのIDであり、clearしないと止まらない
     idInterval[event.code] = undefined;
     isKeyDown[event.code] = false;
     // console.log("up:" + event.code);
 };
 
 function keyEvent(event: KeyboardEvent) {
-    if (event.code === keyMap.moveLeft) wetris.moveLeft(idxWetris);
-    if (event.code === keyMap.moveRight) wetris.moveRight(idxWetris);
-    if (event.code === keyMap.hardDrop) {
-        wetris.hardDrop(idxWetris);
-        console.log(wetris.getField(idxWetris));
+    // if (event.code === keyMap.moveLeft) wetris.moveLeft(idxWetris);
+    // if (event.code === keyMap.moveRight) wetris.moveRight(idxWetris);
+    // if (event.code === keyMap.hardDrop) {
+    //     wetris.hardDrop(idxWetris);
+    //     console.log(wetris.getField(idxWetris));
+    // }
+    // if (event.code === keyMap.softDrop) wetris.softDrop(idxWetris);
+    // if (event.code === keyMap.rotateLeft) wetris.rotateLeft(idxWetris);
+    // if (event.code === keyMap.rotateRight) wetris.rotateRight(idxWetris);
+    // if (event.code === keyMap.hold) wetris.hold(idxWetris);
+    switch (event.code) {
+        case keyMap.moveLeft:
+            wetris.moveLeft(idxWetris);
+            break;
+
+        case keyMap.moveRight:
+            wetris.moveRight(idxWetris);
+            break;
+
+        case keyMap.softDrop:
+            wetris.softDrop(idxWetris);
+            break;
+
+        case keyMap.hardDrop:
+            wetris.hardDrop(idxWetris);
+            console.log(wetris.getField(idxWetris));
+            break;
+
+        case keyMap.rotateLeft:
+            wetris.rotateLeft(idxWetris);
+            break;
+
+        case keyMap.rotateRight:
+            wetris.rotateRight(idxWetris);
+            break;
+
+        case keyMap.hold:
+            wetris.hold(idxWetris);
+            break;
+
+        default:
+            console.log("unknown key");
     }
-    if (event.code === keyMap.softDrop) wetris.softDrop(idxWetris);
-    if (event.code === keyMap.rotateLeft) wetris.rotateLeft(idxWetris);
-    if (event.code === keyMap.rotateRight) wetris.rotateRight(idxWetris);
-    if (event.code === keyMap.hold) wetris.hold(idxWetris);
 }
 
 function setLabelScore(score: string) {

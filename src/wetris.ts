@@ -1,4 +1,4 @@
-const { ipcMain, IpcMainInvokeEvent } = require("electron");
+const { ipcMain, BrowserWindow, IpcMainInvokeEvent } = require("electron");
 const {
     CONFIG_PATH,
     I_MINO,
@@ -458,7 +458,7 @@ class Wetris {
     modeTspin = false;
     isBtB = false;
 
-    isMainloopActive = true;
+    isMainloopActive: boolean;
 
     lines = 0; // debug
 
@@ -483,6 +483,7 @@ class Wetris {
 
         this.makeNewMino();
         this.mainloop();
+        this.isMainloopActive = true;
 
         console.log("wetris constructor ended.");
     }
@@ -842,11 +843,16 @@ let listWetris: Wetris[] = [];
 function handleWetris() {
     ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
         console.log("wetris starting...");
+
         listWetris.push(new Wetris(event.sender));
-        // console.log(listWetris);
 
         // console.log(listWetris.length - 1); // idx
         return listWetris.length - 1; // idx
+    });
+
+    ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+        listWetris[idx].isMainloopActive = false;
+        console.log("stop:" + idx);
     });
 
     ipcMain.handle("moveLeft", (event: typeof IpcMainInvokeEvent, idx: number) => {
@@ -885,8 +891,8 @@ function handleWetris() {
         return listWetris[idx].field.field;
     });
 
-    ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
-        listWetris[idx].isMainloopActive = false;
+    ipcMain.handle("getLength", (event: typeof IpcMainInvokeEvent): number => {
+        return listWetris.length;
     });
 }
 

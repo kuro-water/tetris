@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 
 contextBridge.exposeInMainWorld("wetris", {
     start: () => ipcRenderer.invoke("start"),
+    stop: (idx) => ipcRenderer.invoke("stop", idx),
     moveLeft: (idx) => ipcRenderer.invoke("moveLeft", idx),
     moveRight: (idx) => ipcRenderer.invoke("moveRight", idx),
     softDrop: (idx) => ipcRenderer.invoke("softDrop", idx),
@@ -17,7 +18,7 @@ contextBridge.exposeInMainWorld("wetris", {
     hold: (idx) => ipcRenderer.invoke("hold", idx),
     printField: (idx) => ipcRenderer.invoke("printField", idx),
     getField: (idx) => ipcRenderer.invoke("getField", idx),
-    stop: (idx) => ipcRenderer.invoke("stop", idx),
+    getLength: () => ipcRenderer.invoke("getLength"),
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {

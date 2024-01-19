@@ -19,21 +19,6 @@ ipcMain.handle('writeJson', async (event, jsonPath, data) => {
 	return;
 });
 
-// ipcMain.handle(
-// 	"wetris",
-// 	(
-// 		event,
-// 		canvasField,
-// 		canvasHold,
-// 		canvasNext,
-// 		labelScore,
-// 		labelRen
-// 	) => {
-// 		console.log("wetris starting...");
-// 		new Wetris(canvasField, canvasHold, canvasNext, labelScore, labelRen);
-// 	}
-// );
-
 handleWetris();
 
 const createWindow = () => {
