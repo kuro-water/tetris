@@ -544,8 +544,8 @@ class Wetris {
         }
     };
 
-    draw() {
-        this.sender.send("draw", this.field.field);
+    drawField() {
+        this.sender.send("drawField", this.field.field);
         this.currentMino.drawGhostMino();
         this.currentMino.drawMino();
     }
@@ -567,7 +567,7 @@ class Wetris {
         }
         // console.log(this.nextMinos);
         // console.log(this.afterNextMinos);
-        this.draw();
+        this.drawField();
         this.drawNext();
     }
 
@@ -695,10 +695,10 @@ class Wetris {
         // this.draw();
         this.makeNewMino();
         this.isUsedHold = false;
-        // this.labelScore.innerText = String("score:" + this.score);
+        this.sender.send("setLabelScore", String("score:" + this.score));
         let ren = this.ren;
         if (ren < 0) ren = 0;
-        // this.labelRen.innerText = String("ren:" + ren);
+        this.sender.send("setLabelRen", String("ren:" + ren));
     };
 
     /**
@@ -798,7 +798,7 @@ class Wetris {
             this.isLocking = false;
             this.countKSKS = 0;
             this.score += 1;
-            // this.labelScore.innerText = String("score:" + this.score);
+            this.sender.send("setLabelScore", String("score:" + this.score));
             return false;
         } else {
             this.lockDown();
@@ -810,10 +810,12 @@ class Wetris {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
+        this.score += this.currentMino.getGhostY() - this.currentMino.y;
+        this.score += 10;
+
         // ゴーストのy座標まで移動(接地)
         this.currentMino.moveMino(0, this.currentMino.getGhostY() - this.currentMino.y);
 
-        this.score += 10;
         this.set();
     }
 

@@ -887,22 +887,11 @@
 // }
 // debug();
 
-/**
- *  よくわからんけどスリープできるようになる。Promiseてなんやねん
- * @param waitTime  ミリ秒
- * @return Promise
- */
-function sleep(waitTime: number) {
-    return new Promise((resolve) => setTimeout(resolve, waitTime));
-}
+ipcRenderer.on("test", (arg1: string, arg2: string) => {
+    console.log("received:" + arg1 + "," + arg2);
+});
 
-console.log("renderer started.");
 let idxWetris: number;
-
-(async () => {
-    idxWetris = await wetris.start();
-    // console.log(idxWetris);
-})();
 
 let keyMap = {
     moveLeft: "KeyA",
@@ -926,6 +915,33 @@ let keyMap = {
 // Record<key, value>
 let idInterval: Record<string, NodeJS.Timeout> = {};
 let isKeyDown: Record<string, boolean> = {};
+
+const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
+const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
+const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
+
+const CANVAS_FIELD_CONTEXT = CANVAS_FIELD.getContext("2d") as CanvasRenderingContext2D;
+const CANVAS_HOLD_CONTEXT = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
+const CANVAS_NEXT_CONTEXT = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
+
+const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
+const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
+
+(async function constructor() {
+    console.log("renderer started.");
+
+    idxWetris = await wetris.start();
+    // console.log(idxWetris);
+})();
+
+/**
+ *  よくわからんけどスリープできるようになる。Promiseてなんやねん
+ * @param waitTime  ミリ秒
+ * @return Promise
+ */
+function sleep(waitTime: number) {
+    return new Promise((resolve) => setTimeout(resolve, waitTime));
+}
 
 document.onkeydown = async (event) => {
     // console.log("down:" + event.code);
@@ -971,20 +987,19 @@ function keyEvent(event: KeyboardEvent) {
     if (event.code === keyMap.hold) wetris.hold(idxWetris);
 }
 
-const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
-const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
-const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
+function setLabelScore(score: string) {
+    LABEL_SCORE.innerText = score;
+}
+ipcRenderer.on("setLabelScore", setLabelScore);
 
-const CANVAS_FIELD_CONTEXT = CANVAS_FIELD.getContext("2d") as CanvasRenderingContext2D;
-const CANVAS_HOLD_CONTEXT = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
-const CANVAS_NEXT_CONTEXT = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
-
-const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
-const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
+function setLabelRen(ren: string) {
+    LABEL_REN.innerText = ren;
+}
+ipcRenderer.on("setLabelRen", setLabelRen);
 
 function clearFieldContext() {
     console.log("clearFieldContext");
-    draw(INIT_FIELD);
+    drawField(INIT_FIELD);
 
     CANVAS_FIELD_CONTEXT.fillStyle = FRAME_COLOR;
     CANVAS_FIELD_CONTEXT.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
@@ -1005,26 +1020,20 @@ function clearFieldContext() {
     // CANVAS_FIELD_CONTEXT.fillRect(220, 0, 20, 420);
     // CANVAS_FIELD_CONTEXT.fillRect(0, 400, 220, 20);
 }
-ipcRenderer.on("clearFieldContext", () => {
-    clearFieldContext();
-});
+ipcRenderer.on("clearFieldContext", clearFieldContext);
 
 function clearHoldContext() {
     console.log("clearHoldContext");
     CANVAS_HOLD_CONTEXT.fillStyle = BACKGROUND_COLOR;
     CANVAS_HOLD_CONTEXT.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
 }
-ipcRenderer.on("clearHoldContext", () => {
-    clearHoldContext();
-});
+ipcRenderer.on("clearHoldContext", clearHoldContext);
 
 function clearNextContext() {
     CANVAS_NEXT_CONTEXT.fillStyle = BACKGROUND_COLOR;
     CANVAS_NEXT_CONTEXT.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
 }
-ipcRenderer.on("clearNextContext", () => {
-    clearNextContext();
-});
+ipcRenderer.on("clearNextContext", clearNextContext);
 
 function drawBlock(x: number, y: number, color: string) {
     // console.log("draw block");
@@ -1032,9 +1041,7 @@ function drawBlock(x: number, y: number, color: string) {
     CANVAS_FIELD_CONTEXT.fillStyle = color;
     CANVAS_FIELD_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
-ipcRenderer.on("drawBlock", (x: number, y: number, color: string) => {
-    drawBlock(x, y, color);
-});
+ipcRenderer.on("drawBlock", drawBlock);
 
 function drawMino(x: number, y: number, blocks: number[][], color: string) {
     console.log("draw mino");
@@ -1042,9 +1049,7 @@ function drawMino(x: number, y: number, blocks: number[][], color: string) {
         drawBlock(x + block[0], y + block[1], color);
     }
 }
-ipcRenderer.on("drawMino", (x: number, y: number, blocks: number[][], color: string) => {
-    drawMino(x, y, blocks, color);
-});
+ipcRenderer.on("drawMino", drawMino);
 
 // メインプロセスから起動するとラグでチカチカするのでこちらで処理
 ipcRenderer.on(
@@ -1074,9 +1079,7 @@ function drawNextBlock(x: number, y: number, color: string) {
     CANVAS_NEXT_CONTEXT.fillStyle = color;
     CANVAS_NEXT_CONTEXT.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
-ipcRenderer.on("drawNextBlock", (x: number, y: number, color: string) => {
-    drawNextBlock(x, y, color);
-});
+ipcRenderer.on("drawNextBlock", drawNextBlock);
 
 function drawHoldBlock(x: number, y: number, color: string) {
     // console.log("draw hold block");
@@ -1089,11 +1092,9 @@ function drawHoldBlock(x: number, y: number, color: string) {
         BLOCK_SIZE
     );
 }
-ipcRenderer.on("drawHoldBlock", (x: number, y: number, color: string) => {
-    drawHoldBlock(x, y, color);
-});
+ipcRenderer.on("drawHoldBlock", drawHoldBlock);
 
-function draw(field: number[][]) {
+function drawField(field: number[][]) {
     console.log("draw field");
     // console.log("i:" + this.field.length);
     // console.log("j:" + this.field[0].length);
@@ -1115,10 +1116,4 @@ function draw(field: number[][]) {
         }
     }
 }
-ipcRenderer.on("draw", (field: number[][]) => {
-    draw(field);
-});
-
-ipcRenderer.on("test", (arg1: string, arg2: string) => {
-    console.log("received:" + arg1 + "," + arg2);
-});
+ipcRenderer.on("drawField", drawField);
