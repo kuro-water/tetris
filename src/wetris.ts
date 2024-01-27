@@ -36,36 +36,8 @@ const {
     KSKS_LIMIT,
 } = require("./constant");
 
-/**
- * @param  {number}x 基準ブロックを0とした相対座標
- * @param  y 基準ブロックを0とした相対座標
- */
-class Block {
-    sender: typeof IpcMainInvokeEvent.sender;
-    x: number;
-    y: number;
-
-    constructor(x: number, y: number, sender: typeof IpcMainInvokeEvent.sender) {
-        this.x = x;
-        this.y = y;
-        this.sender = sender;
-    }
-
-    drawBlock(x: number, y: number, color: string) {
-        this.sender.send("drawBlock", this.x + x, this.y + y, color);
-    }
-
-    drawNextBlock(x: number, y: number, color: string) {
-        this.sender.send("drawNextBlock", this.x + x, this.y + y, color);
-    }
-
-    drawHoldBlock(color: string) {
-        this.sender.send("drawHoldBlock", this.x, this.y, color);
-    }
-}
-
 class Mino {
-    sender: typeof IpcMainInvokeEvent.sender;
+    sender: electronSender;
 
     field: Field;
 
@@ -74,10 +46,10 @@ class Mino {
     y = DRAW_FIELD_TOP + 1;
     idxMino: number;
     angle = 0;
-    blocks: Block[] = [];
+    blockPos: blocks = [];
     lastSRS: number;
 
-    constructor(field: Field, idxMino: number, sender: typeof IpcMainInvokeEvent.sender) {
+    constructor(field: Field, idxMino: number, sender: electronSender) {
         // console.log("mino constructor start.");
         this.sender = sender;
         this.idxMino = idxMino;
@@ -93,21 +65,29 @@ class Mino {
                 console.log("out:", x + this.x, y + this.y);
                 return;
             }
-            this.blocks.push(new Block(minoPos[0], minoPos[1], this.sender));
+            this.blockPos.push({ x: minoPos[0], y: minoPos[1] });
         }
         this.drawMino();
         // console.log("mino constructor end.");
     }
 
     clearMino() {
-        this.blocks.forEach((block) => {
-            block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, BACKGROUND_COLOR);
+        this.blockPos.forEach((block) => {
+            this.sender.send(
+                "drawBlock",
+                { x: this.x + block.x, y: this.y + block.y - DRAW_FIELD_TOP },
+                BACKGROUND_COLOR
+            );
         });
     }
 
     drawMino() {
-        this.blocks.forEach((block) => {
-            block.drawBlock(this.x, this.y - DRAW_FIELD_TOP, MINO_COLORS[this.idxMino]);
+        this.blockPos.forEach((block) => {
+            this.sender.send(
+                "drawBlock",
+                { x: this.x + block.x, y: this.y + block.y - DRAW_FIELD_TOP },
+                MINO_COLORS[this.idxMino]
+            );
         });
     }
 
@@ -117,7 +97,7 @@ class Mino {
      * */
     getGhostY(x = this.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
-            for (const block of this.blocks) {
+            for (const block of this.blockPos) {
                 if (this.field.isFilled(x + block.x, this.y + block.y + i)) {
                     return this.y + i - 1; // ぶつかる1つ手前がゴーストの位置
                 }
@@ -131,16 +111,20 @@ class Mino {
      * 別途現在地にも描画しないと上書きされる
      */
     drawGhostMino() {
-        this.blocks.forEach((block) => {
-            block.drawBlock(this.x, this.getGhostY() - DRAW_FIELD_TOP, GHOST_COLORS[this.idxMino]);
+        this.blockPos.forEach((block) => {
+            this.sender.send(
+                "drawBlock",
+                { x: this.x + block.x, y: this.getGhostY() + block.y - DRAW_FIELD_TOP },
+                GHOST_COLORS[this.idxMino]
+            );
         });
     }
 
     drawHoldMino() {
         // console.log("drawHoldMino");
         this.sender.send("clearHoldContext");
-        this.blocks.forEach((block) => {
-            block.drawHoldBlock(MINO_COLORS[this.idxMino]);
+        this.blockPos.forEach((block) => {
+            this.sender.send("drawHoldBlock", block, MINO_COLORS[this.idxMino]);
         });
     }
 
@@ -153,16 +137,15 @@ class Mino {
         const toX = this.x + dx;
         const toY = this.y + dy;
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
-        let blockPos: number[][] = [[], [], [], []];
+        let blockPos: blocks = [];
 
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
-            if (this.field.isFilled(toX + this.blocks[i].x, toY + this.blocks[i].y)) {
+            if (this.field.isFilled(toX + this.blockPos[i].x, toY + this.blockPos[i].y)) {
                 return false;
             }
             // ブロックの座標を格納(send用)
-            blockPos[i].push(this.blocks[i].x);
-            blockPos[i].push(this.blocks[i].y);
+            blockPos.push(Object.assign({}, this.blockPos[i]));
         }
 
         const preX = this.x;
@@ -174,11 +157,11 @@ class Mino {
         this.sender.send(
             "reDrawMino",
             blockPos,
-            [preX, preY - DRAW_FIELD_TOP],
-            [preX, preGhostY - DRAW_FIELD_TOP],
+            { x: preX, y: preY - DRAW_FIELD_TOP },
+            { x: preX, y: preGhostY - DRAW_FIELD_TOP },
             blockPos,
-            [this.x, this.y - DRAW_FIELD_TOP],
-            [this.x, this.getGhostY() - DRAW_FIELD_TOP],
+            { x: this.x, y: this.y - DRAW_FIELD_TOP },
+            { x: this.x, y: this.getGhostY() - DRAW_FIELD_TOP },
             this.idxMino
         );
 
@@ -191,10 +174,10 @@ class Mino {
      * @return {bool} true:移動可(移動済) false:移動不可
      */
     rotateMino(dif = 1): boolean {
-        // 回転後の Block.x,y を格納([x,y],[x,y],[x,y],[x,y])
-        let postBlockPos: number[][] = [[], [], [], []];
+        // 回転後の block.x,y を格納([x,y],[x,y],[x,y],[x,y])
+        let postBlockPos: blocks = [];
         // SRSにより移動する座標(x,y)
-        let move = [0, 0];
+        let move: position = { x: 0, y: 0 };
 
         while (this.angle <= 0) {
             // -1%4は3ではなく-1と出てしまうため、正の数にする
@@ -203,8 +186,10 @@ class Mino {
 
         for (let i = 0; i < 4; i++) {
             // 基本回転
-            postBlockPos[i].push(MINO_POS[this.idxMino][(this.angle + dif) % 4][i][0]);
-            postBlockPos[i].push(MINO_POS[this.idxMino][(this.angle + dif) % 4][i][1]);
+            postBlockPos.push({
+                x: MINO_POS[this.idxMino][(this.angle + dif) % 4][i][0],
+                y: MINO_POS[this.idxMino][(this.angle + dif) % 4][i][1],
+            });
             // console.log("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
             // console.log("x:" + rotatedX + "y:" + rotatedY);
         }
@@ -215,11 +200,10 @@ class Mino {
         }
 
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
-        let preBlockPos: number[][] = [[], [], [], []];
-        this.blocks.forEach((block, i) => {
+        let preBlockPos: blocks = [];
+        this.blockPos.forEach((block) => {
             // 移動前の座標を格納しておく
-            preBlockPos[i].push(block.x);
-            preBlockPos[i].push(block.y);
+            preBlockPos.push(Object.assign({}, block));
         });
 
         // 回転前の座標を格納しておく
@@ -229,21 +213,22 @@ class Mino {
 
         // 回転処理を反映
         this.angle += dif;
-        this.x += move[0];
-        this.y += move[1];
+        this.x += move.x;
+        this.y += move.y;
         postBlockPos.forEach((pos, i) => {
-            this.blocks[i].x = pos[0];
-            this.blocks[i].y = pos[1];
+            // this.blocks[i].x = pos[0];
+            // this.blocks[i].y = pos[1];
+            this.blockPos[i] = Object.assign({}, pos);
         });
 
         this.sender.send(
             "reDrawMino",
             preBlockPos,
-            [preX, preY - DRAW_FIELD_TOP],
-            [preX, preGhostY - DRAW_FIELD_TOP],
+            { x: preX, y: preY - DRAW_FIELD_TOP },
+            { x: preX, y: preGhostY - DRAW_FIELD_TOP },
             postBlockPos,
-            [this.x, this.y - DRAW_FIELD_TOP],
-            [this.x, this.getGhostY() - DRAW_FIELD_TOP],
+            { x: this.x, y: this.y - DRAW_FIELD_TOP },
+            { x: this.x, y: this.getGhostY() - DRAW_FIELD_TOP },
             this.idxMino
         );
 
@@ -254,12 +239,12 @@ class Mino {
      *  returnが使いたいので別関数に分けた
      * @returns {bool} true:移動可 false:移動不可
      */
-    canRotate(dif: number, postBlockPos: number[][], move: number[]): boolean {
+    canRotate(dif: number, postBlockPos: blocks, move: position): boolean {
         let wallKickData: number[][][][];
 
         for (let i = 0; i < 4; i++) {
             // 基本回転の検証
-            if (this.field.isFilled(this.x + postBlockPos[i][0], this.y + postBlockPos[i][1])) {
+            if (this.field.isFilled(this.x + postBlockPos[i].x, this.y + postBlockPos[i].y)) {
                 // 埋まっているブロックがあればSRSを試す
                 break;
             }
@@ -275,15 +260,15 @@ class Mino {
 
         for (let i = 0; i < 4; i++) {
             // SRSの動作
-            move[0] = wallKickData[this.angle % 4][(this.angle + dif) % 4][i][0];
-            move[1] = wallKickData[this.angle % 4][(this.angle + dif) % 4][i][1];
+            move.x = wallKickData[this.angle % 4][(this.angle + dif) % 4][i][0];
+            move.y = wallKickData[this.angle % 4][(this.angle + dif) % 4][i][1];
             // console.log("moved:" + move);
             for (let j = 0; j < 4; j++) {
                 // 移動先の検証
                 if (
                     this.field.isFilled(
-                        this.x + postBlockPos[j][0] + move[0],
-                        this.y + postBlockPos[j][1] + move[1]
+                        this.x + postBlockPos[j].x + move.x,
+                        this.y + postBlockPos[j].y + move.y
                     )
                 ) {
                     // console.log("braek:" + i);
@@ -308,8 +293,7 @@ class Mino {
      * 接地の可不の判定等は無いので注意
      */
     setMino() {
-        this.blocks.forEach((block) => {
-            // console.log("set:", this.x + block.x, this.y + block.y);
+        this.blockPos.forEach((block) => {
             this.field.setBlock(this.x + block.x, this.y + block.y);
         });
     }
@@ -433,7 +417,7 @@ class Field {
 }
 
 class Wetris {
-    sender: typeof IpcMainInvokeEvent.sender;
+    sender: electronSender;
 
     currentMino: Mino;
     nextMinos: Number[] = [];
@@ -462,7 +446,7 @@ class Wetris {
 
     lines = 0; // debug
 
-    constructor(sender: typeof IpcMainInvokeEvent.sender) {
+    constructor(sender: electronSender) {
         this.sender = sender;
         console.log("wetris constructor started.");
 
@@ -470,16 +454,11 @@ class Wetris {
         this.clearHoldContext();
         this.clearNextContext();
 
-        // this.labelScore = labelScore;
-        // this.labelRen = labelRen;
-
         this.field = new Field();
         this.latestTime = Date.now();
 
         this.nextMinos = this.getTurn();
         this.afterNextMinos = this.getTurn();
-
-        // this.getConfig();
 
         this.makeNewMino();
         this.mainloop();
@@ -560,7 +539,7 @@ class Wetris {
 
         this.currentMino = new Mino(this.field, this.nextMinos.pop() as number, this.sender);
 
-        if (this.currentMino.blocks.length !== 4) {
+        if (this.currentMino.blockPos.length !== 4) {
             // gameover
             this.currentMino = null;
             this.isMainloopActive = false;
@@ -600,8 +579,6 @@ class Wetris {
         let afterNextMinos = [...this.afterNextMinos];
         const NUM_OF_NEXT = 5;
         for (let i = 0; i < NUM_OF_NEXT; i++) {
-            let blocks: Block[] = [];
-
             if (!nextMinos.length) {
                 nextMinos = afterNextMinos;
                 // console.log("入れ替えた");
@@ -612,10 +589,15 @@ class Wetris {
             let idxMino = nextMinos.pop() as number;
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
-                blocks.push(
-                    new Block(MINO_POS[idxMino][0][j][0], MINO_POS[idxMino][0][j][1], this.sender)
+                const block: position = {
+                    x: MINO_POS[idxMino][0][j][0],
+                    y: MINO_POS[idxMino][0][j][1],
+                };
+                this.sender.send(
+                    "drawNextBlock",
+                    { x: 1 + block.x, y: 1 + i * 4 + block.y },
+                    MINO_COLORS[idxMino]
                 );
-                blocks[j].drawNextBlock(1, 1 + i * 4, MINO_COLORS[idxMino]);
             }
         }
         // console.log("---------- end draw next ----------")
@@ -841,7 +823,7 @@ class Wetris {
 let listWetris: Wetris[] = [];
 
 function handleWetris() {
-    ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
+    ipcMain.handle("start", (event: electronEvent): number => {
         console.log("wetris starting...");
 
         listWetris.push(new Wetris(event.sender));
@@ -850,48 +832,48 @@ function handleWetris() {
         return listWetris.length - 1; // idx
     });
 
-    ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("stop", (event: electronEvent, idx: number) => {
         listWetris[idx].isMainloopActive = false;
         console.log("stop:" + idx);
     });
 
-    ipcMain.handle("moveLeft", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("moveLeft", (event: electronEvent, idx: number) => {
         listWetris[idx].moveLeft();
     });
 
-    ipcMain.handle("moveRight", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("moveRight", (event: electronEvent, idx: number) => {
         listWetris[idx].moveRight();
     });
 
-    ipcMain.handle("softDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("softDrop", (event: electronEvent, idx: number) => {
         listWetris[idx].softDrop();
     });
 
-    ipcMain.handle("hardDrop", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("hardDrop", (event: electronEvent, idx: number) => {
         listWetris[idx].hardDrop();
     });
 
-    ipcMain.handle("rotateLeft", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("rotateLeft", (event: electronEvent, idx: number) => {
         listWetris[idx].rotateLeft();
     });
 
-    ipcMain.handle("rotateRight", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("rotateRight", (event: electronEvent, idx: number) => {
         listWetris[idx].rotateRight();
     });
 
-    ipcMain.handle("hold", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("hold", (event: electronEvent, idx: number) => {
         listWetris[idx].hold();
     });
 
-    ipcMain.handle("printField", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("printField", (event: electronEvent, idx: number) => {
         listWetris[idx].field.printField();
     });
 
-    ipcMain.handle("getField", (event: typeof IpcMainInvokeEvent, idx: number) => {
+    ipcMain.handle("getField", (event: electronEvent, idx: number) => {
         return listWetris[idx].field.field;
     });
 
-    ipcMain.handle("getLength", (event: typeof IpcMainInvokeEvent): number => {
+    ipcMain.handle("getLength", (event: electronEvent): number => {
         return listWetris.length;
     });
 }
