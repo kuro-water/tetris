@@ -13,3 +13,4 @@ src/Field.js
 src/Mino.class.js
 src/Mino.js
 src/Wetris.class.js
+src/constant.js
