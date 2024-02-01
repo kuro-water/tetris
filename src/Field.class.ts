@@ -1,4 +1,4 @@
-const {
+import {
     CONFIG_PATH,
     I_MINO,
     T_MINO,
@@ -33,7 +33,7 @@ const {
     PLACED_MINO_COLOR,
     BACKGROUND_COLOR,
     KSKS_LIMIT,
-} = require("./constant");
+} from "./constant";
 
 /**
  * field配列は[y][x]であることに注意
