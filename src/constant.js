@@ -9,15 +9,18 @@
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.INIT_KEY_MAP = exports.KSKS_LIMIT = exports.DEL_DELAY = exports.SET_DELAY = exports.LOCK_DOWN_DELAY = exports.ARR = exports.DAS = exports._f = exports.NEXT_CANVAS_SIZE = exports.FIELD_CANVAS_SIZE = exports.HOLD_CANVAS_SIZE = exports.BLOCK_SIZE = exports.BACKGROUND_COLOR = exports.PLACED_MINO_COLOR = exports.FRAME_COLOR = exports.GHOST_COLORS = exports.MINO_COLORS = exports.SRS_I = exports.SRS_TLJSZ = exports.MINO_POS = exports.DRAW_FIELD_LEFT = exports.DRAW_FIELD_WITDH = exports.DRAW_FIELD_HEIGHT = exports.DRAW_FIELD_TOP = exports.INIT_FIELD = exports.FULL_ROW = exports.EMPTY_ROW = exports.Z_MINO = exports.S_MINO = exports.J_MINO = exports.L_MINO = exports.O_MINO = exports.T_MINO = exports.I_MINO = exports.CONFIG_PATH = void 0;
+    exports.INIT_KEY_MAP = exports.KSKS_LIMIT = exports.DEL_DELAY = exports.SET_DELAY = exports.LOCK_DOWN_DELAY = exports.ARR = exports.DAS = exports._f = exports.NEXT_CANVAS_SIZE = exports.FIELD_CANVAS_SIZE = exports.HOLD_CANVAS_SIZE = exports.BLOCK_SIZE = exports.BACKGROUND_COLOR = exports.PLACED_MINO_COLOR = exports.FRAME_COLOR = exports.GHOST_COLORS = exports.MINO_COLORS = exports.SRS_I = exports.SRS_TLJSZ = exports.MINO_POS = exports.DRAW_FIELD_LEFT = exports.DRAW_FIELD_WITDH = exports.DRAW_FIELD_HEIGHT = exports.DRAW_FIELD_TOP = exports.INIT_FIELD = exports.FULL_ROW = exports.EMPTY_ROW = exports.MINO_IDX = exports.CONFIG_PATH = void 0;
     exports.CONFIG_PATH = "\\config.json";
-    exports.I_MINO = 0;
-    exports.T_MINO = 1;
-    exports.O_MINO = 2;
-    exports.L_MINO = 3;
-    exports.J_MINO = 4;
-    exports.S_MINO = 5;
-    exports.Z_MINO = 6;
+    var MINO_IDX;
+    (function (MINO_IDX) {
+        MINO_IDX[MINO_IDX["I_MINO"] = 0] = "I_MINO";
+        MINO_IDX[MINO_IDX["T_MINO"] = 1] = "T_MINO";
+        MINO_IDX[MINO_IDX["O_MINO"] = 2] = "O_MINO";
+        MINO_IDX[MINO_IDX["L_MINO"] = 3] = "L_MINO";
+        MINO_IDX[MINO_IDX["J_MINO"] = 4] = "J_MINO";
+        MINO_IDX[MINO_IDX["S_MINO"] = 5] = "S_MINO";
+        MINO_IDX[MINO_IDX["Z_MINO"] = 6] = "Z_MINO";
+    })(MINO_IDX || (exports.MINO_IDX = MINO_IDX = {}));
     exports.EMPTY_ROW = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
     exports.FULL_ROW = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     exports.INIT_FIELD = [
