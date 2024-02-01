@@ -1,12 +1,6 @@
 import {
     CONFIG_PATH,
-    I_MINO,
-    T_MINO,
-    O_MINO,
-    L_MINO,
-    J_MINO,
-    S_MINO,
-    Z_MINO,
+    MINO_IDX,
     EMPTY_ROW,
     FULL_ROW,
     INIT_FIELD,

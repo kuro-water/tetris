@@ -27,13 +27,15 @@ type electronEvent = typeof IpcMainInvokeEvent;
 type electronSender = typeof IpcMainInvokeEvent.sender;
 
 declare const CONFIG_PATH: string;
-declare const I_MINO: number;
-declare const T_MINO: number;
-declare const O_MINO: number;
-declare const L_MINO: number;
-declare const J_MINO: number;
-declare const S_MINO: number;
-declare const Z_MINO: number;
+declare const MINO_IDX: {
+    I_MINO: 0;
+    T_MINO: 1;
+    O_MINO: 2;
+    L_MINO: 3;
+    J_MINO: 4;
+    S_MINO: 5;
+    Z_MINO: 6;
+};
 declare const EMPTY_ROW: number[];
 declare const FULL_ROW: number[];
 declare const INIT_FIELD: number[][];

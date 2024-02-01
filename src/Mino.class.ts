@@ -1,12 +1,6 @@
 import {
     CONFIG_PATH,
-    I_MINO,
-    T_MINO,
-    O_MINO,
-    L_MINO,
-    J_MINO,
-    S_MINO,
-    Z_MINO,
+    MINO_IDX,
     EMPTY_ROW,
     FULL_ROW,
     INIT_FIELD,
@@ -256,8 +250,9 @@ export class Mino {
             }
         }
 
-        if (this.idxMino === O_MINO) return false; // OミノにSRSは存在しない
-        if (this.idxMino === I_MINO) wallKickData = SRS_I; // Iミノは独自のSRS判定を使用する
+        if (this.idxMino === MINO_IDX.O_MINO) return false; // OミノにSRSは存在しない
+        if (this.idxMino === MINO_IDX.I_MINO)
+            wallKickData = SRS_I; // Iミノは独自のSRS判定を使用する
         else wallKickData = SRS_TLJSZ;
 
         for (let i = 0; i < 4; i++) {
@@ -310,7 +305,7 @@ export class Mino {
      * @returns 1:Tspin, 2:Tspin mini
      */
     getModeTspin(): number {
-        if (this.idxMino !== T_MINO) return 0;
+        if (this.idxMino !== MINO_IDX.T_MINO) return 0;
 
         let filled_count = 0;
         if (this.field.isFilled(this.x + 1, this.y + 1)) filled_count += 1;

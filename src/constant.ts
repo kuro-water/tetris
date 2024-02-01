@@ -1,12 +1,14 @@
 export const CONFIG_PATH = "\\config.json";
 
-export const I_MINO = 0;
-export const T_MINO = 1;
-export const O_MINO = 2;
-export const L_MINO = 3;
-export const J_MINO = 4;
-export const S_MINO = 5;
-export const Z_MINO = 6;
+export enum MINO_IDX {
+    I_MINO = 0,
+    T_MINO = 1,
+    O_MINO = 2,
+    L_MINO = 3,
+    J_MINO = 4,
+    S_MINO = 5,
+    Z_MINO = 6,
+}
 
 export const EMPTY_ROW = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
 export const FULL_ROW = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
