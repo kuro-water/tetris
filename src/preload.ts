@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, IpcMainInvokeEvent } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("ipcRenderer", {
     on: (channel: string, func: any) => {
