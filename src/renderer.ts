@@ -60,7 +60,7 @@ function sleep(waitTime: number) {
 }
 
 async function getConfig() {
-    const config = await window.electronAPI.readJson(CONFIG_PATH);
+    const config = await electronAPI.readJson(CONFIG_PATH);
     keyMap = config.keyMap;
     console.log("read:config");
 }

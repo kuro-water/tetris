@@ -1,5 +1,4 @@
-declare var electronAPI: any;
-declare var ipcRenderer: any;
+declare const electronAPI: any;
 
 declare class wetris {
     static start(): Promise<number>;
@@ -22,43 +21,3 @@ type blocks = position[]; // [[x, y], [x, y], ...]
 // [position, position, position, position]
 // としたほうが強制力は上がるが、
 // a = []として後でpushする方法が使えなくなる
-
-type electronEvent = typeof IpcMainInvokeEvent;
-type electronSender = typeof IpcMainInvokeEvent.sender;
-
-declare const CONFIG_PATH: string;
-declare const MINO_IDX: {
-    I_MINO: 0;
-    T_MINO: 1;
-    O_MINO: 2;
-    L_MINO: 3;
-    J_MINO: 4;
-    S_MINO: 5;
-    Z_MINO: 6;
-};
-declare const EMPTY_ROW: number[];
-declare const FULL_ROW: number[];
-declare const INIT_FIELD: number[][];
-declare const DRAW_FIELD_TOP: number;
-declare const DRAW_FIELD_HEIGHT: number;
-declare const DRAW_FIELD_WITDH: number;
-declare const DRAW_FIELD_LEFT: number;
-declare const MINO_POS: number[][][];
-declare const MINO_COLORS: string[];
-declare const GHOST_COLORS: string[];
-declare const SRS_TLJSZ: number[][][];
-declare const SRS_I: number[][][];
-declare const DAS: number;
-declare const ARR: number;
-declare const LOCK_DOWN_DELAY: number;
-declare const SET_DELAY: number;
-declare const DEL_DELAY: number;
-declare const INIT_KEY_MAP: Record<string, string>;
-declare const BLOCK_SIZE: number;
-declare const HOLD_CANVAS_SIZE: number[];
-declare const FIELD_CANVAS_SIZE: number[];
-declare const NEXT_CANVAS_SIZE: number[];
-declare const FRAME_COLOR: string;
-declare const PLACED_MINO_COLOR: string;
-declare const BACKGROUND_COLOR: string;
-declare const KSKS_LIMIT: number;

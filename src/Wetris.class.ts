@@ -36,7 +36,7 @@ const Mino = require("./Mino.class");
 type Mino = typeof Mino;
 
 export class Wetris {
-    sender: electronSender;
+    sender: typeof IpcMainInvokeEvent.sender;
 
     currentMino: Mino;
     nextMinos: Number[] = [];
@@ -65,7 +65,7 @@ export class Wetris {
 
     lines = 0; // debug
 
-    constructor(sender: electronSender) {
+    constructor(sender: typeof IpcMainInvokeEvent.sender) {
         this.sender = sender;
         console.log("wetris constructor started.");
 
@@ -108,7 +108,7 @@ export class Wetris {
     }
 
     getConfig = async () => {
-        const config = await window.electronAPI.readJson(CONFIG_PATH);
+        const config = await electronAPI.readJson(CONFIG_PATH);
         // if (config.keyMode == "default") {
         //     this.keyMap = INIT_KEY_MAP;
         // } else if (config.keyMode == "custom") {

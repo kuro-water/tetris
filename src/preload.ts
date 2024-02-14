@@ -1,29 +1,36 @@
 const { contextBridge, ipcRenderer } = require("electron");
+
 contextBridge.exposeInMainWorld("ipcRenderer", {
-    on: (channel, func) => {
-        ipcRenderer.on(channel, (event, ...args) => func(...args));
+    on: (channel: string, func: any) => {
+        ipcRenderer.on(channel, (event: typeof IpcMainInvokeEvent, ...args: any[]) =>
+            func(...args)
+        );
     },
 });
+
 contextBridge.exposeInMainWorld("wetris", {
     start: () => ipcRenderer.invoke("start"),
-    stop: (idx) => ipcRenderer.invoke("stop", idx),
-    moveLeft: (idx) => ipcRenderer.invoke("moveLeft", idx),
-    moveRight: (idx) => ipcRenderer.invoke("moveRight", idx),
-    softDrop: (idx) => ipcRenderer.invoke("softDrop", idx),
-    hardDrop: (idx) => ipcRenderer.invoke("hardDrop", idx),
-    rotateLeft: (idx) => ipcRenderer.invoke("rotateLeft", idx),
-    rotateRight: (idx) => ipcRenderer.invoke("rotateRight", idx),
-    hold: (idx) => ipcRenderer.invoke("hold", idx),
-    printField: (idx) => ipcRenderer.invoke("printField", idx),
-    getField: (idx) => ipcRenderer.invoke("getField", idx),
+    stop: (idx: number) => ipcRenderer.invoke("stop", idx),
+    moveLeft: (idx: number) => ipcRenderer.invoke("moveLeft", idx),
+    moveRight: (idx: number) => ipcRenderer.invoke("moveRight", idx),
+    softDrop: (idx: number) => ipcRenderer.invoke("softDrop", idx),
+    hardDrop: (idx: number) => ipcRenderer.invoke("hardDrop", idx),
+    rotateLeft: (idx: number) => ipcRenderer.invoke("rotateLeft", idx),
+    rotateRight: (idx: number) => ipcRenderer.invoke("rotateRight", idx),
+    hold: (idx: number) => ipcRenderer.invoke("hold", idx),
+    printField: (idx: number) => ipcRenderer.invoke("printField", idx),
+    getField: (idx: number) => ipcRenderer.invoke("getField", idx),
     getLength: () => ipcRenderer.invoke("getLength"),
 });
+
 contextBridge.exposeInMainWorld("electronAPI", {
-    readJson: (jsonPath) => ipcRenderer.invoke("readJson", jsonPath),
-    writeJson: (jsonPath, data) => ipcRenderer.invoke("writeJson", jsonPath, data),
+    readJson: (jsonPath: string) => ipcRenderer.invoke("readJson", jsonPath),
+    writeJson: (jsonPath: string, data: any) => ipcRenderer.invoke("writeJson", jsonPath, data),
 });
+
 const CONFIG_PATH = "\\config.json";
 contextBridge.exposeInMainWorld("CONFIG_PATH", CONFIG_PATH);
+
 const I_MINO = 0;
 contextBridge.exposeInMainWorld("I_MINO", I_MINO);
 const T_MINO = 1;
@@ -38,6 +45,7 @@ const S_MINO = 5;
 contextBridge.exposeInMainWorld("S_MINO", S_MINO);
 const Z_MINO = 6;
 contextBridge.exposeInMainWorld("Z_MINO", Z_MINO);
+
 const INIT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -95,48 +103,49 @@ const DRAW_FIELD_WITDH = 10;
 contextBridge.exposeInMainWorld("DRAW_FIELD_WITDH", DRAW_FIELD_WITDH);
 const DRAW_FIELD_LEFT = 1;
 contextBridge.exposeInMainWorld("DRAW_FIELD_LEFT", DRAW_FIELD_LEFT);
+
 // 参考：https://tetris.wiki/Super_Rotation_System
 // 画像を見ながら座標をベタ打ちした。こうでないとSRSの動作が難しい
 // How Guideline move Really Works
 // prettier-ignore
 const MINO_POS = [
-    [
+    [ // I
         [[-1, 0], [0, 0], [1, 0], [2, 0]],
         [[1, -1], [1, 0], [1, 1], [1, 2]],
         [[-1, 1], [0, 1], [1, 1], [2, 1]],
         [[0, -1], [0, 0], [0, 1], [0, 2]],
     ],
-    [
+    [ // T
         [[0, -1], [-1, 0], [0, 0], [1, 0]],
         [[0, -1], [0, 0], [1, 0], [0, 1]],
         [[-1, 0], [0, 0], [1, 0], [0, 1]],
         [[0, -1], [-1, 0], [0, 0], [0, 1]],
     ],
-    [
+    [ // O
         [[0, -1], [1, -1], [0, 0], [1, 0]],
         [[1, -1], [0, 0], [1, 0], [0, -1]],
         [[0, 0], [1, 0], [0, -1], [1, -1]],
         [[1, 0], [0, -1], [1, -1], [0, 0]],
     ],
-    [
+    [ // L
         [[1, -1], [-1, 0], [0, 0], [1, 0]],
         [[0, -1], [0, 0], [0, 1], [1, 1]],
         [[-1, 0], [0, 0], [1, 0], [-1, 1]],
         [[-1, -1], [0, -1], [0, 0], [0, 1]],
     ],
-    [
+    [ // J
         [[-1, -1], [-1, 0], [0, 0], [1, 0]],
         [[0, -1], [1, -1], [0, 0], [0, 1]],
         [[-1, 0], [0, 0], [1, 0], [1, 1]],
         [[0, -1], [0, 0], [-1, 1], [0, 1]],
     ],
-    [
+    [ // S
         [[0, -1], [1, -1], [-1, 0], [0, 0]],
         [[0, -1], [0, 0], [1, 0], [1, 1]],
         [[0, 0], [1, 0], [-1, 1], [0, 1]],
         [[-1, -1], [-1, 0], [0, 0], [0, 1]],
     ],
-    [
+    [ // Z
         [[-1, -1], [0, -1], [0, 0], [1, 0]],
         [[1, -1], [0, 0], [1, 0], [0, 1]],
         [[-1, 0], [0, 0], [0, 1], [1, 1]],
@@ -144,6 +153,7 @@ const MINO_POS = [
     ],
 ];
 contextBridge.exposeInMainWorld("MINO_POS", MINO_POS);
+
 // prettier-ignore
 const SRS_TLJSZ = [
     [
@@ -200,16 +210,19 @@ const SRS_I = [
     ],
 ];
 contextBridge.exposeInMainWorld("SRS_I", SRS_I);
+
 const MINO_COLORS = ["#0F9BD7", "#AF298A", "#E39F02", "#E35B02", "#2141C6", "#59B101", "#D70F37"];
 contextBridge.exposeInMainWorld("MINO_COLORS", MINO_COLORS);
 const GHOST_COLORS = ["#074D6B", "#571445", "#714F01", "#712D01", "#102063", "#2C5800", "#6B071B"];
 contextBridge.exposeInMainWorld("GHOST_COLORS", GHOST_COLORS);
+
 const FRAME_COLOR = "black";
 contextBridge.exposeInMainWorld("FRAME_COLOR", FRAME_COLOR);
 const PLACED_MINO_COLOR = "gray";
 contextBridge.exposeInMainWorld("PLACED_MINO_COLOR", PLACED_MINO_COLOR);
 const BACKGROUND_COLOR = "whitesmoke";
 contextBridge.exposeInMainWorld("BACKGROUND_COLOR", BACKGROUND_COLOR);
+
 const BLOCK_SIZE = 20;
 contextBridge.exposeInMainWorld("BLOCK_SIZE", BLOCK_SIZE);
 const HOLD_CANVAS_SIZE = [0, 0, 80, 80];
@@ -218,6 +231,7 @@ const FIELD_CANVAS_SIZE = [0, 0, 240, 420];
 contextBridge.exposeInMainWorld("FIELD_CANVAS_SIZE", FIELD_CANVAS_SIZE);
 const NEXT_CANVAS_SIZE = [0, 0, 80, 420];
 contextBridge.exposeInMainWorld("NEXT_CANVAS_SIZE", NEXT_CANVAS_SIZE);
+
 // 単位はすべてms
 const _f = 1000 / 60; // 60fpsにおける1フレーム 16.6666...ミリ秒
 const DAS = Math.floor(10 * _f); // 166ms
@@ -230,8 +244,10 @@ const SET_DELAY = 20; // 接地硬直
 contextBridge.exposeInMainWorld("SET_DELAY", SET_DELAY);
 const DEL_DELAY = 100; // ライン消去時の硬直
 contextBridge.exposeInMainWorld("DEL_DELAY", DEL_DELAY);
+
 const KSKS_LIMIT = 12;
 contextBridge.exposeInMainWorld("KSKS_LIMIT", KSKS_LIMIT);
+
 const INIT_KEY_MAP = {
     moveLeft: "ArrowLeft",
     moveRight: "ArrowRight",
@@ -242,4 +258,3 @@ const INIT_KEY_MAP = {
     hold: "KeyC",
 };
 contextBridge.exposeInMainWorld("INIT_KEY_MAP", INIT_KEY_MAP);
-//# sourceMappingURL=preload.js.map

@@ -33,7 +33,7 @@ const Field = require("./Field.class");
 type Field = typeof Field;
 
 export class Mino {
-    sender: electronSender;
+    sender: typeof IpcMainInvokeEvent.sender;
 
     field: Field;
 
@@ -45,7 +45,7 @@ export class Mino {
     blockPos: blocks = [];
     lastSRS: number;
 
-    constructor(field: Field, idxMino: number, sender: electronSender) {
+    constructor(field: Field, idxMino: number, sender: typeof IpcMainInvokeEvent.sender) {
         // console.log("mino constructor start.");
         this.sender = sender;
         this.idxMino = idxMino;
