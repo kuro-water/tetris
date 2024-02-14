@@ -1,3 +1,5 @@
+const { IpcMainInvokeEvent } = require("electron");
+
 import {
     CONFIG_PATH,
     MINO_IDX,
