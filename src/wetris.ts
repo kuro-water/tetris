@@ -16,8 +16,8 @@ function handleWetris() {
         console.log("wetris starting...");
 
         listWetris.push(new Wetris(event.sender));
-
         // console.log(listWetris.length - 1); // idx
+
         return listWetris.length - 1; // idx
     });
 

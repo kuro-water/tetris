@@ -97,16 +97,6 @@ document.onkeyup = (event) => {
 };
 
 function keyEvent(event: KeyboardEvent) {
-    // if (event.code === keyMap.moveLeft) wetris.moveLeft(idxWetris);
-    // if (event.code === keyMap.moveRight) wetris.moveRight(idxWetris);
-    // if (event.code === keyMap.hardDrop) {
-    //     wetris.hardDrop(idxWetris);
-    //     console.log(wetris.getField(idxWetris));
-    // }
-    // if (event.code === keyMap.softDrop) wetris.softDrop(idxWetris);
-    // if (event.code === keyMap.rotateLeft) wetris.rotateLeft(idxWetris);
-    // if (event.code === keyMap.rotateRight) wetris.rotateRight(idxWetris);
-    // if (event.code === keyMap.hold) wetris.hold(idxWetris);
     switch (event.code) {
         case keyMap.moveLeft:
             wetris.moveLeft(idxWetris);

@@ -1,33 +1,4 @@
-import {
-    CONFIG_PATH,
-    MINO_IDX,
-    EMPTY_ROW,
-    FULL_ROW,
-    INIT_FIELD,
-    DRAW_FIELD_TOP,
-    DRAW_FIELD_HEIGHT,
-    DRAW_FIELD_WITDH,
-    DRAW_FIELD_LEFT,
-    MINO_POS,
-    MINO_COLORS,
-    GHOST_COLORS,
-    SRS_TLJSZ,
-    SRS_I,
-    DAS,
-    ARR,
-    LOCK_DOWN_DELAY,
-    SET_DELAY,
-    DEL_DELAY,
-    INIT_KEY_MAP,
-    BLOCK_SIZE,
-    HOLD_CANVAS_SIZE,
-    FIELD_CANVAS_SIZE,
-    NEXT_CANVAS_SIZE,
-    FRAME_COLOR,
-    PLACED_MINO_COLOR,
-    BACKGROUND_COLOR,
-    KSKS_LIMIT,
-} from "./constant";
+import { EMPTY_ROW, INIT_FIELD } from "./constant";
 
 /**
  * field配列は[y][x]であることに注意
