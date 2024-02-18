@@ -70,7 +70,7 @@ export class Wetris {
 
     score = 0;
     ren = 0;
-    modeTspin = false;
+    modeTspin = 0;
     isBtB = false;
 
     isMainloopActive: boolean;
@@ -274,7 +274,7 @@ export class Wetris {
     }
 
     set = async () => {
-        let modeTspin, lines;
+        let lines;
 
         // debug
         // if (this.currentMino.idxMino === T_MINO) console.log(this.currentMino.lastSRS);
@@ -285,8 +285,7 @@ export class Wetris {
         // console.log("lock");
 
         settingMino.setMino();
-        modeTspin = settingMino.getModeTspin();
-        // console.log("modeTspin:" + modeTspin);
+        console.log("modeTspin:" + this.modeTspin);
         lines = this.field.clearLines();
         console.log("l:", this.lines);
         this.lines += lines;
@@ -294,11 +293,11 @@ export class Wetris {
             this.ren += 1;
             // 今回がTspinかどうか、前回がTspinかどうかの4パターン存在する。いい感じにした
             if (this.isBtB) {
-                this.isBtB === !!modeTspin || lines === 4;
-                this.addScore(lines, this.ren, modeTspin, this.isBtB);
+                this.isBtB = !!this.modeTspin || lines === 4;
+                this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
             } else {
-                this.addScore(lines, this.ren, modeTspin, this.isBtB);
-                this.isBtB === !!modeTspin || lines === 4;
+                this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
+                this.isBtB = !!this.modeTspin || lines === 4;
             }
             await this.sleep(DEL_DELAY);
         } else {
@@ -345,6 +344,7 @@ export class Wetris {
             score += 100 * lines;
         }
 
+        console.log("btb:" + isBtB);
         if (isBtB) {
             score *= 1.5;
             score = Math.floor(score);
@@ -359,44 +359,42 @@ export class Wetris {
         this.score += score;
     }
 
-    moveLeft() {
+    move(difx: number, dify: number) {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
         if (this.checkKSKS()) return;
-        if (this.currentMino.moveMino(-1, 0)) {
+        if (this.currentMino.moveMino(difx, dify)) {
             this.isLocking = false;
+            this.modeTspin = 0;
         }
     }
 
+    moveLeft() {
+        this.move(-1, 0);
+    }
+
     moveRight() {
+        this.move(1, 0);
+    }
+
+    rotate(angle: number) {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
         if (this.checkKSKS()) return;
-        if (this.currentMino.moveMino(1, 0)) {
+        if (this.currentMino.rotateMino(angle)) {
             this.isLocking = false;
+            this.modeTspin = this.currentMino.getModeTspin();
         }
     }
 
     rotateLeft() {
-        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
-
-        if (this.checkKSKS()) return;
-        if (this.currentMino.rotateMino(-1)) {
-            this.isLocking = false;
-        }
+        this.rotate(-1);
     }
 
     rotateRight() {
-        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
-
-        if (this.checkKSKS()) return;
-        if (this.currentMino.rotateMino(1)) {
-            this.isLocking = false;
-        }
+        this.rotate(1);
     }
 
     /**
