@@ -2,7 +2,7 @@
 
 ## ダウンロード
 
-https://github.com/kuro-water/wetris/releases/tag/release
+https://github.com/kuro-water/wetris/releases/tag/v1.1.0
 
 ## 操作方法
 
