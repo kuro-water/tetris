@@ -21,12 +21,12 @@ export class Mino {
     //基準ブロックの絶対座標(内部座標)
     x = 5;
     y = DRAW_FIELD_TOP + 1;
-    idxMino: number;
+    idxMino: MINO_IDX;
     angle = 0;
     blockPos: blocks = [];
     lastSRS: number;
 
-    constructor(field: Field, idxMino: number, sender: typeof IpcMainInvokeEvent.sender) {
+    constructor(field: Field, idxMino: MINO_IDX, sender: typeof IpcMainInvokeEvent.sender) {
         // console.log("mino constructor start.");
         this.sender = sender;
         this.idxMino = idxMino;

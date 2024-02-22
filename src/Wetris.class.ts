@@ -39,6 +39,7 @@ import {
     SET_DELAY,
     DEL_DELAY,
     KSKS_LIMIT,
+    MINO_IDX,
 } from "./constant";
 
 const Field = require("./Field.class");
@@ -51,9 +52,9 @@ export class Wetris {
     sender: typeof IpcMainInvokeEvent.sender;
 
     currentMino: Mino;
-    nextMinos: Number[] = [];
-    afterNextMinos: Number[] = [];
-    holdMino: Number;
+    nextMinos: MINO_IDX[] = [];
+    afterNextMinos: MINO_IDX[] = [];
+    holdMino: MINO_IDX;
 
     field: Field;
 
@@ -168,7 +169,7 @@ export class Wetris {
             this.afterNextMinos = this.getTurn();
         }
 
-        this.currentMino = new Mino(this.field, this.nextMinos.pop() as number, this.sender);
+        this.currentMino = new Mino(this.field, this.nextMinos.pop() as MINO_IDX, this.sender);
 
         if (this.currentMino.blockPos.length !== 4) {
             // gameover
@@ -182,7 +183,7 @@ export class Wetris {
         this.drawNext();
     }
 
-    getTurn(): number[] {
+    getTurn(): MINO_IDX[] {
         const getRandomInt = (min: number, max: number): number => {
             //整数の乱数を生成 https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
             min = Math.ceil(min);
@@ -217,7 +218,7 @@ export class Wetris {
             // console.log(nextMinos);
             // console.log(afterNextMinos);
             // console.log("");
-            let idxMino = nextMinos.pop() as number;
+            let idxMino = nextMinos.pop() as MINO_IDX;
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
                 const block: position = {
