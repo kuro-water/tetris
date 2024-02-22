@@ -25,18 +25,18 @@ export class Field {
      * 指定した座標の真偽値を返す
      * @returns {boolean} true:すでに存在する
      */
-    isFilled(x: number, y: number): boolean {
+    isFilled(pos: position): boolean {
         // console.log("checking at (%d,%d)", x, y)
-        if (x < 0 || 11 < x || y < 0 || this.field.length < y) return true;
-        return !!this.field[y][x]; //number to boolean
+        if (pos.x < 0 || 11 < pos.x || pos.y < 0 || this.field.length < pos.y) return true;
+        return !!this.field[pos.y][pos.x]; //number to boolean
     }
 
-    setBlock(x: number, y: number) {
-        this.field[y][x] = 1;
+    setBlock(pos: position) {
+        this.field[pos.y][pos.x] = 1;
     }
 
-    removeBlock(x: number, y: number) {
-        this.field[y][x] = 0;
+    removeBlock(pos: position) {
+        this.field[pos.y][pos.x] = 0;
     }
 
     isPerfectClear(): boolean {

@@ -146,7 +146,7 @@ export class Wetris {
                 // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
                 continue;
             }
-            if (this.currentMino.moveMino(0, 1)) {
+            if (this.currentMino.moveMino({ x: 0, y: 1 })) {
                 this.isLocking = false;
                 this.countKSKS = 0;
             } else {
@@ -359,23 +359,23 @@ export class Wetris {
         this.score += score;
     }
 
-    move(difx: number, dify: number) {
+    move(dif: position) {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
         if (this.checkKSKS()) return;
-        if (this.currentMino.moveMino(difx, dify)) {
+        if (this.currentMino.moveMino(dif)) {
             this.isLocking = false;
             this.modeTspin = 0;
         }
     }
 
     moveLeft() {
-        this.move(-1, 0);
+        this.move({ x: -1, y: 0 });
     }
 
     moveRight() {
-        this.move(1, 0);
+        this.move({ x: 1, y: 0 });
     }
 
     rotate(angle: number) {
@@ -406,7 +406,7 @@ export class Wetris {
         if (!this.currentMino) return true;
 
         // 下へ動かせなければ接地
-        if (this.currentMino.moveMino(0, 1)) {
+        if (this.currentMino.moveMino({ x: 0, y: 1 })) {
             this.isLocking = false;
             this.countKSKS = 0;
             this.score += 1;
@@ -426,7 +426,7 @@ export class Wetris {
         this.score += 10;
 
         // ゴーストのy座標まで移動(接地)
-        this.currentMino.moveMino(0, this.currentMino.getGhostY() - this.currentMino.y);
+        this.currentMino.moveMino({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
 
         this.set();
     }
