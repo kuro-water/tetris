@@ -248,7 +248,7 @@ export class Wetris {
         // まだカサカサできる
         if (this.countKSKS < KSKS_LIMIT) {
             // console.log("plus");
-            this.countKSKS += 1;
+            // this.countKSKS += 1;
             return false;
         }
 
@@ -368,6 +368,7 @@ export class Wetris {
         if (this.currentMino.moveMino(dif)) {
             this.isLocking = false;
             this.modeTspin = 0;
+            this.countKSKS += 1;
         }
     }
 
@@ -387,6 +388,7 @@ export class Wetris {
         if (this.currentMino.rotateMino(angle)) {
             this.isLocking = false;
             this.modeTspin = this.currentMino.getModeTspin();
+            this.countKSKS += 1;
         }
     }
 
