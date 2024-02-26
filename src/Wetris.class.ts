@@ -162,7 +162,7 @@ export class Wetris {
         this.currentMino.drawMino();
     }
 
-    makeNewMino() {
+    makeNewMino = async () => {
         if (!this.nextMinos.length) {
             // ネクストが空なら生成
             this.nextMinos = this.afterNextMinos;
@@ -171,8 +171,9 @@ export class Wetris {
 
         this.currentMino = new Mino(this.field, this.nextMinos.pop() as MINO_IDX, this.sender);
 
-        if (this.currentMino.blockPos.length !== 4) {
-            // gameover
+        if (this.currentMino.isGameOver) {
+            this.drawField();
+            this.currentMino.drawMino();
             this.currentMino = null;
             this.isMainloopActive = false;
             return;
@@ -181,7 +182,7 @@ export class Wetris {
         // console.log(this.afterNextMinos);
         this.drawField();
         this.drawNext();
-    }
+    };
 
     getTurn(): MINO_IDX[] {
         const getRandomInt = (min: number, max: number): number => {

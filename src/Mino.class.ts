@@ -26,6 +26,8 @@ export class Mino {
     blockPos: blocks = [];
     lastSRS: number;
 
+    isGameOver = false;
+
     constructor(field: Field, idxMino: MINO_IDX, sender: typeof IpcMainInvokeEvent.sender) {
         // console.log("mino constructor start.");
         this.sender = sender;
@@ -35,16 +37,17 @@ export class Mino {
             const x = minoPos[0] + this.x;
             const y = minoPos[1] + this.y;
             if (this.field.isFilled({ x: x, y: y })) {
-                for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-                    console.log("gameover");
-                    console.log(minoPos[0] + this.x, minoPos[1] + this.y);
-                }
+                // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
+                //     console.log(minoPos[0] + this.x, minoPos[1] + this.y);
+                // }
+                console.log("gameover");
                 console.log("out:", x + this.x, y + this.y);
-                return;
+                this.isGameOver = true;
             }
             this.blockPos.push({ x: minoPos[0], y: minoPos[1] });
         }
         this.drawMino();
+        if (this.isGameOver) return;
         // console.log("mino constructor end.");
     }
 
