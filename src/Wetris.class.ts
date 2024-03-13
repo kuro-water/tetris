@@ -39,6 +39,7 @@ import {
     SET_DELAY,
     DEL_DELAY,
     KSKS_LIMIT,
+    MINO_IDX,
 } from "./constant";
 
 const Field = require("./Field.class");
@@ -51,9 +52,9 @@ export class Wetris {
     sender: typeof IpcMainInvokeEvent.sender;
 
     currentMino: Mino;
-    nextMinos: Number[] = [];
-    afterNextMinos: Number[] = [];
-    holdMino: Number;
+    nextMinos: MINO_IDX[] = [];
+    afterNextMinos: MINO_IDX[] = [];
+    holdMino: MINO_IDX;
 
     field: Field;
 
@@ -70,7 +71,7 @@ export class Wetris {
 
     score = 0;
     ren = 0;
-    modeTspin = false;
+    modeTspin = 0;
     isBtB = false;
 
     isMainloopActive: boolean;
@@ -146,7 +147,7 @@ export class Wetris {
                 // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
                 continue;
             }
-            if (this.currentMino.moveMino(0, 1)) {
+            if (this.currentMino.moveMino({ x: 0, y: 1 })) {
                 this.isLocking = false;
                 this.countKSKS = 0;
             } else {
@@ -161,17 +162,18 @@ export class Wetris {
         this.currentMino.drawMino();
     }
 
-    makeNewMino() {
+    makeNewMino = async () => {
         if (!this.nextMinos.length) {
             // ネクストが空なら生成
             this.nextMinos = this.afterNextMinos;
             this.afterNextMinos = this.getTurn();
         }
 
-        this.currentMino = new Mino(this.field, this.nextMinos.pop() as number, this.sender);
+        this.currentMino = new Mino(this.field, this.nextMinos.pop() as MINO_IDX, this.sender);
 
-        if (this.currentMino.blockPos.length !== 4) {
-            // gameover
+        if (this.currentMino.isGameOver) {
+            this.drawField();
+            this.currentMino.drawMino();
             this.currentMino = null;
             this.isMainloopActive = false;
             return;
@@ -180,9 +182,9 @@ export class Wetris {
         // console.log(this.afterNextMinos);
         this.drawField();
         this.drawNext();
-    }
+    };
 
-    getTurn(): number[] {
+    getTurn(): MINO_IDX[] {
         const getRandomInt = (min: number, max: number): number => {
             //整数の乱数を生成 https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Math/random
             min = Math.ceil(min);
@@ -217,7 +219,7 @@ export class Wetris {
             // console.log(nextMinos);
             // console.log(afterNextMinos);
             // console.log("");
-            let idxMino = nextMinos.pop() as number;
+            let idxMino = nextMinos.pop() as MINO_IDX;
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
                 const block: position = {
@@ -247,7 +249,7 @@ export class Wetris {
         // まだカサカサできる
         if (this.countKSKS < KSKS_LIMIT) {
             // console.log("plus");
-            this.countKSKS += 1;
+            // this.countKSKS += 1;
             return false;
         }
 
@@ -274,7 +276,7 @@ export class Wetris {
     }
 
     set = async () => {
-        let modeTspin, lines;
+        let lines;
 
         // debug
         // if (this.currentMino.idxMino === T_MINO) console.log(this.currentMino.lastSRS);
@@ -285,8 +287,7 @@ export class Wetris {
         // console.log("lock");
 
         settingMino.setMino();
-        modeTspin = settingMino.getModeTspin();
-        // console.log("modeTspin:" + modeTspin);
+        console.log("modeTspin:" + this.modeTspin);
         lines = this.field.clearLines();
         console.log("l:", this.lines);
         this.lines += lines;
@@ -294,11 +295,11 @@ export class Wetris {
             this.ren += 1;
             // 今回がTspinかどうか、前回がTspinかどうかの4パターン存在する。いい感じにした
             if (this.isBtB) {
-                this.isBtB === !!modeTspin || lines === 4;
-                this.addScore(lines, this.ren, modeTspin, this.isBtB);
+                this.isBtB = !!this.modeTspin || lines === 4;
+                this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
             } else {
-                this.addScore(lines, this.ren, modeTspin, this.isBtB);
-                this.isBtB === !!modeTspin || lines === 4;
+                this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
+                this.isBtB = !!this.modeTspin || lines === 4;
             }
             await this.sleep(DEL_DELAY);
         } else {
@@ -345,6 +346,7 @@ export class Wetris {
             score += 100 * lines;
         }
 
+        console.log("btb:" + isBtB);
         if (isBtB) {
             score *= 1.5;
             score = Math.floor(score);
@@ -359,44 +361,44 @@ export class Wetris {
         this.score += score;
     }
 
-    moveLeft() {
+    move(dif: position) {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
         if (this.checkKSKS()) return;
-        if (this.currentMino.moveMino(-1, 0)) {
+        if (this.currentMino.moveMino(dif)) {
             this.isLocking = false;
+            this.modeTspin = 0;
+            this.countKSKS += 1;
         }
     }
 
+    moveLeft() {
+        this.move({ x: -1, y: 0 });
+    }
+
     moveRight() {
+        this.move({ x: 1, y: 0 });
+    }
+
+    rotate(angle: number) {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
         if (this.checkKSKS()) return;
-        if (this.currentMino.moveMino(1, 0)) {
+        if (this.currentMino.rotateMino(angle)) {
             this.isLocking = false;
+            this.modeTspin = this.currentMino.getModeTspin();
+            this.countKSKS += 1;
         }
     }
 
     rotateLeft() {
-        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
-
-        if (this.checkKSKS()) return;
-        if (this.currentMino.rotateMino(-1)) {
-            this.isLocking = false;
-        }
+        this.rotate(-1);
     }
 
     rotateRight() {
-        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
-
-        if (this.checkKSKS()) return;
-        if (this.currentMino.rotateMino(1)) {
-            this.isLocking = false;
-        }
+        this.rotate(1);
     }
 
     /**
@@ -408,7 +410,7 @@ export class Wetris {
         if (!this.currentMino) return true;
 
         // 下へ動かせなければ接地
-        if (this.currentMino.moveMino(0, 1)) {
+        if (this.currentMino.moveMino({ x: 0, y: 1 })) {
             this.isLocking = false;
             this.countKSKS = 0;
             this.score += 1;
@@ -428,7 +430,7 @@ export class Wetris {
         this.score += 10;
 
         // ゴーストのy座標まで移動(接地)
-        this.currentMino.moveMino(0, this.currentMino.getGhostY() - this.currentMino.y);
+        this.currentMino.moveMino({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
 
         this.set();
     }

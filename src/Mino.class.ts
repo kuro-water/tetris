@@ -21,12 +21,14 @@ export class Mino {
     //基準ブロックの絶対座標(内部座標)
     x = 5;
     y = DRAW_FIELD_TOP + 1;
-    idxMino: number;
+    idxMino: MINO_IDX;
     angle = 0;
     blockPos: blocks = [];
     lastSRS: number;
 
-    constructor(field: Field, idxMino: number, sender: typeof IpcMainInvokeEvent.sender) {
+    isGameOver = false;
+
+    constructor(field: Field, idxMino: MINO_IDX, sender: typeof IpcMainInvokeEvent.sender) {
         // console.log("mino constructor start.");
         this.sender = sender;
         this.idxMino = idxMino;
@@ -34,17 +36,18 @@ export class Mino {
         for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
             const x = minoPos[0] + this.x;
             const y = minoPos[1] + this.y;
-            if (this.field.isFilled(x, y)) {
-                for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-                    console.log("gameover");
-                    console.log(minoPos[0] + this.x, minoPos[1] + this.y);
-                }
+            if (this.field.isFilled({ x: x, y: y })) {
+                // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
+                //     console.log(minoPos[0] + this.x, minoPos[1] + this.y);
+                // }
+                console.log("gameover");
                 console.log("out:", x + this.x, y + this.y);
-                return;
+                this.isGameOver = true;
             }
             this.blockPos.push({ x: minoPos[0], y: minoPos[1] });
         }
         this.drawMino();
+        if (this.isGameOver) return;
         // console.log("mino constructor end.");
     }
 
@@ -75,7 +78,7 @@ export class Mino {
     getGhostY(x = this.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
             for (const block of this.blockPos) {
-                if (this.field.isFilled(x + block.x, this.y + block.y + i)) {
+                if (this.field.isFilled({ x: x + block.x, y: this.y + block.y + i })) {
                     return this.y + i - 1; // ぶつかる1つ手前がゴーストの位置
                 }
             }
@@ -110,15 +113,15 @@ export class Mino {
      * 座標は 1/BLOCK_SIZE
      * @return {bool} true:移動可(移動済) false:移動不可
      */
-    moveMino(dx: number, dy: number): boolean {
-        const toX = this.x + dx;
-        const toY = this.y + dy;
+    moveMino(dif: position): boolean {
+        const toX = this.x + dif.x;
+        const toY = this.y + dif.y;
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let blockPos: blocks = [];
 
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
-            if (this.field.isFilled(toX + this.blockPos[i].x, toY + this.blockPos[i].y)) {
+            if (this.field.isFilled({ x: toX + this.blockPos[i].x, y: toY + this.blockPos[i].y })) {
                 return false;
             }
             // ブロックの座標を格納(send用)
@@ -221,7 +224,12 @@ export class Mino {
 
         for (let i = 0; i < 4; i++) {
             // 基本回転の検証
-            if (this.field.isFilled(this.x + postBlockPos[i].x, this.y + postBlockPos[i].y)) {
+            if (
+                this.field.isFilled({
+                    x: this.x + postBlockPos[i].x,
+                    y: this.y + postBlockPos[i].y,
+                })
+            ) {
                 // 埋まっているブロックがあればSRSを試す
                 break;
             }
@@ -244,10 +252,10 @@ export class Mino {
             for (let j = 0; j < 4; j++) {
                 // 移動先の検証
                 if (
-                    this.field.isFilled(
-                        this.x + postBlockPos[j].x + move.x,
-                        this.y + postBlockPos[j].y + move.y
-                    )
+                    this.field.isFilled({
+                        x: this.x + postBlockPos[j].x + move.x,
+                        y: this.y + postBlockPos[j].y + move.y,
+                    })
                 ) {
                     // console.log("braek:" + i);
                     // console.log((this.x + postBlockPos[0][j] + move[0]) + "," + (this.y + postBlockPos[1][j] + move[1]))
@@ -272,7 +280,7 @@ export class Mino {
      */
     setMino() {
         this.blockPos.forEach((block) => {
-            this.field.setBlock(this.x + block.x, this.y + block.y);
+            this.field.setBlock({ x: this.x + block.x, y: this.y + block.y });
         });
     }
 
@@ -289,10 +297,10 @@ export class Mino {
         if (this.idxMino !== MINO_IDX.T_MINO) return 0;
 
         let filled_count = 0;
-        if (this.field.isFilled(this.x + 1, this.y + 1)) filled_count += 1;
-        if (this.field.isFilled(this.x + 1, this.y - 1)) filled_count += 1;
-        if (this.field.isFilled(this.x - 1, this.y + 1)) filled_count += 1;
-        if (this.field.isFilled(this.x - 1, this.y - 1)) filled_count += 1;
+        if (this.field.isFilled({ x: this.x + 1, y: this.y + 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.x + 1, y: this.y - 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.x - 1, y: this.y + 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.x - 1, y: this.y - 1 })) filled_count += 1;
         if (filled_count < 3) return 0;
 
         if (this.lastSRS === 3) return 1;
@@ -309,11 +317,11 @@ export class Mino {
         ];
         const [x1, x2] = TSM_POS[this.angle % 4][0];
         const [y1, y2] = TSM_POS[this.angle % 4][1];
-        if (!this.field.isFilled(this.x + x1, this.y + y1)) {
+        if (!this.field.isFilled({ x: this.x + x1, y: this.y + y1 })) {
             // console.log("(x, y) = (" + (this.x + x1) + ", " + (this.y + y1) + ")");
             return 2;
         }
-        if (!this.field.isFilled(this.x + x2, this.y + y2)) {
+        if (!this.field.isFilled({ x: this.x + x2, y: this.y + y2 })) {
             // console.log("(x, y) = (" + (this.x + x1) + ", " + (this.y + y2) + ")");
             return 2;
         }
