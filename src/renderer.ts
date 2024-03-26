@@ -41,9 +41,17 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
 (async function constructor() {
     console.log("renderer started.");
 
-    await getConfig();
-    idxWetris = await wetris.start();
-    // console.log(idxWetris);
+    const path = window.location.pathname;
+    if (path.includes("cpu.html")) {
+        console.log("this is cpu.html");
+        idxWetris = await wetris.start();
+        wetris.startCpu(idxWetris);
+    } else if (path.includes("wetris.html")) {
+        console.log("this is wetris.html");
+        await getConfig();
+        idxWetris = await wetris.start();
+        // console.log(idxWetris);
+    }
 })();
 
 window.addEventListener("beforeunload", (event) => {

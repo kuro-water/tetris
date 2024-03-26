@@ -9,6 +9,9 @@ type Mino = typeof Mino;
 const Wetris = require("./Wetris.class");
 type Wetris = typeof Wetris;
 
+const Cpu = require("./Cpu.class");
+type Cpu = typeof Cpu;
+
 let listWetris: Wetris[] = [];
 
 function handleWetris() {
@@ -21,8 +24,13 @@ function handleWetris() {
         return listWetris.length - 1; // idx
     });
 
+    ipcMain.handle("startCpu", (event: typeof IpcMainInvokeEvent, idx: number): void => {
+        new Cpu(listWetris[idx]);
+    });
+
     ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].isMainloopActive = false;
+        listWetris[idx] = null;
         console.log("stop:" + idx);
     });
 

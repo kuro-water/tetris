@@ -2,6 +2,8 @@ declare const electronAPI: any;
 
 declare class wetris {
     static start(): Promise<number>;
+    static startCpu(idx: number): null;
+    static stop(idx: number): null;
     static moveLeft(idx: number): null;
     static moveRight(idx: number): null;
     static hardDrop(idx: number): null;
@@ -10,7 +12,6 @@ declare class wetris {
     static rotateRight(idx: number): null;
     static hold(idx: number): null;
     static getField(idx: number): Promise<number[][]>;
-    static stop(idx: number): null;
 }
 
 type position = {
