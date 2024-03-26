@@ -52,6 +52,7 @@ export class Mino {
     }
 
     clearMino() {
+        if (this.sender === null) return;
         this.blockPos.forEach((block) => {
             this.sender.send(
                 "drawBlock",
@@ -62,6 +63,7 @@ export class Mino {
     }
 
     drawMino() {
+        if (this.sender === null) return;
         this.blockPos.forEach((block) => {
             this.sender.send(
                 "drawBlock",
@@ -91,6 +93,7 @@ export class Mino {
      * 別途現在地にも描画しないと上書きされる
      */
     drawGhostMino() {
+        if (this.sender === null) return;
         this.blockPos.forEach((block) => {
             this.sender.send(
                 "drawBlock",
@@ -101,6 +104,7 @@ export class Mino {
     }
 
     drawHoldMino() {
+        if (this.sender === null) return;
         // console.log("drawHoldMino");
         this.sender.send("clearHoldContext");
         this.blockPos.forEach((block) => {
@@ -133,6 +137,8 @@ export class Mino {
         const preGhostY = this.getGhostY();
         this.x = toX;
         this.y = toY;
+
+        if (this.sender === null) return true;
 
         this.sender.send(
             "reDrawMino",
@@ -200,6 +206,8 @@ export class Mino {
             // this.blocks[i].y = pos[1];
             this.blockPos[i] = Object.assign({}, pos);
         });
+
+        if (this.sender === null) return true;
 
         this.sender.send(
             "reDrawMino",
