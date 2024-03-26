@@ -367,44 +367,48 @@ export class Wetris {
         this.score += score;
     }
 
-    move(dif: position) {
+    move(dif: position): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
+        if (!this.currentMino) return false;
 
-        if (this.checkKSKS()) return;
+        if (this.checkKSKS()) return false;
         if (this.currentMino.moveMino(dif)) {
             this.isLocking = false;
             this.modeTspin = 0;
             this.countKSKS += 1;
+            return true;
         }
+        return false;
     }
 
-    moveLeft() {
-        this.move({ x: -1, y: 0 });
+    moveLeft(): boolean {
+        return this.move({ x: -1, y: 0 });
     }
 
-    moveRight() {
-        this.move({ x: 1, y: 0 });
+    moveRight(): boolean {
+        return this.move({ x: 1, y: 0 });
     }
 
-    rotate(angle: number) {
+    rotate(angle: number): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
+        if (!this.currentMino) return false;
 
-        if (this.checkKSKS()) return;
+        if (this.checkKSKS()) return false;
         if (this.currentMino.rotateMino(angle)) {
             this.isLocking = false;
             this.modeTspin = this.currentMino.getModeTspin();
             this.countKSKS += 1;
+            return true;
         }
+        return false;
     }
 
-    rotateLeft() {
-        this.rotate(-1);
+    rotateLeft(): boolean {
+        return this.rotate(-1);
     }
 
-    rotateRight() {
-        this.rotate(1);
+    rotateRight(): boolean {
+        return this.rotate(1);
     }
 
     /**
