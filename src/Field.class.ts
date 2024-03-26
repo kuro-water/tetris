@@ -18,7 +18,10 @@ export class Field {
      * debug
      */
     printField() {
-        this.field.forEach((row) => console.log(row));
+        this.field.forEach((row) => {
+            row.forEach((block) => process.stdout.write(block ? "1" : "0"));
+            process.stdout.write("\n");
+        });
     }
 
     /**
