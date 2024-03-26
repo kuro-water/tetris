@@ -228,8 +228,8 @@ export class Wetris {
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
                 const block: position = {
-                    x: MINO_POS[idxMino][0][j][0],
-                    y: MINO_POS[idxMino][0][j][1],
+                    x: MINO_POS[idxMino][0][j].x,
+                    y: MINO_POS[idxMino][0][j].y,
                 };
                 this.sender.send(
                     "drawNextBlock",

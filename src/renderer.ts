@@ -44,6 +44,7 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
     const path = window.location.pathname;
     if (path.includes("cpu.html")) {
         console.log("this is cpu.html");
+        await getConfig();
         idxWetris = await wetris.start();
         wetris.startCpu(idxWetris);
     } else if (path.includes("wetris.html")) {
