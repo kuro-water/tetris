@@ -36,14 +36,14 @@ type Wetris = Wetris_;
 type Mino = Mino_;
 type Field = Field_;
 
-type FieldData = { field: Field; pos: position; idxMino: MINO_IDX };
+type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number };
 
 /**
  * 評価後のフィールドデータ
  * hole: 埋まってしまった穴の数
- * maxHeight: 一番高い(内部的な値としては一番小さい)ブロックのy座標
+ * height: 一番高い(内部的な値としては一番小さい)ブロックのy座標
  */
-type FieldScore = { fieldData: FieldData; hole: number; maxHeight: number };
+type FieldScore = { fieldData: FieldData; hole: number; height: number };
 
 class Cpu {
     mainWetris: Wetris;
@@ -67,26 +67,40 @@ class Cpu {
             const minHoleValue = fieldScoreList.reduce((min, b) => Math.min(min, b.hole), Infinity);
             const minHoleFieldList = fieldScoreList.filter((item) => item.hole === minHoleValue);
 
-            const minMaxHeightValue = minHoleFieldList.reduce(
-                (max, b) => Math.max(max, b.maxHeight),
+            const minHeightValue = minHoleFieldList.reduce(
+                (max, b) => Math.max(max, b.height),
                 -Infinity
             );
-            const minMaxHeightFieldList = minHoleFieldList.filter(
-                (item) => item.maxHeight === minMaxHeightValue
+            const minHeightFieldList = minHoleFieldList.filter(
+                (item) => item.height === minHeightValue
             );
 
-            const lowerPosFieldValue = minMaxHeightFieldList.reduce(
+            const lowerPosFieldValue = minHeightFieldList.reduce(
                 (max, b) => Math.max(max, b.fieldData.pos.y),
                 -Infinity
             );
-            const lowerPosFieldList = minMaxHeightFieldList.filter(
+            const lowerPosFieldList = minHeightFieldList.filter(
                 (item) => item.fieldData.pos.y === lowerPosFieldValue
             );
 
             // 最初に出現したフィールドを優先する -> 左から順に積まれていく
             const bestField = lowerPosFieldList[0];
             bestField.fieldData.field.printField();
-            await this.mainWetris.sleep(3000);
+
+            // 実際に操作する
+            while (this.mainWetris.currentMino.angle % 4 !== bestField.fieldData.angle % 4) {
+                this.mainWetris.rotate(1);
+                await this.mainWetris.sleep(ARR);
+            }
+            while (this.mainWetris.currentMino.x !== bestField.fieldData.pos.x) {
+                const dif = bestField.fieldData.pos.x - this.mainWetris.currentMino.x;
+                const wasMoved = await this.mainWetris.move({ x: 0 < dif ? 1 : -1, y: 0 });
+                if (!wasMoved) {
+                    error("CPU: failed to move!");
+                }
+                await this.mainWetris.sleep(ARR);
+            }
+            await this.mainWetris.hardDrop();
         }
     }
 
@@ -95,8 +109,12 @@ class Cpu {
         for (let rotation = 0; rotation < 4; rotation++) {
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる
             for (let movement = 0; ; movement++) {
+                this.trialWetris = new Wetris(null);
+                this.trialWetris.isMainloopActive = false;
                 this.trialWetris.currentMino.idxMino = idxMino;
-                this.trialWetris.currentMino.rotateMino(rotation);
+                for (let i = 0; i < rotation; i++) {
+                    this.trialWetris.currentMino.rotateMino();
+                }
                 this.trialWetris.field.field = field.field.map((row: number[]) => [...row]);
 
                 while (this.trialWetris.currentMino.moveMino({ x: -1, y: 0 }));
@@ -114,16 +132,17 @@ class Cpu {
                     field: this.trialWetris.field.clone(),
                     pos: pos,
                     idxMino: idxMino,
+                    angle: rotation,
                 };
                 fieldDataList.push(feldData);
 
                 // debug
-                this.trialWetris.field.printField();
-                this.culcFieldScore(feldData).then((fieldScore) => {
-                    info(`hole: ${fieldScore.hole}`);
-                    info(`maxHeight: ${fieldScore.maxHeight}`);
-                    info(`pos: (${fieldScore.fieldData.pos.x}, ${fieldScore.fieldData.pos.y})`);
-                });
+                // this.trialWetris.field.printField();
+                // this.culcFieldScore(feldData).then((fieldScore) => {
+                //     info(`hole: ${fieldScore.hole}`);
+                //     info(`height: ${fieldScore.height}`);
+                //     info(`pos: (${fieldScore.fieldData.pos.x}, ${fieldScore.fieldData.pos.y})`);
+                // });
             }
         }
         return fieldDataList;
@@ -131,7 +150,7 @@ class Cpu {
 
     async culcFieldScore(fieldData: FieldData): Promise<FieldScore> {
         let hole = 0;
-        let maxHeight = fieldData.field.field.length - 1;
+        let height = fieldData.field.field.length - 1;
         // 全てのx座標について、上から順に確かめていく
         for (let x = 1; x < fieldData.field.field[0].length - 1; x++) {
             let y: number;
@@ -145,8 +164,8 @@ class Cpu {
 
             // 一番高いブロックのy座標を記録
             // 値として小さい方がゲームとしては高いことに注意
-            if (y < maxHeight) {
-                maxHeight = y;
+            if (y < height) {
+                height = y;
             }
 
             // 穴の数を数える
@@ -156,7 +175,7 @@ class Cpu {
                 }
             }
         }
-        return { fieldData: fieldData, hole: hole, maxHeight: maxHeight };
+        return { fieldData: fieldData, hole: hole, height: height };
     }
 
     async culcAllFieldScore(fieldDataList: FieldData[]): Promise<FieldScore[]> {
