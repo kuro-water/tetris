@@ -18,10 +18,16 @@ export class Field {
      * debug
      */
     printField() {
-        this.field.forEach((row) => {
-            row.forEach((block) => process.stdout.write(block ? "\x1b[34m1\x1b[0m" : "0"));
+        // this.field.forEach((row) => {
+        //     row.forEach((block) => process.stdout.write(block ? "\x1b[34m1\x1b[0m" : "0"));
+        //     process.stdout.write("\n");
+        // });
+        for (let i = 20; i < this.field.length; i++) {
+            this.field[i].forEach((block) =>
+                process.stdout.write(block ? "\x1b[34m1\x1b[0m" : "0")
+            );
             process.stdout.write("\n");
-        });
+        }
     }
 
     /**
