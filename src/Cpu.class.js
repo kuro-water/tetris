@@ -1,30 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const Wetris = require("./wetris.class");
+// import { Wetris } from "Wetris.class";
 class Cpu {
-    wetris;
+    mainWetris;
+    trialWetris;
     constructor(wetris) {
-        this.wetris = wetris;
-        this.test();
+        this.mainWetris = wetris;
+        this.trialWetris = new Wetris(null);
+        this.trialWetris.isMainloopActive = false;
+        this.testAllSet();
     }
-    async test() {
-        this.wetris.moveLeft();
-        await this.wetris.sleep(20);
-        this.wetris.moveRight();
-        await this.wetris.sleep(20);
-        this.wetris.moveLeft();
-        await this.wetris.sleep(20);
-        this.wetris.moveRight();
-        await this.wetris.sleep(20);
-        this.wetris.moveLeft();
-        await this.wetris.sleep(20);
-        this.wetris.moveRight();
-        await this.wetris.sleep(20);
-        this.wetris.softDrop();
-        await this.wetris.sleep(20);
-        this.wetris.softDrop();
-        await this.wetris.sleep(20);
-        this.wetris.softDrop();
+    async testAllSet() {
+        let fieldList = [];
+        // 全ての回転を試す
+        for (let rotation = 0; rotation < 4; rotation++) {
+            // 移動可能な全てのx座標における一番下に接地した場合を調べる
+            for (let movement = 0;; movement++) {
+                this.trialWetris.currentMino.idxMino = this.mainWetris.currentMino.idxMino;
+                this.trialWetris.currentMino.rotateMino(rotation);
+                this.trialWetris.field.field = this.mainWetris.field.field.map((row) => [
+                    ...row,
+                ]);
+                while (this.trialWetris.currentMino.moveMino({ x: -1, y: 0 }))
+                    ;
+                while (this.trialWetris.currentMino.moveMino({ x: 0, y: 1 }))
+                    ;
+                const wasMoved = this.trialWetris.currentMino.moveMino({ x: movement, y: 0 });
+                await this.trialWetris.set();
+                if (!wasMoved)
+                    break; // これ以上右に動かせない
+                this.trialWetris.field.printField();
+                fieldList.push(this.trialWetris.field.clone());
+            }
+        }
+        return fieldList;
     }
 }
 module.exports = Cpu;
-//# sourceMappingURL=Cpu.class.js.map
+//# sourceMappingURL=cpu.class.js.map
