@@ -306,10 +306,10 @@ export class Wetris {
                 this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
                 this.isBtB = !!this.modeTspin || lines === 4;
             }
-            await this.sleep(DEL_DELAY);
+            if (this.sender !== null) await this.sleep(DEL_DELAY);
         } else {
             this.ren = -1;
-            await this.sleep(SET_DELAY);
+            if (this.sender !== null) await this.sleep(SET_DELAY);
         }
         // console.log("release")
         // this.draw();
