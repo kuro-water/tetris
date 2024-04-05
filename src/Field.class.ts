@@ -73,6 +73,12 @@ export class Field {
         }
         return clearedLineCount;
     }
+
+    clone() {
+        const newField = new Field();
+        newField.field = this.field.map((row) => [...row]);
+        return newField;
+    }
 }
 
 module.exports = Field;
