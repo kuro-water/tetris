@@ -292,9 +292,9 @@ export class Wetris {
         // console.log("lock");
 
         settingMino.setMino();
-        console.log("modeTspin:" + this.modeTspin);
+        // console.log("modeTspin:" + this.modeTspin);
         lines = this.field.clearLines();
-        console.log("l:", this.lines);
+        // console.log("l:", this.lines);
         this.lines += lines;
         if (lines) {
             this.ren += 1;
@@ -313,7 +313,7 @@ export class Wetris {
         }
         // console.log("release")
         // this.draw();
-        this.makeNewMino();
+        await this.makeNewMino();
         this.isUsedHold = false;
         let ren = this.ren;
         if (ren < 0) ren = 0;
@@ -433,7 +433,7 @@ export class Wetris {
         }
     }
 
-    hardDrop() {
+    hardDrop = async () => {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
@@ -443,8 +443,8 @@ export class Wetris {
         // ゴーストのy座標まで移動(接地)
         this.currentMino.moveMino({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
 
-        this.set();
-    }
+        await this.set();
+    };
 
     hold() {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
