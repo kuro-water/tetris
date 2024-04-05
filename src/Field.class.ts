@@ -74,7 +74,7 @@ export class Field {
         return clearedLineCount;
     }
 
-    clone() {
+    clone(): Field {
         const newField = new Field();
         newField.field = this.field.map((row) => [...row]);
         return newField;
