@@ -19,7 +19,7 @@ export class Field {
      */
     printField() {
         this.field.forEach((row) => {
-            row.forEach((block) => process.stdout.write(block ? "1" : "0"));
+            row.forEach((block) => process.stdout.write(block ? "\x1b[34m1\x1b[0m" : "0"));
             process.stdout.write("\n");
         });
     }
