@@ -39,6 +39,7 @@
         }
     },
     "dependencies": {
+        "dayjs": "^1.11.10",
         "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^8.1.0"
     }

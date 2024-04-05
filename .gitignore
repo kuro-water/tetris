@@ -16,3 +16,4 @@ src/Wetris.class.js
 src/constant.js
 src/Cpu.class.js
 src/cpu.class.js
+src/messageUtil.js
