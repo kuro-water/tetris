@@ -58,15 +58,18 @@ class Cpu {
 
     async main() {
         while (true) {
+            // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
             const fieldDataList = await this.getAllFieldPattern(
                 this.mainWetris.currentMino.idxMino,
                 this.mainWetris.field
             );
             const fieldScoreList = await this.culcAllFieldScore(fieldDataList);
 
+            // 穴が最も少ないフィールドを選択
             const minHoleValue = fieldScoreList.reduce((min, b) => Math.min(min, b.hole), Infinity);
             const minHoleFieldList = fieldScoreList.filter((item) => item.hole === minHoleValue);
 
+            // そのうち、フィールドの高さが最も低いものを選択
             const minHeightValue = minHoleFieldList.reduce(
                 (max, b) => Math.max(max, b.height),
                 -Infinity
@@ -75,6 +78,7 @@ class Cpu {
                 (item) => item.height === minHeightValue
             );
 
+            // そのうち、設置するミノのy高さが最も低いものを選択
             const lowerPosFieldValue = minHeightFieldList.reduce(
                 (max, b) => Math.max(max, b.fieldData.pos.y),
                 -Infinity
@@ -163,7 +167,7 @@ class Cpu {
             }
 
             // 一番高いブロックのy座標を記録
-            // 値として小さい方がゲームとしては高いことに注意
+            // 値として小さい方がy座標としては高いことに注意
             if (y < height) {
                 height = y;
             }
