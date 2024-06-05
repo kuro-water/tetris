@@ -41,10 +41,17 @@ type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number
 /**
  * 評価後のフィールドデータ
  * hole: 埋まっている穴の数
+ * lidBlock: 下穴を埋めているブロックの数
  * height: 一番高い(内部的な値としては一番小さい)ブロックのy座標
  * requiedIMinoCount: 縦に3つ以上空いた穴の数 = 必要なIミノの数
  */
-type FieldInfo = { fieldData: FieldData; hole: number; height: number; requiedIMinoCount: number };
+type FieldInfo = {
+    fieldData: FieldData;
+    hole: number;
+    lidBlock: number;
+    height: number;
+    requiedIMinoCount: number;
+};
 
 type FieldScore = { fieldData: FieldData; score: number };
 
@@ -145,6 +152,7 @@ class Cpu {
 
     async getFieldInfo(fieldData: FieldData): Promise<FieldInfo> {
         let hole = 0;
+        let lidBlock = 0;
         let requiedIMinoCount = 0;
         let maxHeight = fieldData.field.field.length - 1;
         // 全てのx座標について順に確かめていく
@@ -168,6 +176,18 @@ class Cpu {
             for (; y < fieldData.field.field.length; y++) {
                 if (!fieldData.field.isFilled({ x: x, y: y })) {
                     hole++;
+                }
+            }
+
+            // 下穴を埋めているブロックを数える
+            for (y = fieldData.field.field.length - 1; 0 <= y; y--) {
+                if (!fieldData.field.isFilled({ x: x, y: y })) {
+                    break;
+                }
+            }
+            for (; 0 <= y; y--) {
+                if (fieldData.field.isFilled({ x: x, y: y })) {
+                    lidBlock++;
                 }
             }
 
@@ -215,6 +235,7 @@ class Cpu {
         return {
             fieldData: fieldData,
             hole: hole,
+            lidBlock: lidBlock,
             height: maxHeight,
             requiedIMinoCount: requiedIMinoCount,
         };
@@ -231,6 +252,7 @@ class Cpu {
     async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
+        score -= fieldInfo.lidBlock * 8;
         score -= fieldInfo.hole * 8;
         score += fieldInfo.height * 4;
         score -= fieldInfo.requiedIMinoCount * 2;
