@@ -95,12 +95,12 @@ class Cpu {
                 (item) => item.fieldData.pos.y === lowerPosFieldValue
             );
 
-            // 最初に出現したフィールドを優先する -> 左から順に積まれていく
+            // 最初に出現したフィールドを採用する -> 左から順に積まれていく
             const bestField = fieldScoreList[0];
             bestField.fieldData.field.printField();
-            info(`hole: ${bestField.hole}`);
-            info(`height: ${bestField.height}`);
-            info(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
+            // info(`hole: ${bestField.hole}`);
+            // info(`height: ${bestField.height}`);
+            // info(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
 
             // 実際に操作する
             while (this.mainWetris.currentMino.angle % 4 !== bestField.fieldData.angle % 4) {
@@ -211,13 +211,13 @@ class Cpu {
             }
             // カウント
             for (; y < fieldData.field.field.length; y++) {
-                info(
-                    `x: ${x}, y: ${y}, ${
-                        fieldData.field.isFilled({ x: x - 1, y: y }) &&
-                        !fieldData.field.isFilled({ x: x, y: y }) &&
-                        fieldData.field.isFilled({ x: x + 1, y: y })
-                    }`
-                );
+                // info(
+                //     `x: ${x}, y: ${y}, ${
+                //         fieldData.field.isFilled({ x: x - 1, y: y }) &&
+                //         !fieldData.field.isFilled({ x: x, y: y }) &&
+                //         fieldData.field.isFilled({ x: x + 1, y: y })
+                //     }`
+                // );
                 if (
                     fieldData.field.isFilled({ x: x - 1, y: y }) &&
                     !fieldData.field.isFilled({ x: x, y: y }) &&
