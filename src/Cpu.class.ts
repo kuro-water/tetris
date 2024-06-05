@@ -252,11 +252,23 @@ class Cpu {
     async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
-        score -= fieldInfo.lidBlock * 8;
-        score -= fieldInfo.hole * 8;
-        score += fieldInfo.height * 4;
-        score -= fieldInfo.requiedIMinoCount * 2;
+        // if (10 < fieldInfo.height - DRAW_FIELD_TOP) {
+        // 地形が低い場合
+        score -= fieldInfo.lidBlock;
+        score -= fieldInfo.hole * 2;
+        score += fieldInfo.height / 2;
+        score -= (fieldInfo.requiedIMinoCount - 1) * 3;
         score += fieldInfo.fieldData.pos.y;
+        // } else {
+        //     error("hi");
+        //     error("hi");
+        //     error("hi");
+        //     score -= fieldInfo.lidBlock * 3;
+        //     score -= fieldInfo.hole * 3;
+        //     score += fieldInfo.height * 3;
+        //     score -= fieldInfo.requiedIMinoCount * 2;
+        //     score += fieldInfo.fieldData.pos.y;
+        // }
 
         return { fieldData: fieldInfo.fieldData, score: score };
     }
