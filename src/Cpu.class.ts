@@ -44,7 +44,9 @@ type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number
  * height: 一番高い(内部的な値としては一番小さい)ブロックのy座標
  * requiedIMinoCount: 縦に3つ以上空いた穴の数 = 必要なIミノの数
  */
-type FieldScore = { fieldData: FieldData; hole: number; height: number; requiedIMinoCount: number };
+type FieldInfo = { fieldData: FieldData; hole: number; height: number; requiedIMinoCount: number };
+
+type FieldScore = { fieldData: FieldData; score: number };
 
 class Cpu {
     mainWetris: Wetris;
@@ -64,39 +66,15 @@ class Cpu {
                 this.mainWetris.currentMino.idxMino,
                 this.mainWetris.field
             );
-            let fieldScoreList = await this.culcAllFieldScore(fieldDataList);
+            const fieldInfoList = await this.getAllFieldInfo(fieldDataList);
 
-            // 埋まっている穴が最も少ないフィールドを選択
-            const minHoleValue = fieldScoreList.reduce((min, b) => Math.min(min, b.hole), Infinity);
-            fieldScoreList = fieldScoreList.filter((item) => item.hole === minHoleValue);
+            // const bestField = await this.choiceGoodField(fieldInfoList);
 
-            // そのうち、Iミノ要求数が最も少ないものを選択
-            const minRequiedIMinoCountValue = fieldScoreList.reduce(
-                (min, b) => Math.min(min, b.requiedIMinoCount),
-                Infinity
-            );
-            fieldScoreList = fieldScoreList.filter(
-                (item) => item.requiedIMinoCount === minRequiedIMinoCountValue
-            );
+            const fieldScoreList = await this.culcAllFieldScore(fieldInfoList);
 
-            // そのうち、フィールドの高さが最も低いものを選択
-            const minHeightValue = fieldScoreList.reduce(
-                (max, b) => Math.max(max, b.height),
-                -Infinity
-            );
-            fieldScoreList = fieldScoreList.filter((item) => item.height === minHeightValue);
+            const maxScore = fieldScoreList.reduce((max, b) => Math.max(max, b.score), -Infinity);
+            const bestField = fieldScoreList.filter((item) => item.score === maxScore)[0];
 
-            // そのうち、設置するミノのy高さが最も低いものを選択
-            const lowerPosFieldValue = fieldScoreList.reduce(
-                (max, b) => Math.max(max, b.fieldData.pos.y),
-                -Infinity
-            );
-            fieldScoreList = fieldScoreList.filter(
-                (item) => item.fieldData.pos.y === lowerPosFieldValue
-            );
-
-            // 最初に出現したフィールドを採用する -> 左から順に積まれていく
-            const bestField = fieldScoreList[0];
             bestField.fieldData.field.printField();
             // info(`hole: ${bestField.hole}`);
             // info(`height: ${bestField.height}`);
@@ -154,7 +132,7 @@ class Cpu {
 
                 // // debug
                 // this.trialWetris.field.printField();
-                // this.culcFieldScore(feldData).then((fieldScore) => {
+                // this.getFieldInfo(feldData).then((fieldScore) => {
                 //     info(`hole: ${fieldScore.hole}`);
                 //     info(`height: ${fieldScore.height}`);
                 //     info(`requiedIMinoCount: ${fieldScore.requiedIMinoCount}`);
@@ -165,7 +143,7 @@ class Cpu {
         return fieldDataList;
     }
 
-    async culcFieldScore(fieldData: FieldData): Promise<FieldScore> {
+    async getFieldInfo(fieldData: FieldData): Promise<FieldInfo> {
         let hole = 0;
         let requiedIMinoCount = 0;
         let maxHeight = fieldData.field.field.length - 1;
@@ -242,12 +220,60 @@ class Cpu {
         };
     }
 
-    async culcAllFieldScore(fieldDataList: FieldData[]): Promise<FieldScore[]> {
-        let fieldScoreList: FieldScore[] = [];
+    async getAllFieldInfo(fieldDataList: FieldData[]): Promise<FieldInfo[]> {
+        let fieldInfoList: FieldInfo[] = [];
         for (const fieldData of fieldDataList) {
-            fieldScoreList.push(await this.culcFieldScore(fieldData));
+            fieldInfoList.push(await this.getFieldInfo(fieldData));
+        }
+        return fieldInfoList;
+    }
+
+    async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
+        let score = 0;
+
+        score -= fieldInfo.hole * 8;
+        score += fieldInfo.height * 4;
+        score -= fieldInfo.requiedIMinoCount * 2;
+        score += fieldInfo.fieldData.pos.y;
+
+        return { fieldData: fieldInfo.fieldData, score: score };
+    }
+
+    async culcAllFieldScore(fieldInfoList: FieldInfo[]): Promise<FieldScore[]> {
+        let fieldScoreList: FieldScore[] = [];
+        for (const fieldInfo of fieldInfoList) {
+            fieldScoreList.push(await this.culcFieldScore(fieldInfo));
         }
         return fieldScoreList;
+    }
+
+    async choiceGoodField(fieldInfoList: FieldInfo[]): Promise<FieldInfo> {
+        // 埋まっている穴が最も少ないフィールドを選択
+        const minHoleValue = fieldInfoList.reduce((min, b) => Math.min(min, b.hole), Infinity);
+        fieldInfoList = fieldInfoList.filter((item) => item.hole === minHoleValue);
+
+        // そのうち、Iミノ要求数が最も少ないものを選択
+        const minRequiedIMinoCountValue = fieldInfoList.reduce(
+            (min, b) => Math.min(min, b.requiedIMinoCount),
+            Infinity
+        );
+        fieldInfoList = fieldInfoList.filter(
+            (item) => item.requiedIMinoCount === minRequiedIMinoCountValue
+        );
+
+        // そのうち、フィールドの高さが最も低いものを選択
+        const minHeightValue = fieldInfoList.reduce((max, b) => Math.max(max, b.height), -Infinity);
+        fieldInfoList = fieldInfoList.filter((item) => item.height === minHeightValue);
+
+        // そのうち、設置するミノのy高さが最も低いものを選択
+        const lowerPosFieldValue = fieldInfoList.reduce(
+            (max, b) => Math.max(max, b.fieldData.pos.y),
+            -Infinity
+        );
+        fieldInfoList = fieldInfoList.filter((item) => item.fieldData.pos.y === lowerPosFieldValue);
+
+        // 最初に出現したフィールドを採用する -> 左から順に積まれていく
+        return fieldInfoList[0];
     }
 }
 
