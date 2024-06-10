@@ -39,7 +39,7 @@ type Field = Field_;
 type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number };
 
 /**
- * 評価後のフィールドデータ
+ * 評価基準値を求めた後のデータを格納する
  * hole: 埋まっている穴の数
  * lidBlock: 下穴を埋めているブロックの数
  * height: 一番高い(内部的な値としては一番小さい)ブロックのy座標
@@ -68,58 +68,69 @@ class Cpu {
 
     async main() {
         while (true) {
-            // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
-            const fieldDataList = await this.getAllFieldPattern(
+            const bestField = await this.getBestField(
                 this.mainWetris.currentMino.idxMino,
                 this.mainWetris.field
             );
-            const fieldInfoList = await this.getAllFieldInfo(fieldDataList);
 
-            // const bestField = await this.choiceGoodField(fieldInfoList);
-
-            const fieldScoreList = await this.culcAllFieldScore(fieldInfoList);
-
-            const maxScore = fieldScoreList.reduce((max, b) => Math.max(max, b.score), -Infinity);
-            const bestField = fieldScoreList.filter((item) => item.score === maxScore)[0];
-
-            bestField.fieldData.field.printField();
+            // bestField.fieldData.field.printField();
             // info(`hole: ${bestField.hole}`);
             // info(`height: ${bestField.height}`);
             // info(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
 
-            // 実際に操作する
-            while (this.mainWetris.currentMino.angle % 4 !== bestField.fieldData.angle % 4) {
-                this.mainWetris.rotate(1);
-                await this.mainWetris.sleep(ARR);
-            }
-            while (this.mainWetris.currentMino.x !== bestField.fieldData.pos.x) {
-                const dif = bestField.fieldData.pos.x - this.mainWetris.currentMino.x;
-                const wasMoved = await this.mainWetris.move({ x: 0 < dif ? 1 : -1, y: 0 });
-                if (!wasMoved) {
-                    error("CPU: failed to move!");
-                }
-                await this.mainWetris.sleep(ARR);
-            }
-            await this.mainWetris.hardDrop();
-            // await this.mainWetris.sleep(1000);
+            await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
         }
+    }
+
+    async moveMinoToMatchField(wetris: Wetris, fieldData: FieldData) {
+        while (wetris.currentMino.angle % 4 !== fieldData.angle % 4) {
+            wetris.rotateRight();
+            await wetris.sleep(ARR);
+        }
+        while (wetris.currentMino.x !== fieldData.pos.x) {
+            const dif = fieldData.pos.x - wetris.currentMino.x;
+            const wasMoved = dif < 0 ? await wetris.moveLeft() : await wetris.moveRight();
+            if (!wasMoved) {
+                error("CPU: failed to move!");
+            }
+            await wetris.sleep(ARR);
+        }
+        await wetris.hardDrop();
+    }
+
+    async getBestField(idxMino: MINO_IDX, field: Field): Promise<FieldScore> {
+        // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
+        const fieldDataList = await this.getAllFieldPattern(idxMino, field);
+        const fieldInfoList = await this.getAllFieldInfo(fieldDataList);
+        const fieldScoreList = await this.culcAllFieldScore(fieldInfoList);
+
+        // 評価値が最大のフィールドを返す
+        const maxScore = fieldScoreList.reduce((max, b) => Math.max(max, b.score), -Infinity);
+        return fieldScoreList.filter((item) => item.score === maxScore)[0];
     }
 
     async getAllFieldPattern(idxMino: MINO_IDX, field: Field): Promise<FieldData[]> {
         let fieldDataList: FieldData[] = [];
-        for (let rotation = 0; rotation < 4; rotation++) {
+        for (let angle = 0; angle < 4; angle++) {
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる
             for (let movement = 0; ; movement++) {
                 this.trialWetris = new Wetris(null);
                 this.trialWetris.isMainloopActive = false;
                 this.trialWetris.currentMino.idxMino = idxMino;
-                for (let i = 0; i < rotation; i++) {
+                for (let i = 0; i < angle; i++) {
                     this.trialWetris.currentMino.rotateMino();
                 }
-                this.trialWetris.field.field = field.field.map((row: number[]) => [...row]);
+                // ミノもfield: Fieldを持ってる。field.field: number[][]を書き換えると、ミノのfieldも書き換わる
+                this.trialWetris.field.field = field.clone().field;
+                // あるいは両方書き換える
+                // this.trialWetris.field = field.clone();
+                // this.trialWetris.currentMino.field = this.trialWetris.field;
 
                 while (this.trialWetris.currentMino.moveMino({ x: -1, y: 0 }));
-                const wasMoved = this.trialWetris.currentMino.moveMino({ x: movement, y: 0 });
+                if (!this.trialWetris.currentMino.moveMino({ x: movement, y: 0 })) {
+                    // これ以上右に動かせない
+                    break;
+                }
                 while (this.trialWetris.currentMino.moveMino({ x: 0, y: 1 }));
                 const pos = {
                     x: this.trialWetris.currentMino.x,
@@ -127,13 +138,11 @@ class Cpu {
                 };
                 await this.trialWetris.set();
 
-                if (!wasMoved) break; // これ以上右に動かせない
-
                 const feldData: FieldData = {
                     field: this.trialWetris.field.clone(),
                     pos: pos,
                     idxMino: idxMino,
-                    angle: rotation,
+                    angle: angle,
                 };
                 fieldDataList.push(feldData);
 
@@ -196,7 +205,7 @@ class Cpu {
             // 1 0 1
             // 1 0 1
             // 1 1 1
-            // みたいなこと。
+            // みたいなもの。
             let trenchCount = 0;
             // 左右どちらかにブロックがある座標まで読み飛ばす
             for (y = 0; ; y++) {
@@ -242,72 +251,38 @@ class Cpu {
     }
 
     async getAllFieldInfo(fieldDataList: FieldData[]): Promise<FieldInfo[]> {
-        let fieldInfoList: FieldInfo[] = [];
-        for (const fieldData of fieldDataList) {
-            fieldInfoList.push(await this.getFieldInfo(fieldData));
-        }
-        return fieldInfoList;
+        // let fieldInfoList: FieldInfo[] = [];
+        // for (const fieldData of fieldDataList) {
+        //     fieldInfoList.push(await this.getFieldInfo(fieldData));
+        // }
+        // return fieldInfoList;
+        return await Promise.all(fieldDataList.map((fieldData) => this.getFieldInfo(fieldData)));
     }
 
     async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
-        // if (10 < fieldInfo.height - DRAW_FIELD_TOP) {
-        // 地形が低い場合
-        score -= fieldInfo.lidBlock;
-        score -= fieldInfo.hole * 2;
-        score += fieldInfo.height / 2;
-        score -= (fieldInfo.requiedIMinoCount - 1) * 3;
+        score -= fieldInfo.hole * 8;
+        score += fieldInfo.height;
+        score -= fieldInfo.requiedIMinoCount * 2;
         score += fieldInfo.fieldData.pos.y;
-        // } else {
-        //     error("hi");
-        //     error("hi");
-        //     error("hi");
-        //     score -= fieldInfo.lidBlock * 3;
-        //     score -= fieldInfo.hole * 3;
-        //     score += fieldInfo.height * 3;
-        //     score -= fieldInfo.requiedIMinoCount * 2;
-        //     score += fieldInfo.fieldData.pos.y;
-        // }
+
+        // 死にそうな高さは基本置かない
+        if (fieldInfo.height - DRAW_FIELD_TOP < 5) {
+            error("hi");
+            score *= 0.01;
+        }
 
         return { fieldData: fieldInfo.fieldData, score: score };
     }
 
     async culcAllFieldScore(fieldInfoList: FieldInfo[]): Promise<FieldScore[]> {
-        let fieldScoreList: FieldScore[] = [];
-        for (const fieldInfo of fieldInfoList) {
-            fieldScoreList.push(await this.culcFieldScore(fieldInfo));
-        }
-        return fieldScoreList;
-    }
-
-    async choiceGoodField(fieldInfoList: FieldInfo[]): Promise<FieldInfo> {
-        // 埋まっている穴が最も少ないフィールドを選択
-        const minHoleValue = fieldInfoList.reduce((min, b) => Math.min(min, b.hole), Infinity);
-        fieldInfoList = fieldInfoList.filter((item) => item.hole === minHoleValue);
-
-        // そのうち、Iミノ要求数が最も少ないものを選択
-        const minRequiedIMinoCountValue = fieldInfoList.reduce(
-            (min, b) => Math.min(min, b.requiedIMinoCount),
-            Infinity
-        );
-        fieldInfoList = fieldInfoList.filter(
-            (item) => item.requiedIMinoCount === minRequiedIMinoCountValue
-        );
-
-        // そのうち、フィールドの高さが最も低いものを選択
-        const minHeightValue = fieldInfoList.reduce((max, b) => Math.max(max, b.height), -Infinity);
-        fieldInfoList = fieldInfoList.filter((item) => item.height === minHeightValue);
-
-        // そのうち、設置するミノのy高さが最も低いものを選択
-        const lowerPosFieldValue = fieldInfoList.reduce(
-            (max, b) => Math.max(max, b.fieldData.pos.y),
-            -Infinity
-        );
-        fieldInfoList = fieldInfoList.filter((item) => item.fieldData.pos.y === lowerPosFieldValue);
-
-        // 最初に出現したフィールドを採用する -> 左から順に積まれていく
-        return fieldInfoList[0];
+        // let fieldScoreList: FieldScore[] = [];
+        // for (const fieldInfo of fieldInfoList) {
+        //     fieldScoreList.push(await this.culcFieldScore(fieldInfo));
+        // }
+        // return fieldScoreList;
+        return await Promise.all(fieldInfoList.map((fieldInfo) => this.culcFieldScore(fieldInfo)));
     }
 }
 
