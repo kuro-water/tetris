@@ -14,59 +14,60 @@ class Cpu {
     }
     async main() {
         while (true) {
-            // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
-            const fieldDataList = await this.getAllFieldPattern(this.mainWetris.currentMino.idxMino, this.mainWetris.field);
-            let fieldScoreList = await this.culcAllFieldScore(fieldDataList);
-            // そのうち、Iミノ要求数が最も少ないものを選択
-            const minRequiedIMinoCountValue = fieldScoreList.reduce((min, b) => Math.min(min, b.requiedIMinoCount), Infinity);
-            fieldScoreList = fieldScoreList.filter((item) => item.requiedIMinoCount === minRequiedIMinoCountValue);
-            // そのうち、フィールドの高さが最も低いものを選択
-            const minHeightValue = fieldScoreList.reduce((max, b) => Math.max(max, b.height), -Infinity);
-            fieldScoreList = fieldScoreList.filter((item) => item.height === minHeightValue);
-            // 埋まっている穴が最も少ないフィールドを選択
-            const minHoleValue = fieldScoreList.reduce((min, b) => Math.min(min, b.hole), Infinity);
-            fieldScoreList = fieldScoreList.filter((item) => item.hole === minHoleValue);
-            // そのうち、設置するミノのy高さが最も低いものを選択
-            const lowerPosFieldValue = fieldScoreList.reduce((max, b) => Math.max(max, b.fieldData.pos.y), -Infinity);
-            fieldScoreList = fieldScoreList.filter((item) => item.fieldData.pos.y === lowerPosFieldValue);
-            // 最初に出現したフィールドを優先する -> 左から順に積まれていく
-            const bestField = fieldScoreList[0];
-            bestField.fieldData.field.printField();
-            (0, messageUtil_1.info)(`hole: ${bestField.hole}`);
-            (0, messageUtil_1.info)(`height: ${bestField.height}`);
-            (0, messageUtil_1.info)(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
-            // 実際に操作する
-            while (this.mainWetris.currentMino.angle % 4 !== bestField.fieldData.angle % 4) {
-                this.mainWetris.rotate(1);
-                await this.mainWetris.sleep(constant_1.ARR);
-            }
-            while (this.mainWetris.currentMino.x !== bestField.fieldData.pos.x) {
-                const dif = bestField.fieldData.pos.x - this.mainWetris.currentMino.x;
-                const wasMoved = await this.mainWetris.move({ x: 0 < dif ? 1 : -1, y: 0 });
-                if (!wasMoved) {
-                    (0, messageUtil_1.error)("CPU: failed to move!");
-                }
-                await this.mainWetris.sleep(constant_1.ARR);
-            }
-            await this.mainWetris.hardDrop();
-            // await this.mainWetris.sleep(1000);
+            const bestField = await this.getBestField(this.mainWetris.currentMino.idxMino, this.mainWetris.field);
+            // bestField.fieldData.field.printField();
+            // info(`hole: ${bestField.hole}`);
+            // info(`height: ${bestField.height}`);
+            // info(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
+            await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
         }
+    }
+    async moveMinoToMatchField(wetris, fieldData) {
+        while (wetris.currentMino.angle % 4 !== fieldData.angle % 4) {
+            wetris.rotateRight();
+            await wetris.sleep(constant_1.ARR);
+        }
+        while (wetris.currentMino.x !== fieldData.pos.x) {
+            const dif = fieldData.pos.x - wetris.currentMino.x;
+            const wasMoved = dif < 0 ? await wetris.moveLeft() : await wetris.moveRight();
+            if (!wasMoved) {
+                (0, messageUtil_1.error)("CPU: failed to move!");
+            }
+            await wetris.sleep(constant_1.ARR);
+        }
+        await wetris.hardDrop();
+    }
+    async getBestField(idxMino, field) {
+        // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
+        const fieldDataList = await this.getAllFieldPattern(idxMino, field);
+        const fieldInfoList = await this.getAllFieldInfo(fieldDataList);
+        const fieldScoreList = await this.culcAllFieldScore(fieldInfoList);
+        // 評価値が最大のフィールドを返す
+        const maxScore = fieldScoreList.reduce((max, b) => Math.max(max, b.score), -Infinity);
+        return fieldScoreList.filter((item) => item.score === maxScore)[0];
     }
     async getAllFieldPattern(idxMino, field) {
         let fieldDataList = [];
-        for (let rotation = 0; rotation < 4; rotation++) {
+        for (let angle = 0; angle < 4; angle++) {
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる
             for (let movement = 0;; movement++) {
                 this.trialWetris = new Wetris(null);
                 this.trialWetris.isMainloopActive = false;
                 this.trialWetris.currentMino.idxMino = idxMino;
-                for (let i = 0; i < rotation; i++) {
+                for (let i = 0; i < angle; i++) {
                     this.trialWetris.currentMino.rotateMino();
                 }
-                this.trialWetris.field.field = field.field.map((row) => [...row]);
+                // ミノもfield: Fieldを持ってる。field.field: number[][]を書き換えると、ミノのfieldも書き換わる
+                this.trialWetris.field.field = field.clone().field;
+                // あるいは両方書き換える
+                // this.trialWetris.field = field.clone();
+                // this.trialWetris.currentMino.field = this.trialWetris.field;
                 while (this.trialWetris.currentMino.moveMino({ x: -1, y: 0 }))
                     ;
-                const wasMoved = this.trialWetris.currentMino.moveMino({ x: movement, y: 0 });
+                if (!this.trialWetris.currentMino.moveMino({ x: movement, y: 0 })) {
+                    // これ以上右に動かせない
+                    break;
+                }
                 while (this.trialWetris.currentMino.moveMino({ x: 0, y: 1 }))
                     ;
                 const pos = {
@@ -74,18 +75,16 @@ class Cpu {
                     y: this.trialWetris.currentMino.y,
                 };
                 await this.trialWetris.set();
-                if (!wasMoved)
-                    break; // これ以上右に動かせない
                 const feldData = {
                     field: this.trialWetris.field.clone(),
                     pos: pos,
                     idxMino: idxMino,
-                    angle: rotation,
+                    angle: angle,
                 };
                 fieldDataList.push(feldData);
                 // // debug
                 // this.trialWetris.field.printField();
-                // this.culcFieldScore(feldData).then((fieldScore) => {
+                // this.getFieldInfo(feldData).then((fieldScore) => {
                 //     info(`hole: ${fieldScore.hole}`);
                 //     info(`height: ${fieldScore.height}`);
                 //     info(`requiedIMinoCount: ${fieldScore.requiedIMinoCount}`);
@@ -95,8 +94,9 @@ class Cpu {
         }
         return fieldDataList;
     }
-    async culcFieldScore(fieldData) {
+    async getFieldInfo(fieldData) {
         let hole = 0;
+        let lidBlock = 0;
         let requiedIMinoCount = 0;
         let maxHeight = fieldData.field.field.length - 1;
         // 全てのx座標について順に確かめていく
@@ -119,12 +119,23 @@ class Cpu {
                     hole++;
                 }
             }
+            // 下穴を埋めているブロックを数える
+            for (y = fieldData.field.field.length - 1; 0 <= y; y--) {
+                if (!fieldData.field.isFilled({ x: x, y: y })) {
+                    break;
+                }
+            }
+            for (; 0 <= y; y--) {
+                if (fieldData.field.isFilled({ x: x, y: y })) {
+                    lidBlock++;
+                }
+            }
             // 縦に3つ以上空いた穴の数を数える
             // 1 0 1
             // 1 0 1
             // 1 0 1
             // 1 1 1
-            // みたいなこと。
+            // みたいなもの。
             let trenchCount = 0;
             // 左右どちらかにブロックがある座標まで読み飛ばす
             for (y = 0;; y++) {
@@ -135,9 +146,13 @@ class Cpu {
             }
             // カウント
             for (; y < fieldData.field.field.length; y++) {
-                (0, messageUtil_1.info)(`x: ${x}, y: ${y}, ${fieldData.field.isFilled({ x: x - 1, y: y }) &&
-                    !fieldData.field.isFilled({ x: x, y: y }) &&
-                    fieldData.field.isFilled({ x: x + 1, y: y })}`);
+                // info(
+                //     `x: ${x}, y: ${y}, ${
+                //         fieldData.field.isFilled({ x: x - 1, y: y }) &&
+                //         !fieldData.field.isFilled({ x: x, y: y }) &&
+                //         fieldData.field.isFilled({ x: x + 1, y: y })
+                //     }`
+                // );
                 if (fieldData.field.isFilled({ x: x - 1, y: y }) &&
                     !fieldData.field.isFilled({ x: x, y: y }) &&
                     fieldData.field.isFilled({ x: x + 1, y: y })) {
@@ -156,16 +171,40 @@ class Cpu {
         return {
             fieldData: fieldData,
             hole: hole,
+            lidBlock: lidBlock,
             height: maxHeight,
             requiedIMinoCount: requiedIMinoCount,
         };
     }
-    async culcAllFieldScore(fieldDataList) {
-        let fieldScoreList = [];
-        for (const fieldData of fieldDataList) {
-            fieldScoreList.push(await this.culcFieldScore(fieldData));
+    async getAllFieldInfo(fieldDataList) {
+        // let fieldInfoList: FieldInfo[] = [];
+        // for (const fieldData of fieldDataList) {
+        //     fieldInfoList.push(await this.getFieldInfo(fieldData));
+        // }
+        // return fieldInfoList;
+        return await Promise.all(fieldDataList.map((fieldData) => this.getFieldInfo(fieldData)));
+    }
+    async culcFieldScore(fieldInfo) {
+        let score = 0;
+        score -= fieldInfo.hole * 4;
+        score -= fieldInfo.lidBlock;
+        score += fieldInfo.height;
+        score -= fieldInfo.requiedIMinoCount * 2;
+        score += fieldInfo.fieldData.pos.y;
+        // 死にそうな高さは基本置かない
+        if (fieldInfo.height - constant_1.DRAW_FIELD_TOP < 5) {
+            (0, messageUtil_1.error)("hi");
+            score *= 0 < score ? 0.01 : 100;
         }
-        return fieldScoreList;
+        return { fieldData: fieldInfo.fieldData, score: score };
+    }
+    async culcAllFieldScore(fieldInfoList) {
+        // let fieldScoreList: FieldScore[] = [];
+        // for (const fieldInfo of fieldInfoList) {
+        //     fieldScoreList.push(await this.culcFieldScore(fieldInfo));
+        // }
+        // return fieldScoreList;
+        return await Promise.all(fieldInfoList.map((fieldInfo) => this.culcFieldScore(fieldInfo)));
     }
 }
 module.exports = Cpu;
