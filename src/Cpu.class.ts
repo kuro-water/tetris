@@ -262,7 +262,8 @@ class Cpu {
     async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
-        score -= fieldInfo.hole * 8;
+        score -= fieldInfo.hole * 4;
+        score -= fieldInfo.lidBlock;
         score += fieldInfo.height;
         score -= fieldInfo.requiedIMinoCount * 2;
         score += fieldInfo.fieldData.pos.y;
@@ -270,7 +271,7 @@ class Cpu {
         // 死にそうな高さは基本置かない
         if (fieldInfo.height - DRAW_FIELD_TOP < 5) {
             error("hi");
-            score *= 0.01;
+            score *= 0 < score ? 0.01 : 100;
         }
 
         return { fieldData: fieldInfo.fieldData, score: score };
