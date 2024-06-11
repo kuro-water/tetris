@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const constant_1 = require("./constant");
 const messageUtil_1 = require("./messageUtil");
-const Wetris = require("./wetris.class");
+const Wetris = require("./Wetris.class");
 class Cpu {
     mainWetris;
     trialWetris;
@@ -208,4 +208,4 @@ class Cpu {
     }
 }
 module.exports = Cpu;
-//# sourceMappingURL=cpu.class.js.map
+//# sourceMappingURL=Cpu.class.js.map
