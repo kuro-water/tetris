@@ -37,10 +37,10 @@ handleWetris();
 const createWindow = () => {
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
-		width: 512,
-		height: 768,
-		// width: 1280,
-		// height: 720,
+		// width: 512,
+		// height: 768,
+		width: 1280,
+		height: 720,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
 		},
@@ -50,7 +50,7 @@ const createWindow = () => {
 	mainWindow.loadFile(path.join(__dirname, "index.html"));
 
 	// Open the DevTools.
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
