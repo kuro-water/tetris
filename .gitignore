@@ -8,12 +8,5 @@ config.json
 /dist
 /get_srs_data
 /src/backup
-src/Field.class.js
-src/Field.js
-src/Mino.class.js
-src/Mino.js
-src/Wetris.class.js
-src/constant.js
-src/Cpu.class.js
-src/cpu.class.js
-src/messageUtil.js
+src/*.js
+!src/index.js
