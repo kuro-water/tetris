@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
-const { handleWetris, handleRotate } = require("./wetris.js");
+import { handleWetris } from "./wetris";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
