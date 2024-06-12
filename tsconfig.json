@@ -101,5 +101,8 @@
     "exclude": [
         "node_modules",
         "src/backup",
+    ],
+    "include": [
+        "src/**/*.ts"
     ]
 }

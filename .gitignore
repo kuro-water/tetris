@@ -1,12 +1,6 @@
-/node_modules
-*.map
-renderer.js
-settings.js
-wetris.js
-constant.js
-config.json
 /dist
-/get_srs_data
+/node_modules
 /src/backup
-src/*.js
-!src/index.js
+*.js
+*.js.map
+!src/main/main.js

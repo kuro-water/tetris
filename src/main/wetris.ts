@@ -14,7 +14,7 @@ type Cpu = typeof Cpu;
 
 let listWetris: Wetris[] = [];
 
-function handleWetris() {
+export function handleWetris() {
     ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
         console.log("wetris starting...");
 
@@ -75,4 +75,4 @@ function handleWetris() {
     });
 }
 
-module.exports = { handleWetris };
+// module.exports = { handleWetris };
