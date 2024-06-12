@@ -1,6 +1,6 @@
 declare class electronAPI {
-    static readJson(jsonPath: string): Promise<any>;
-    static writeJson(jsonPath: string, data: any): Promise<void>;
+    static readJson(key: string): Promise<Config>;
+    static writeJson(key: string, data: Config): Promise<void>;
 }
 
 declare class wetris {
@@ -16,6 +16,20 @@ declare class wetris {
     static hold(idx: number): null;
     static getField(idx: number): Promise<number[][]>;
 }
+
+type KeyMap = {
+    moveLeft: string;
+    moveRight: string;
+    softDrop: string;
+    hardDrop: string;
+    rotateLeft: string;
+    rotateRight: string;
+    hold: string;
+};
+type Config = {
+    keyMode: string;
+    keyMap: KeyMap;
+};
 
 type position = {
     x: number;

@@ -10,27 +10,23 @@ if (require("electron-squirrel-startup")) {
     app.quit();
 }
 
-ipcMain.handle("readJson", async (event: any, Key: string) => {
-    console.log("read : " + Key);
-    const data = store.get(Key);
-    console.log(data);
-    return data;
-});
-// ipcMain.handle("readJson", async (event, jsonPath) => {
-// 	console.log("read : " + jsonPath);
-// 	return JSON.parse(fs.readFileSync(__dirname + jsonPath, "utf-8"));
-// });
+ipcMain.handle(
+    "readJson",
+    async (event: typeof IpcMainInvokeEvent, key: string): Promise<Config> => {
+        console.log("read : " + key);
+        const data: Config = store.get(key);
+        console.log(data);
+        return data;
+    }
+);
 
-ipcMain.handle("writeJson", async (event: any, Key: string, data: any) => {
-    console.log("write : " + Key);
-    store.set(Key, data);
-    return;
-});
-// ipcMain.handle("writeJson", async (event, jsonPath, data) => {
-// 	console.log("write : " + jsonPath);
-// 	fs.writeFileSync(__dirname + jsonPath, JSON.stringify(data));
-// 	return;
-// });
+ipcMain.handle(
+    "writeJson",
+    async (event: typeof IpcMainInvokeEvent, key: string, data: Config): Promise<void> => {
+        console.log("write : " + key);
+        store.set(key, data);
+    }
+);
 
 handleWetris();
 

@@ -8,7 +8,7 @@ const INPUT_ROTATE_LEFT = document.getElementById("rotateLeft") as HTMLInputElem
 const INPUT_ROTATE_RIGHT = document.getElementById("rotateRight") as HTMLInputElement;
 const INPUT_HOLD = document.getElementById("hold") as HTMLInputElement;
 
-let config: any = undefined;
+let config: Config = undefined;
 
 const setInputValue = function () {
     INPUT_MOVE_LEFT.value = config.keyMap.moveLeft;
