@@ -1,5 +1,5 @@
 /node_modules
-*.map
+*.js.map
 renderer.js
 settings.js
 wetris.js
@@ -8,5 +8,5 @@ config.json
 /dist
 /get_srs_data
 /src/backup
-src/*.js
-!src/index.js
+*.js
+!src/main/index.js
