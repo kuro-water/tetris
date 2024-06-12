@@ -23,8 +23,8 @@ export class Mino {
     y = DRAW_FIELD_TOP + 1;
     idxMino: MINO_IDX;
     angle = 0;
-    blockPos: blocks = [];
     lastSRS: number;
+    blockPos = () => MINO_POS[this.idxMino][this.angle % 4];
 
     isGameOver = false;
 
@@ -34,17 +34,16 @@ export class Mino {
         this.idxMino = idxMino;
         this.field = field;
         for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-            const x = minoPos[0] + this.x;
-            const y = minoPos[1] + this.y;
+            const x = minoPos.x + this.x;
+            const y = minoPos.y + this.y;
             if (this.field.isFilled({ x: x, y: y })) {
                 // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-                //     console.log(minoPos[0] + this.x, minoPos[1] + this.y);
+                //     console.log(minoPos.x + this.x, minoPos.y + this.y);
                 // }
                 console.log("gameover");
                 console.log("out:", x + this.x, y + this.y);
                 this.isGameOver = true;
             }
-            this.blockPos.push({ x: minoPos[0], y: minoPos[1] });
         }
         this.drawMino();
         if (this.isGameOver) return;
@@ -52,7 +51,8 @@ export class Mino {
     }
 
     clearMino() {
-        this.blockPos.forEach((block) => {
+        if (this.sender === null) return;
+        this.blockPos().forEach((block) => {
             this.sender.send(
                 "drawBlock",
                 { x: this.x + block.x, y: this.y + block.y - DRAW_FIELD_TOP },
@@ -62,7 +62,8 @@ export class Mino {
     }
 
     drawMino() {
-        this.blockPos.forEach((block) => {
+        if (this.sender === null) return;
+        this.blockPos().forEach((block) => {
             this.sender.send(
                 "drawBlock",
                 { x: this.x + block.x, y: this.y + block.y - DRAW_FIELD_TOP },
@@ -77,7 +78,7 @@ export class Mino {
      * */
     getGhostY(x = this.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
-            for (const block of this.blockPos) {
+            for (const block of this.blockPos()) {
                 if (this.field.isFilled({ x: x + block.x, y: this.y + block.y + i })) {
                     return this.y + i - 1; // ぶつかる1つ手前がゴーストの位置
                 }
@@ -91,7 +92,8 @@ export class Mino {
      * 別途現在地にも描画しないと上書きされる
      */
     drawGhostMino() {
-        this.blockPos.forEach((block) => {
+        if (this.sender === null) return;
+        this.blockPos().forEach((block) => {
             this.sender.send(
                 "drawBlock",
                 { x: this.x + block.x, y: this.getGhostY() + block.y - DRAW_FIELD_TOP },
@@ -101,9 +103,10 @@ export class Mino {
     }
 
     drawHoldMino() {
+        if (this.sender === null) return;
         // console.log("drawHoldMino");
         this.sender.send("clearHoldContext");
-        this.blockPos.forEach((block) => {
+        this.blockPos().forEach((block) => {
             this.sender.send("drawHoldBlock", block, MINO_COLORS[this.idxMino]);
         });
     }
@@ -121,11 +124,16 @@ export class Mino {
 
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
-            if (this.field.isFilled({ x: toX + this.blockPos[i].x, y: toY + this.blockPos[i].y })) {
+            if (
+                this.field.isFilled({
+                    x: toX + this.blockPos()[i].x,
+                    y: toY + this.blockPos()[i].y,
+                })
+            ) {
                 return false;
             }
             // ブロックの座標を格納(send用)
-            blockPos.push(Object.assign({}, this.blockPos[i]));
+            blockPos.push(Object.assign({}, this.blockPos()[i]));
         }
 
         const preX = this.x;
@@ -133,6 +141,8 @@ export class Mino {
         const preGhostY = this.getGhostY();
         this.x = toX;
         this.y = toY;
+
+        if (this.sender === null) return true;
 
         this.sender.send(
             "reDrawMino",
@@ -167,8 +177,8 @@ export class Mino {
         for (let i = 0; i < 4; i++) {
             // 基本回転
             postBlockPos.push({
-                x: MINO_POS[this.idxMino][(this.angle + dif) % 4][i][0],
-                y: MINO_POS[this.idxMino][(this.angle + dif) % 4][i][1],
+                x: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].x,
+                y: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].y,
             });
             // console.log("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
             // console.log("x:" + rotatedX + "y:" + rotatedY);
@@ -181,7 +191,7 @@ export class Mino {
 
         // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
         let preBlockPos: blocks = [];
-        this.blockPos.forEach((block) => {
+        this.blockPos().forEach((block) => {
             // 移動前の座標を格納しておく
             preBlockPos.push(Object.assign({}, block));
         });
@@ -195,11 +205,8 @@ export class Mino {
         this.angle += dif;
         this.x += move.x;
         this.y += move.y;
-        postBlockPos.forEach((pos, i) => {
-            // this.blocks[i].x = pos[0];
-            // this.blocks[i].y = pos[1];
-            this.blockPos[i] = Object.assign({}, pos);
-        });
+
+        if (this.sender === null) return true;
 
         this.sender.send(
             "reDrawMino",
@@ -220,7 +227,7 @@ export class Mino {
      * @returns {bool} true:移動可 false:移動不可
      */
     canRotate(dif: number, postBlockPos: blocks, move: position): boolean {
-        let wallKickData: number[][][][];
+        let wallKickData: position[][][];
 
         for (let i = 0; i < 4; i++) {
             // 基本回転の検証
@@ -246,8 +253,8 @@ export class Mino {
 
         for (let i = 0; i < 4; i++) {
             // SRSの動作
-            move.x = wallKickData[this.angle % 4][(this.angle + dif) % 4][i][0];
-            move.y = wallKickData[this.angle % 4][(this.angle + dif) % 4][i][1];
+            move.x = wallKickData[this.angle % 4][(this.angle + dif) % 4][i].x;
+            move.y = wallKickData[this.angle % 4][(this.angle + dif) % 4][i].y;
             // console.log("moved:" + move);
             for (let j = 0; j < 4; j++) {
                 // 移動先の検証
@@ -279,7 +286,7 @@ export class Mino {
      * 接地の可不の判定等は無いので注意
      */
     setMino() {
-        this.blockPos.forEach((block) => {
+        this.blockPos().forEach((block) => {
             this.field.setBlock({ x: this.x + block.x, y: this.y + block.y });
         });
     }

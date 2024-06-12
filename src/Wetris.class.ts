@@ -109,14 +109,17 @@ export class Wetris {
     }
 
     clearFieldContext() {
+        if (this.sender === null) return;
         this.sender.send("clearFieldContext");
     }
 
     clearHoldContext() {
+        if (this.sender === null) return;
         this.sender.send("clearHoldContext");
     }
 
     clearNextContext() {
+        if (this.sender === null) return;
         this.sender.send("clearNextContext");
     }
 
@@ -157,6 +160,7 @@ export class Wetris {
     };
 
     drawField() {
+        if (this.sender === null) return;
         this.sender.send("drawField", this.field.field);
         this.currentMino.drawGhostMino();
         this.currentMino.drawMino();
@@ -205,6 +209,7 @@ export class Wetris {
     }
 
     drawNext() {
+        if (this.sender === null) return;
         // console.log("---------- draw next ----------")
         this.clearNextContext();
         // ネクスト配列のコピーを作り、popで取り出す
@@ -223,8 +228,8 @@ export class Wetris {
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
                 const block: position = {
-                    x: MINO_POS[idxMino][0][j][0],
-                    y: MINO_POS[idxMino][0][j][1],
+                    x: MINO_POS[idxMino][0][j].x,
+                    y: MINO_POS[idxMino][0][j].y,
                 };
                 this.sender.send(
                     "drawNextBlock",
@@ -287,9 +292,9 @@ export class Wetris {
         // console.log("lock");
 
         settingMino.setMino();
-        console.log("modeTspin:" + this.modeTspin);
+        // console.log("modeTspin:" + this.modeTspin);
         lines = this.field.clearLines();
-        console.log("l:", this.lines);
+        // console.log("l:", this.lines);
         this.lines += lines;
         if (lines) {
             this.ren += 1;
@@ -301,18 +306,19 @@ export class Wetris {
                 this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
                 this.isBtB = !!this.modeTspin || lines === 4;
             }
-            await this.sleep(DEL_DELAY);
+            if (this.sender !== null) await this.sleep(DEL_DELAY);
         } else {
             this.ren = -1;
-            await this.sleep(SET_DELAY);
+            if (this.sender !== null) await this.sleep(SET_DELAY);
         }
         // console.log("release")
         // this.draw();
-        this.makeNewMino();
+        await this.makeNewMino();
         this.isUsedHold = false;
-        this.sender.send("setLabelScore", String("score:" + this.score));
         let ren = this.ren;
         if (ren < 0) ren = 0;
+        if (this.sender === null) return;
+        this.sender.send("setLabelScore", String("score:" + this.score));
         this.sender.send("setLabelRen", String("ren:" + ren));
     };
 
@@ -361,44 +367,48 @@ export class Wetris {
         this.score += score;
     }
 
-    move(dif: position) {
+    move(dif: position): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
+        if (!this.currentMino) return false;
 
-        if (this.checkKSKS()) return;
+        if (this.checkKSKS()) return false;
         if (this.currentMino.moveMino(dif)) {
             this.isLocking = false;
             this.modeTspin = 0;
             this.countKSKS += 1;
+            return true;
         }
+        return false;
     }
 
-    moveLeft() {
-        this.move({ x: -1, y: 0 });
+    moveLeft(): boolean {
+        return this.move({ x: -1, y: 0 });
     }
 
-    moveRight() {
-        this.move({ x: 1, y: 0 });
+    moveRight(): boolean {
+        return this.move({ x: 1, y: 0 });
     }
 
-    rotate(angle: number) {
+    rotate(angle: number): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
-        if (!this.currentMino) return;
+        if (!this.currentMino) return false;
 
-        if (this.checkKSKS()) return;
+        if (this.checkKSKS()) return false;
         if (this.currentMino.rotateMino(angle)) {
             this.isLocking = false;
             this.modeTspin = this.currentMino.getModeTspin();
             this.countKSKS += 1;
+            return true;
         }
+        return false;
     }
 
-    rotateLeft() {
-        this.rotate(-1);
+    rotateLeft(): boolean {
+        return this.rotate(-1);
     }
 
-    rotateRight() {
-        this.rotate(1);
+    rotateRight(): boolean {
+        return this.rotate(1);
     }
 
     /**
@@ -414,7 +424,8 @@ export class Wetris {
             this.isLocking = false;
             this.countKSKS = 0;
             this.score += 1;
-            this.sender.send("setLabelScore", String("score:" + this.score));
+            if (this.sender.send !== null)
+                this.sender.send("setLabelScore", String("score:" + this.score));
             return false;
         } else {
             this.lockDown();
@@ -422,7 +433,7 @@ export class Wetris {
         }
     }
 
-    hardDrop() {
+    hardDrop = async () => {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
@@ -432,8 +443,8 @@ export class Wetris {
         // ゴーストのy座標まで移動(接地)
         this.currentMino.moveMino({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
 
-        this.set();
-    }
+        await this.set();
+    };
 
     hold() {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため

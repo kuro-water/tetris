@@ -1,6 +1,6 @@
 {
     "name": "wetris",
-    "version": "1.0.0",
+    "version": "1.9.0-alpha",
     "description": "",
     "main": "src/index.js",
     "scripts": {
@@ -9,7 +9,7 @@
         "make": "electron-forge make",
         "publish": "electron-forge publish",
         "lint": "echo \"No linting configured\"",
-        "build": "electron-packager ."
+        "build": "tsc && npx electron-builder --win --x64"
     },
     "keywords": [],
     "author": "",
@@ -39,6 +39,7 @@
         }
     },
     "dependencies": {
+        "dayjs": "^1.11.10",
         "electron-squirrel-startup": "^1.0.0",
         "electron-store": "^8.1.0"
     }

@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 
 contextBridge.exposeInMainWorld("wetris", {
     start: () => ipcRenderer.invoke("start"),
+    startCpu: (idx: number) => ipcRenderer.invoke("startCpu", idx),
     stop: (idx: number) => ipcRenderer.invoke("stop", idx),
     moveLeft: (idx: number) => ipcRenderer.invoke("moveLeft", idx),
     moveRight: (idx: number) => ipcRenderer.invoke("moveRight", idx),
