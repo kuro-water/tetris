@@ -1,36 +1,35 @@
 const { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } = require("electron");
+type IpcMainInvokeEvent = typeof IpcMainInvokeEvent;
 const path = require("path");
-const fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
-const { handleWetris, handleRotate } = require("./wetris.js");
+import { handleWetris } from "./wetris";
+import * as initConfig from "./initConfig.json";
+import { success, error, warning, task, info } from "./messageUtil";
+// console.dir(store.store, { depth: null });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
     app.quit();
 }
 
-ipcMain.handle("readJson", async (event: any, Key: string) => {
-    console.log("read : " + Key);
-    const data = store.get(Key);
-    console.log(data);
+const CONFIG_KEY = "config";
+if (!store.has(CONFIG_KEY)) store.set(CONFIG_KEY, initConfig);
+
+ipcMain.handle("getInitConfig", async (event: IpcMainInvokeEvent): Promise<Config> => {
+    return initConfig;
+});
+
+ipcMain.handle("getConfig", async (event: IpcMainInvokeEvent): Promise<Config> => {
+    const data: Config = store.get(CONFIG_KEY);
+    // info(`got ${CONFIG_KEY} : ${JSON.stringify(data)}`);
     return data;
 });
-// ipcMain.handle("readJson", async (event, jsonPath) => {
-// 	console.log("read : " + jsonPath);
-// 	return JSON.parse(fs.readFileSync(__dirname + jsonPath, "utf-8"));
-// });
 
-ipcMain.handle("writeJson", async (event: any, Key: string, data: any) => {
-    console.log("write : " + Key);
-    store.set(Key, data);
-    return;
+ipcMain.handle("saveConfig", async (event: IpcMainInvokeEvent, data: Config): Promise<void> => {
+    store.set(CONFIG_KEY, data);
+    // info(`saved ${CONFIG_KEY} : ${JSON.stringify(data)}`);
 });
-// ipcMain.handle("writeJson", async (event, jsonPath, data) => {
-// 	console.log("write : " + jsonPath);
-// 	fs.writeFileSync(__dirname + jsonPath, JSON.stringify(data));
-// 	return;
-// });
 
 handleWetris();
 

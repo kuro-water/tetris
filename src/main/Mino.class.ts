@@ -10,6 +10,8 @@ import {
     BACKGROUND_COLOR,
 } from "./constant";
 
+const { IpcMainInvokeEvent } = require("electron");
+
 const Field = require("./Field.class");
 type Field = typeof Field;
 

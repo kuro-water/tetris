@@ -1,7 +1,6 @@
 const { IpcMainInvokeEvent } = require("electron");
 
 // import {
-//     CONFIG_PATH,
 //     MINO_IDX,
 //     EMPTY_ROW,
 //     FULL_ROW,
@@ -20,7 +19,6 @@ const { IpcMainInvokeEvent } = require("electron");
 //     LOCK_DOWN_DELAY,
 //     SET_DELAY,
 //     DEL_DELAY,
-//     INIT_KEY_MAP,
 //     BLOCK_SIZE,
 //     HOLD_CANVAS_SIZE,
 //     FIELD_CANVAS_SIZE,
@@ -32,7 +30,6 @@ const { IpcMainInvokeEvent } = require("electron");
 // } from "./constant";
 
 import {
-    CONFIG_PATH,
     MINO_POS,
     MINO_COLORS,
     LOCK_DOWN_DELAY,
@@ -124,18 +121,7 @@ export class Wetris {
     }
 
     getConfig = async () => {
-        const config = await electronAPI.readJson(CONFIG_PATH);
-        // if (config.keyMode == "default") {
-        //     this.keyMap = INIT_KEY_MAP;
-        // } else if (config.keyMode == "custom") {
-        //     this.keyMap = config.keyMap;
-        // } else {
-        //     console.log("error : unknown keymap");
-        //     this.keyMap = INIT_KEY_MAP;
-        // }
-        // console.log(config);
-        // console.log(config.keyMap);
-        // console.log(this.keyMap);
+        const config = await electronAPI.getConfig();
         this.keyMap = config.keyMap;
         console.log("read:config");
     };

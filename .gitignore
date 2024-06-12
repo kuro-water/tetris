@@ -3,4 +3,3 @@
 /src/backup
 *.js
 *.js.map
-!src/main/main.js
