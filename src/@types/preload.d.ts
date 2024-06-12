@@ -15,7 +15,7 @@ declare class wetris {
 }
 
 type position = {
-    x: nunber;
+    x: number;
     y: number;
 };
 type blocks = position[]; // [[x, y], [x, y], ...]
