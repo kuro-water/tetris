@@ -32,9 +32,9 @@ import {
 import { success, error, warning, task, info } from "./messageUtil";
 
 const Wetris = require("./Wetris.class");
-type Wetris = Wetris_;
-type Mino = Mino_;
-type Field = Field_;
+// type Wetris = Wetris_;
+const Mino = require("./Mino.class");
+const Field = require("./Field.class");
 
 type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number };
 
