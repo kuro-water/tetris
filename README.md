@@ -2,11 +2,7 @@
 
 ## ダウンロード
 
-https://github.com/kuro-water/tetris/releases/tag/release
-
-## 概要
-
-ふつうのテトリス
+https://github.com/kuro-water/wetris/releases/tag/v1.1.1
 
 ## 操作方法
 

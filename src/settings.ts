@@ -21,7 +21,7 @@ const setInputValue = function () {
 };
 
 const main = async function () {
-    config = await window.electronAPI.readJson(CONFIG_PATH);
+    config = await electronAPI.readJson(CONFIG_PATH);
 
     setInputValue();
 
@@ -42,7 +42,7 @@ const main = async function () {
         config.keyMap.rotateLeft = INPUT_ROTATE_LEFT.value;
         config.keyMap.rotateRight = INPUT_ROTATE_RIGHT.value;
         config.keyMap.hold = INPUT_HOLD.value;
-        await window.electronAPI.writeJson(CONFIG_PATH, config);
+        await electronAPI.writeJson(CONFIG_PATH, config);
         console.log("saved");
     };
 
