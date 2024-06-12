@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } = require("electron");
+type IpcMainInvokeEvent = typeof IpcMainInvokeEvent;
 const path = require("path");
-const fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
 import { handleWetris } from "./wetris";
@@ -10,19 +10,16 @@ if (require("electron-squirrel-startup")) {
     app.quit();
 }
 
-ipcMain.handle(
-    "readJson",
-    async (event: typeof IpcMainInvokeEvent, key: string): Promise<Config> => {
-        console.log("read : " + key);
-        const data: Config = store.get(key);
-        console.log(data);
-        return data;
-    }
-);
+ipcMain.handle("readJson", async (event: IpcMainInvokeEvent, key: string): Promise<Config> => {
+    console.log("read : " + key);
+    const data: Config = store.get(key);
+    console.log(data);
+    return data;
+});
 
 ipcMain.handle(
     "writeJson",
-    async (event: typeof IpcMainInvokeEvent, key: string, data: Config): Promise<void> => {
+    async (event: IpcMainInvokeEvent, key: string, data: Config): Promise<void> => {
         console.log("write : " + key);
         store.set(key, data);
     }
