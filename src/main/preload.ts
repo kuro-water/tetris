@@ -25,12 +25,10 @@ contextBridge.exposeInMainWorld("wetris", {
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
-    readJson: (jsonPath: string) => ipcRenderer.invoke("readJson", jsonPath),
-    writeJson: (jsonPath: string, data: any) => ipcRenderer.invoke("writeJson", jsonPath, data),
+    getInitConfig: () => ipcRenderer.invoke("getInitConfig"),
+    getConfig: (jsonPath: string) => ipcRenderer.invoke("getConfig", jsonPath),
+    saveConfig: (jsonPath: string, data: any) => ipcRenderer.invoke("saveConfig", jsonPath, data),
 });
-
-const CONFIG_PATH = "\\config.json";
-contextBridge.exposeInMainWorld("CONFIG_PATH", CONFIG_PATH);
 
 const INIT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -123,14 +121,3 @@ const SET_DELAY = 20; // 接地硬直
 contextBridge.exposeInMainWorld("SET_DELAY", SET_DELAY);
 const DEL_DELAY = 100; // ライン消去時の硬直
 contextBridge.exposeInMainWorld("DEL_DELAY", DEL_DELAY);
-
-const INIT_KEY_MAP = {
-    moveLeft: "ArrowLeft",
-    moveRight: "ArrowRight",
-    hardDrop: "Space",
-    softDrop: "ArrowDown",
-    rotateLeft: "KeyZ",
-    rotateRight: "KeyX",
-    hold: "KeyC",
-};
-contextBridge.exposeInMainWorld("INIT_KEY_MAP", INIT_KEY_MAP);

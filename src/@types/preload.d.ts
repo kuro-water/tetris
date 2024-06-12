@@ -1,6 +1,7 @@
 declare class electronAPI {
-    static readJson(key: string): Promise<Config>;
-    static writeJson(key: string, data: Config): Promise<void>;
+    static getInitConfig(): Promise<Config>;
+    static getConfig(): Promise<Config>;
+    static saveConfig(data: Config): Promise<void>;
 }
 
 declare class wetris {

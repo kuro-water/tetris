@@ -1,5 +1,4 @@
 import {
-    CONFIG_PATH,
     MINO_IDX,
     EMPTY_ROW,
     FULL_ROW,
@@ -18,7 +17,6 @@ import {
     LOCK_DOWN_DELAY,
     SET_DELAY,
     DEL_DELAY,
-    INIT_KEY_MAP,
     BLOCK_SIZE,
     HOLD_CANVAS_SIZE,
     FIELD_CANVAS_SIZE,

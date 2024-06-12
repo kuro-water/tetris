@@ -4,26 +4,32 @@ const path = require("path");
 const Store = require("electron-store");
 const store = new Store();
 import { handleWetris } from "./wetris";
+import * as initConfig from "./initConfig.json";
+import { success, error, warning, task, info } from "./messageUtil";
+console.dir(store.store, { depth: null });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
     app.quit();
 }
 
-ipcMain.handle("readJson", async (event: IpcMainInvokeEvent, key: string): Promise<Config> => {
-    console.log("read : " + key);
-    const data: Config = store.get(key);
-    console.log(data);
+const CONFIG_KEY = "config";
+if (!store.has(CONFIG_KEY)) store.set(CONFIG_KEY, initConfig);
+
+ipcMain.handle("getInitConfig", async (event: IpcMainInvokeEvent): Promise<Config> => {
+    return initConfig;
+});
+
+ipcMain.handle("getConfig", async (event: IpcMainInvokeEvent): Promise<Config> => {
+    const data: Config = store.get(CONFIG_KEY);
+    info(`got ${CONFIG_KEY} : ${JSON.stringify(data)}`);
     return data;
 });
 
-ipcMain.handle(
-    "writeJson",
-    async (event: IpcMainInvokeEvent, key: string, data: Config): Promise<void> => {
-        console.log("write : " + key);
-        store.set(key, data);
-    }
-);
+ipcMain.handle("saveConfig", async (event: IpcMainInvokeEvent, data: Config): Promise<void> => {
+    store.set(CONFIG_KEY, data);
+    info(`saved ${CONFIG_KEY} : ${JSON.stringify(data)}`);
+});
 
 handleWetris();
 

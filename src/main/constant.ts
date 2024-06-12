@@ -1,5 +1,3 @@
-export const CONFIG_PATH = "\\config.json";
-
 export enum MINO_IDX {
     I_MINO = 0,
     T_MINO = 1,
@@ -207,13 +205,3 @@ export const SET_DELAY = 20; // 接地硬直
 export const DEL_DELAY = 100; // ライン消去時の硬直
 
 export const KSKS_LIMIT = 12;
-
-export const INIT_KEY_MAP = {
-    moveLeft: "ArrowLeft",
-    moveRight: "ArrowRight",
-    hardDrop: "Space",
-    softDrop: "ArrowDown",
-    rotateLeft: "KeyZ",
-    rotateRight: "KeyX",
-    hold: "KeyC",
-};

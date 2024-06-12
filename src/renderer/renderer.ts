@@ -13,15 +13,16 @@ let idxWetris: number;
 //     rotateRight: "ArrowRight",
 //     hold: "ArrowUp",
 // };
-let keyMap = {
-    moveLeft: "ArrowLeft",
-    moveRight: "ArrowRight",
-    softDrop: "ArrowDown",
-    hardDrop: "Space",
-    rotateLeft: "KeyZ",
-    rotateRight: "ArrowUp",
-    hold: "KeyV",
-};
+// let keyMap = {
+//     moveLeft: "ArrowLeft",
+//     moveRight: "ArrowRight",
+//     softDrop: "ArrowDown",
+//     hardDrop: "Space",
+//     rotateLeft: "KeyZ",
+//     rotateRight: "ArrowUp",
+//     hold: "KeyV",
+// };
+let keyMap: KeyMap;
 
 // Record<key, value>
 let idInterval: Record<string, NodeJS.Timeout> = {};
@@ -69,7 +70,7 @@ function sleep(waitTime: number) {
 }
 
 async function getConfig() {
-    const config = await electronAPI.readJson(CONFIG_PATH);
+    const config = await electronAPI.getConfig();
     keyMap = config.keyMap;
     console.log("read:config");
 }
