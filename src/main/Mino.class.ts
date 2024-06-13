@@ -15,6 +15,8 @@ const { IpcMainInvokeEvent } = require("electron");
 const Field = require("./Field.class");
 type Field = typeof Field;
 
+import { success, error, warning, task, debug, info } from "./messageUtil";
+
 export class Mino {
     sender: typeof IpcMainInvokeEvent.sender;
 
@@ -31,7 +33,7 @@ export class Mino {
     isGameOver = false;
 
     constructor(field: Field, idxMino: MINO_IDX, sender: typeof IpcMainInvokeEvent.sender) {
-        // console.log("mino constructor start.");
+        // task("mino constructor start.");
         this.sender = sender;
         this.idxMino = idxMino;
         this.field = field;
@@ -40,16 +42,16 @@ export class Mino {
             const y = minoPos.y + this.y;
             if (this.field.isFilled({ x: x, y: y })) {
                 // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-                //     console.log(minoPos.x + this.x, minoPos.y + this.y);
+                //     debug(minoPos.x + this.x, minoPos.y + this.y);
                 // }
-                console.log("gameover");
-                console.log("out:", x + this.x, y + this.y);
+                info("gameover");
+                info(`out:${x + this.x}, ${y + this.y}`);
                 this.isGameOver = true;
             }
         }
         this.drawMino();
         if (this.isGameOver) return;
-        // console.log("mino constructor end.");
+        // task("mino constructor end.");
     }
 
     clearMino() {
@@ -106,7 +108,7 @@ export class Mino {
 
     drawHoldMino() {
         if (this.sender === null) return;
-        // console.log("drawHoldMino");
+        // debug("drawHoldMino");
         this.sender.send("clearHoldContext");
         this.blockPos().forEach((block) => {
             this.sender.send("drawHoldBlock", block, MINO_COLORS[this.idxMino]);
@@ -182,8 +184,8 @@ export class Mino {
                 x: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].x,
                 y: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].y,
             });
-            // console.log("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
-            // console.log("x:" + rotatedX + "y:" + rotatedY);
+            // debug("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
+            // debug("x:" + rotatedX + "y:" + rotatedY);
         }
 
         if (!this.canRotate(dif, postBlockPos, move)) {
@@ -257,7 +259,7 @@ export class Mino {
             // SRSの動作
             move.x = wallKickData[this.angle % 4][(this.angle + dif) % 4][i].x;
             move.y = wallKickData[this.angle % 4][(this.angle + dif) % 4][i].y;
-            // console.log("moved:" + move);
+            // debug("moved:" + move);
             for (let j = 0; j < 4; j++) {
                 // 移動先の検証
                 if (
@@ -266,14 +268,14 @@ export class Mino {
                         y: this.y + postBlockPos[j].y + move.y,
                     })
                 ) {
-                    // console.log("braek:" + i);
-                    // console.log((this.x + postBlockPos[0][j] + move[0]) + "," + (this.y + postBlockPos[1][j] + move[1]))
+                    // debug("braek:" + i);
+                    // debug((this.x + postBlockPos[0][j] + move[0]) + "," + (this.y + postBlockPos[1][j] + move[1]))
                     break;
                 }
                 if (j === 3) {
-                    // console.log("move:" + i);
+                    // debug("move:" + i);
                     // if (this.idxMino === T_MINO) {
-                    //     console.log("T-spin");
+                    //     info("T-spin");
                     // }
                     this.lastSRS = i;
                     return true;
@@ -313,9 +315,9 @@ export class Mino {
         if (filled_count < 3) return 0;
 
         if (this.lastSRS === 3) return 1;
-        // console.log("miniかも");
+        // debug("miniかも");
 
-        // console.log("angle:" + (this.angle % 4));
+        // debug("angle:" + (this.angle % 4));
 
         //prettier-ignore
         const TSM_POS = [
@@ -327,11 +329,11 @@ export class Mino {
         const [x1, x2] = TSM_POS[this.angle % 4][0];
         const [y1, y2] = TSM_POS[this.angle % 4][1];
         if (!this.field.isFilled({ x: this.x + x1, y: this.y + y1 })) {
-            // console.log("(x, y) = (" + (this.x + x1) + ", " + (this.y + y1) + ")");
+            // debug("(x, y) = (" + (this.x + x1) + ", " + (this.y + y1) + ")");
             return 2;
         }
         if (!this.field.isFilled({ x: this.x + x2, y: this.y + y2 })) {
-            // console.log("(x, y) = (" + (this.x + x1) + ", " + (this.y + y2) + ")");
+            // debug("(x, y) = (" + (this.x + x1) + ", " + (this.y + y2) + ")");
             return 2;
         }
 

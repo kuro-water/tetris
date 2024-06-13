@@ -1,40 +1,13 @@
-import {
-    MINO_IDX,
-    EMPTY_ROW,
-    FULL_ROW,
-    INIT_FIELD,
-    DRAW_FIELD_TOP,
-    DRAW_FIELD_HEIGHT,
-    DRAW_FIELD_WITDH,
-    DRAW_FIELD_LEFT,
-    MINO_POS,
-    MINO_COLORS,
-    GHOST_COLORS,
-    SRS_TLJSZ,
-    SRS_I,
-    DAS,
-    ARR,
-    LOCK_DOWN_DELAY,
-    SET_DELAY,
-    DEL_DELAY,
-    BLOCK_SIZE,
-    HOLD_CANVAS_SIZE,
-    FIELD_CANVAS_SIZE,
-    NEXT_CANVAS_SIZE,
-    FRAME_COLOR,
-    PLACED_MINO_COLOR,
-    BACKGROUND_COLOR,
-    KSKS_LIMIT,
-} from "./constant";
-
-import { success, error, warning, task, info } from "./messageUtil";
-
 const Wetris = require("./Wetris.class");
 type Wetris = typeof Wetris;
 const Mino = require("./Mino.class");
 type Mino = typeof Mino;
 const Field = require("./Field.class");
 type Field = typeof Field;
+
+import { MINO_IDX, DRAW_FIELD_TOP, ARR } from "./constant";
+
+import { success, error, warning, task, debug, info } from "./messageUtil";
 
 type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number };
 
@@ -74,9 +47,9 @@ class Cpu {
             );
 
             // bestField.fieldData.field.printField();
-            // info(`hole: ${bestField.hole}`);
-            // info(`height: ${bestField.height}`);
-            // info(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
+            // debug(`hole: ${bestField.hole}`);
+            // debug(`height: ${bestField.height}`);
+            // debug(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
 
             await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
         }
@@ -153,10 +126,10 @@ class Cpu {
                 // // debug
                 // this.trialWetris.field.printField();
                 // this.getFieldInfo(feldData).then((fieldScore) => {
-                //     info(`hole: ${fieldScore.hole}`);
-                //     info(`height: ${fieldScore.height}`);
-                //     info(`requiedIMinoCount: ${fieldScore.requiedIMinoCount}`);
-                //     info(`pos: (${fieldScore.fieldData.pos.x}, ${fieldScore.fieldData.pos.y})`);
+                //     debug(`hole: ${fieldScore.hole}`);
+                //     debug(`height: ${fieldScore.height}`);
+                //     debug(`requiedIMinoCount: ${fieldScore.requiedIMinoCount}`);
+                //     debug(`pos: (${fieldScore.fieldData.pos.x}, ${fieldScore.fieldData.pos.y})`);
                 // });
             }
         }
@@ -222,7 +195,7 @@ class Cpu {
             }
             // カウント
             for (; y < fieldData.field.field.length; y++) {
-                // info(
+                // debug(
                 //     `x: ${x}, y: ${y}, ${
                 //         fieldData.field.isFilled({ x: x - 1, y: y }) &&
                 //         !fieldData.field.isFilled({ x: x, y: y }) &&
@@ -244,7 +217,7 @@ class Cpu {
             }
         }
         // fieldData.field.printField();
-        // info(`requiedIMinoCount: ${requiedIMinoCount}`);
+        // debug(`requiedIMinoCount: ${requiedIMinoCount}`);
         return {
             fieldData: fieldData,
             hole: hole,
@@ -264,7 +237,7 @@ class Cpu {
 
         // 死にそうな高さは基本置かない
         if (fieldInfo.height - DRAW_FIELD_TOP < 5) {
-            error("hi");
+            info("Too high!");
             score *= 0 < score ? 0.01 : 100;
         }
 

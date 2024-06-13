@@ -5,7 +5,9 @@ const Store = require("electron-store");
 const store = new Store();
 import { handleWetris } from "./wetris";
 import * as initConfig from "./initConfig.json";
-import { success, error, warning, task, info } from "./messageUtil";
+
+import { success, error, warning, task, debug, info } from "./messageUtil";
+
 // console.dir(store.store, { depth: null });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.

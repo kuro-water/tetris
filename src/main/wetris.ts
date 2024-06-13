@@ -2,24 +2,23 @@ const { ipcMain, BrowserWindow, IpcMainInvokeEvent } = require("electron");
 
 const Field = require("./Field.class");
 type Field = typeof Field;
-
 const Mino = require("./Mino.class");
 type Mino = typeof Mino;
-
 const Wetris = require("./Wetris.class");
 type Wetris = typeof Wetris;
-
 const Cpu = require("./Cpu.class");
 type Cpu = typeof Cpu;
+
+import { success, error, warning, task, debug, info } from "./messageUtil";
 
 let listWetris: Wetris[] = [];
 
 export function handleWetris() {
     ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
-        console.log("wetris starting...");
+        task("wetris starting...");
 
         listWetris.push(new Wetris(event.sender));
-        // console.log(listWetris.length - 1); // idx
+        // info(listWetris.length - 1); // idx
 
         return listWetris.length - 1; // idx
     });
@@ -31,7 +30,7 @@ export function handleWetris() {
     ipcMain.handle("stop", (event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].isMainloopActive = false;
         listWetris[idx] = null;
-        console.log("stop:" + idx);
+        task("stop:" + idx);
     });
 
     ipcMain.handle("moveLeft", (event: typeof IpcMainInvokeEvent, idx: number) => {

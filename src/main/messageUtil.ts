@@ -7,26 +7,29 @@ const getLabel = () => {
     return `[${getTime()}]`;
 };
 
-export const success = (msg: string) => {
-    console.log("\x1b[32m%s \x1b[0m", `${getLabel()} SUCCESS: ${msg}`);
+export const success = (...args: any[]) => {
+    console.log("\x1b[32m%s ", `${getLabel()} SUCCESS:`, ...args, "\x1b[0m");
 };
 
-export const error = (msg: string) => {
-    console.log("\x1b[31m%s \x1b[0m", `${getLabel()} ERROR: ${msg}`);
+export const error = (...args: any[]) => {
+    console.log("\x1b[31m%s ", `${getLabel()} ERROR:`, ...args, "\x1b[0m");
 };
 
-export const warning = (msg: string) => {
-    console.log("\x1b[33m%s \x1b[0m", `${getLabel()} WARNING: ${msg}`);
+export const warning = (...args: any[]) => {
+    console.log("\x1b[33m%s ", `${getLabel()} WARNING:`, ...args, "\x1b[0m");
 };
 
-export const task = (msg: string) => {
-    console.log("\x1b[35m%s \x1b[0m", `${getLabel()} TASK: ${msg}`);
+export const task = (...args: any[]) => {
+    console.log("\x1b[35m%s ", `${getLabel()} TASK:`, ...args, "\x1b[0m");
 };
 
-export const info = (msg: string) => {
-    if (!msg) return;
-    const lines = msg.split("\n").filter(Boolean);
-    for (const line of lines) {
-        console.log("\x1b[34m%s \x1b[0m", `${getLabel()} INFO: ${line}`);
-    }
+export const info = (...args: any[]) => {
+    console.log("\x1b[34m%s ", `${getLabel()} INFO:`, ...args, "\x1b[0m");
 };
+
+export const debug = (...args: any[]) => {
+    console.log("\x1b[36m%s ", `${getLabel()} DEBUG:`, ...args, "\x1b[0m");
+};
+
+// info -> debug
+// log -> info

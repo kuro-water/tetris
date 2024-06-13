@@ -1,33 +1,9 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-// import {
-//     MINO_IDX,
-//     EMPTY_ROW,
-//     FULL_ROW,
-//     INIT_FIELD,
-//     DRAW_FIELD_TOP,
-//     DRAW_FIELD_HEIGHT,
-//     DRAW_FIELD_WITDH,
-//     DRAW_FIELD_LEFT,
-//     MINO_POS,
-//     MINO_COLORS,
-//     GHOST_COLORS,
-//     SRS_TLJSZ,
-//     SRS_I,
-//     DAS,
-//     ARR,
-//     LOCK_DOWN_DELAY,
-//     SET_DELAY,
-//     DEL_DELAY,
-//     BLOCK_SIZE,
-//     HOLD_CANVAS_SIZE,
-//     FIELD_CANVAS_SIZE,
-//     NEXT_CANVAS_SIZE,
-//     FRAME_COLOR,
-//     PLACED_MINO_COLOR,
-//     BACKGROUND_COLOR,
-//     KSKS_LIMIT,
-// } from "./constant";
+const Field = require("./Field.class");
+type Field = typeof Field;
+const Mino = require("./Mino.class");
+type Mino = typeof Mino;
 
 import {
     MINO_POS,
@@ -39,11 +15,7 @@ import {
     MINO_IDX,
 } from "./constant";
 
-const Field = require("./Field.class");
-type Field = typeof Field;
-
-const Mino = require("./Mino.class");
-type Mino = typeof Mino;
+import { success, error, warning, task, debug, info } from "./messageUtil";
 
 export class Wetris {
     sender: typeof IpcMainInvokeEvent.sender;
@@ -77,7 +49,7 @@ export class Wetris {
 
     constructor(sender: typeof IpcMainInvokeEvent.sender) {
         this.sender = sender;
-        console.log("wetris constructor started.");
+        task("wetris constructor started.");
 
         this.clearFieldContext();
         this.clearHoldContext();
@@ -93,7 +65,7 @@ export class Wetris {
         this.mainloop();
         this.isMainloopActive = true;
 
-        console.log("wetris constructor ended.");
+        task("wetris constructor ended.");
     }
 
     /**
@@ -123,14 +95,14 @@ export class Wetris {
     getConfig = async () => {
         const config = await electronAPI.getConfig();
         this.keyMap = config.keyMap;
-        console.log("read:config");
+        task("read:config");
     };
 
     mainloop = async () => {
         while (" ω ") {
             await this.sleep(1000);
             if (!this.isMainloopActive) continue;
-            // console.log("mainloop");
+            // info("mainloop");
             // this.sender.send("test", "mainloop");
             if (!this.currentMino) {
                 // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
@@ -168,8 +140,8 @@ export class Wetris {
             this.isMainloopActive = false;
             return;
         }
-        // console.log(this.nextMinos);
-        // console.log(this.afterNextMinos);
+        // info(this.nextMinos);
+        // info(this.afterNextMinos);
         this.drawField();
         this.drawNext();
     };
@@ -190,13 +162,13 @@ export class Wetris {
             turn.push(idxArr[random]);
             idxArr.splice(random, 1);
         }
-        // console.log(turn);
+        // info(turn);
         return turn;
     }
 
     drawNext() {
         if (this.sender === null) return;
-        // console.log("---------- draw next ----------")
+        // info("---------- draw next ----------")
         this.clearNextContext();
         // ネクスト配列のコピーを作り、popで取り出す
         let nextMinos = [...this.nextMinos];
@@ -205,11 +177,11 @@ export class Wetris {
         for (let i = 0; i < NUM_OF_NEXT; i++) {
             if (!nextMinos.length) {
                 nextMinos = afterNextMinos;
-                // console.log("入れ替えた");
+                // info("入れ替えた");
             }
-            // console.log(nextMinos);
-            // console.log(afterNextMinos);
-            // console.log("");
+            // info(nextMinos);
+            // info(afterNextMinos);
+            // info("");
             let idxMino = nextMinos.pop() as MINO_IDX;
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
@@ -224,7 +196,7 @@ export class Wetris {
                 );
             }
         }
-        // console.log("---------- end draw next ----------")
+        // info("---------- end draw next ----------")
     }
 
     /**
@@ -239,7 +211,7 @@ export class Wetris {
 
         // まだカサカサできる
         if (this.countKSKS < KSKS_LIMIT) {
-            // console.log("plus");
+            // debug("plus");
             // this.countKSKS += 1;
             return false;
         }
@@ -259,7 +231,7 @@ export class Wetris {
             return;
         }
         let delay = Date.now() - this.latestTime;
-        // console.log(delay);
+        // debug(`${delay}`);
         if (LOCK_DOWN_DELAY < delay) {
             this.set();
             this.isLocking = false;
@@ -270,17 +242,17 @@ export class Wetris {
         let lines;
 
         // debug
-        // if (this.currentMino.idxMino === T_MINO) console.log(this.currentMino.lastSRS);
+        if (this.currentMino.idxMino === MINO_IDX.T_MINO) debug(this.currentMino.lastSRS);
 
         // 接地硬直中操作不能にする
         let settingMino = this.currentMino;
         this.currentMino = null;
-        // console.log("lock");
+        // debug("lock");
 
         settingMino.setMino();
-        // console.log("modeTspin:" + this.modeTspin);
+        // info("modeTspin:" + this.modeTspin);
         lines = this.field.clearLines();
-        // console.log("l:", this.lines);
+        // info("l:", this.lines);
         this.lines += lines;
         if (lines) {
             this.ren += 1;
@@ -297,7 +269,7 @@ export class Wetris {
             this.ren = -1;
             if (this.sender !== null) await this.sleep(SET_DELAY);
         }
-        // console.log("release")
+        // debug("release")
         // this.draw();
         await this.makeNewMino();
         this.isUsedHold = false;
@@ -325,31 +297,31 @@ export class Wetris {
         score = Math.floor(score);
 
         if (lines === 4) {
-            console.log("Wetris");
+            info("Wetris");
             score += 2000;
         } else if (modeTspin === 1) {
-            console.log("T-spin");
+            info("T-spin");
             score += 1000 * lines;
         } else if (modeTspin === 2) {
-            console.log("T-spin mini");
+            info("T-spin mini");
             score += 500 * lines;
         } else {
             // default
             score += 100 * lines;
         }
 
-        console.log("btb:" + isBtB);
+        info("btb:" + isBtB);
         if (isBtB) {
             score *= 1.5;
             score = Math.floor(score);
-            console.log("BtB!");
+            info("BtB!");
         }
 
         if (this.field.isPerfectClear()) {
-            console.log("ぱふぇ");
+            info("ぱふぇ");
             score += 4000;
         }
-        console.log("+" + score);
+        info("+" + score);
         this.score += score;
     }
 
@@ -446,7 +418,7 @@ export class Wetris {
         this.holdMino = this.currentMino.idxMino;
         this.currentMino.drawHoldMino();
         this.makeNewMino();
-        // console.log("hold");
+        // info("hold");
     }
 }
 

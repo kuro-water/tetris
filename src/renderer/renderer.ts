@@ -107,38 +107,21 @@ document.onkeyup = (event) => {
 };
 
 function keyEvent(event: KeyboardEvent) {
-    switch (event.code) {
-        case keyMap.moveLeft:
-            wetris.moveLeft(idxWetris);
-            break;
+    const actions = {
+        [keyMap.moveLeft]: () => wetris.moveLeft(idxWetris),
+        [keyMap.moveRight]: () => wetris.moveRight(idxWetris),
+        [keyMap.softDrop]: () => wetris.softDrop(idxWetris),
+        [keyMap.hardDrop]: () => wetris.hardDrop(idxWetris),
+        [keyMap.rotateLeft]: () => wetris.rotateLeft(idxWetris),
+        [keyMap.rotateRight]: () => wetris.rotateRight(idxWetris),
+        [keyMap.hold]: () => wetris.hold(idxWetris),
+    };
 
-        case keyMap.moveRight:
-            wetris.moveRight(idxWetris);
-            break;
-
-        case keyMap.softDrop:
-            wetris.softDrop(idxWetris);
-            break;
-
-        case keyMap.hardDrop:
-            wetris.hardDrop(idxWetris);
-            console.log(wetris.getField(idxWetris));
-            break;
-
-        case keyMap.rotateLeft:
-            wetris.rotateLeft(idxWetris);
-            break;
-
-        case keyMap.rotateRight:
-            wetris.rotateRight(idxWetris);
-            break;
-
-        case keyMap.hold:
-            wetris.hold(idxWetris);
-            break;
-
-        default:
-            console.log("unknown key");
+    const action = actions[event.code];
+    if (action) {
+        action();
+    } else {
+        console.log("unknown key");
     }
 }
 
