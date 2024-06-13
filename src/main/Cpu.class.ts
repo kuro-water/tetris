@@ -101,8 +101,12 @@ class Cpu {
     async getBestField(idxMino: MINO_IDX, field: Field): Promise<FieldScore> {
         // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
         const fieldDataList = await this.getAllFieldPattern(idxMino, field);
-        const fieldInfoList = await this.getAllFieldInfo(fieldDataList);
-        const fieldScoreList = await this.culcAllFieldScore(fieldInfoList);
+        const fieldInfoList = await Promise.all(
+            fieldDataList.map((fieldData) => this.getFieldInfo(fieldData))
+        );
+        const fieldScoreList = await Promise.all(
+            fieldInfoList.map((fieldInfo) => this.culcFieldScore(fieldInfo))
+        );
 
         // 評価値が最大のフィールドを返す
         const maxScore = fieldScoreList.reduce((max, b) => Math.max(max, b.score), -Infinity);
@@ -250,15 +254,6 @@ class Cpu {
         };
     }
 
-    async getAllFieldInfo(fieldDataList: FieldData[]): Promise<FieldInfo[]> {
-        // let fieldInfoList: FieldInfo[] = [];
-        // for (const fieldData of fieldDataList) {
-        //     fieldInfoList.push(await this.getFieldInfo(fieldData));
-        // }
-        // return fieldInfoList;
-        return await Promise.all(fieldDataList.map((fieldData) => this.getFieldInfo(fieldData)));
-    }
-
     async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
@@ -274,15 +269,6 @@ class Cpu {
         }
 
         return { fieldData: fieldInfo.fieldData, score: score };
-    }
-
-    async culcAllFieldScore(fieldInfoList: FieldInfo[]): Promise<FieldScore[]> {
-        // let fieldScoreList: FieldScore[] = [];
-        // for (const fieldInfo of fieldInfoList) {
-        //     fieldScoreList.push(await this.culcFieldScore(fieldInfo));
-        // }
-        // return fieldScoreList;
-        return await Promise.all(fieldInfoList.map((fieldInfo) => this.culcFieldScore(fieldInfo)));
     }
 }
 
