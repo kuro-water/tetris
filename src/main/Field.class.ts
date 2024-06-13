@@ -1,4 +1,5 @@
 import { EMPTY_ROW, INIT_FIELD } from "./constant";
+import { success, error, warning, task, debug, info } from "./messageUtil";
 
 /**
  * field配列は[y][x]であることに注意
@@ -35,7 +36,7 @@ export class Field {
      * @returns {boolean} true:すでに存在する
      */
     isFilled(pos: position): boolean {
-        // console.log("checking at (%d,%d)", x, y)
+        // debug("checking at (%d,%d)", x, y)
         if (pos.x < 0 || 11 < pos.x || pos.y < 0 || this.field.length < pos.y) return true;
         return !!this.field[pos.y][pos.x]; //number to boolean
     }
@@ -71,7 +72,7 @@ export class Field {
             if (this.field[y].findIndex((block) => block === 0) !== -1) {
                 continue;
             }
-            console.log("clear:" + y);
+            info("clear:" + y);
             // 一列消去
             this.field.splice(y, 1);
             this.field.unshift([...EMPTY_ROW]);
