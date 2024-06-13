@@ -87,5 +87,3 @@ export class Field {
         return newField;
     }
 }
-
-// module.exports = Field;

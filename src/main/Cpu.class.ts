@@ -1,11 +1,5 @@
-// const Wetris = require("./Wetris.class");
-// type Wetris = typeof Wetris;
-// const Mino = require("./Mino.class");
-// type Mino = typeof Mino;
-// const Field = require("./Field.class");
-// type Field = typeof Field;
 import { Field } from "./Field.class";
-import { Mino } from "./Mino.class";
+// import { Mino } from "./Mino.class";
 import { Wetris } from "./Wetris.class";
 
 import { MINO_IDX, DRAW_FIELD_TOP, ARR } from "./constant";
