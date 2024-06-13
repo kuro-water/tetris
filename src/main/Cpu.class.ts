@@ -262,8 +262,7 @@ class Cpu {
     async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
-        score -= fieldInfo.hole * 4;
-        score -= fieldInfo.lidBlock;
+        score -= fieldInfo.hole * 8;
         score += fieldInfo.height;
         score -= fieldInfo.requiedIMinoCount * 2;
         score += fieldInfo.fieldData.pos.y;
