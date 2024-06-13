@@ -30,7 +30,6 @@ export class Wetris {
     isLocking = false;
     latestTime: number;
 
-    readJson: Function;
     // Record<key, value>
     keyMap: Record<string, string> = {};
     idInterval: Record<string, NodeJS.Timeout> = {};
