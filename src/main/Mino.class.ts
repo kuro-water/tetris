@@ -12,8 +12,9 @@ import {
 
 const { IpcMainInvokeEvent } = require("electron");
 
-const Field = require("./Field.class");
-type Field = typeof Field;
+// const Field = require("./Field.class");
+// type Field = typeof Field;
+import { Field } from "./Field.class";
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
@@ -341,4 +342,4 @@ export class Mino {
     }
 }
 
-module.exports = Mino;
+// module.exports = Mino;

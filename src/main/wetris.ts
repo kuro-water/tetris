@@ -1,13 +1,17 @@
 const { ipcMain, BrowserWindow, IpcMainInvokeEvent } = require("electron");
 
-const Field = require("./Field.class");
-type Field = typeof Field;
-const Mino = require("./Mino.class");
-type Mino = typeof Mino;
-const Wetris = require("./Wetris.class");
-type Wetris = typeof Wetris;
-const Cpu = require("./Cpu.class");
-type Cpu = typeof Cpu;
+// const Field = require("./Field.class");
+// type Field = typeof Field;
+// const Mino = require("./Mino.class");
+// type Mino = typeof Mino;
+// const Wetris = require("./Wetris.class");
+// type Wetris = typeof Wetris;
+import { Field } from "./Field.class";
+import { Mino } from "./Mino.class";
+import { Wetris } from "./Wetris.class";
+import { Cpu } from "./Cpu.class";
+// const Cpu = require("./Cpu.class");
+// type Cpu = typeof Cpu;
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 

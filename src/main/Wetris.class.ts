@@ -1,9 +1,11 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-const Field = require("./Field.class");
-type Field = typeof Field;
-const Mino = require("./Mino.class");
-type Mino = typeof Mino;
+// const Field = require("./Field.class");
+// type Field = typeof Field;
+// const Mino = require("./Mino.class");
+// type Mino = typeof Mino;
+import { Field } from "./Field.class";
+import { Mino } from "./Mino.class";
 
 import {
     MINO_POS,
@@ -421,4 +423,4 @@ export class Wetris {
     }
 }
 
-module.exports = Wetris;
+// module.exports = Wetris;

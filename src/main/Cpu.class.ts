@@ -1,9 +1,12 @@
-const Wetris = require("./Wetris.class");
-type Wetris = typeof Wetris;
-const Mino = require("./Mino.class");
-type Mino = typeof Mino;
-const Field = require("./Field.class");
-type Field = typeof Field;
+// const Wetris = require("./Wetris.class");
+// type Wetris = typeof Wetris;
+// const Mino = require("./Mino.class");
+// type Mino = typeof Mino;
+// const Field = require("./Field.class");
+// type Field = typeof Field;
+import { Field } from "./Field.class";
+import { Mino } from "./Mino.class";
+import { Wetris } from "./Wetris.class";
 
 import { MINO_IDX, DRAW_FIELD_TOP, ARR } from "./constant";
 
@@ -28,7 +31,7 @@ type FieldInfo = {
 
 type FieldScore = { fieldData: FieldData; score: number };
 
-class Cpu {
+export class Cpu {
     mainWetris: Wetris;
     trialWetris: Wetris;
 
@@ -245,4 +248,4 @@ class Cpu {
     }
 }
 
-module.exports = Cpu;
+// module.exports = Cpu;
