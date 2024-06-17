@@ -1,6 +1,8 @@
 import { Field } from "./Field.class";
 // import { Mino } from "./Mino.class";
-import { Wetris } from "./Wetris.class";
+// import { Wetris } from "./Wetris.class";
+import { nWetrisCore } from "./nWetrisCore";
+import { nWetrisSender } from "./nWetrisSender";
 
 import { MINO_IDX, DRAW_FIELD_TOP, ARR } from "./constant";
 
@@ -26,12 +28,12 @@ type FieldInfo = {
 type FieldScore = { fieldData: FieldData; score: number };
 
 export class Cpu {
-    mainWetris: Wetris;
-    trialWetris: Wetris;
+    mainWetris: nWetrisSender;
+    trialWetris: nWetrisCore;
 
-    constructor(wetris: Wetris) {
+    constructor(wetris: nWetrisSender) {
         this.mainWetris = wetris;
-        this.trialWetris = new Wetris(null);
+        this.trialWetris = new nWetrisCore();
         this.trialWetris.isMainloopActive = false;
         this.main();
     }
@@ -52,7 +54,7 @@ export class Cpu {
         }
     }
 
-    async moveMinoToMatchField(wetris: Wetris, fieldData: FieldData) {
+    async moveMinoToMatchField(wetris: nWetrisSender, fieldData: FieldData) {
         while (wetris.currentMino.angle % 4 !== fieldData.angle % 4) {
             wetris.rotateRight();
             await wetris.sleep(ARR);
@@ -88,7 +90,7 @@ export class Cpu {
         for (let angle = 0; angle < 4; angle++) {
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる
             for (let movement = 0; ; movement++) {
-                this.trialWetris = new Wetris(null);
+                this.trialWetris = new nWetrisCore();
                 this.trialWetris.isMainloopActive = false;
                 this.trialWetris.currentMino.idxMino = idxMino;
                 for (let i = 0; i < angle; i++) {
