@@ -51,9 +51,6 @@ export class WetrisCore {
         this.latestTime = Date.now();
         this.start();
 
-        // this.nextMinos = this.getTurn();
-        // this.afterNextMinos = this.getTurn();
-
         // task("wetris constructor ended.");
     }
 
@@ -151,7 +148,6 @@ export class WetrisCore {
         // まだカサカサできる
         if (this.countKSKS < KSKS_LIMIT) {
             // debug("plus");
-            // this.countKSKS += 1;
             return false;
         }
 
@@ -180,7 +176,6 @@ export class WetrisCore {
     async set() {
         let lines;
 
-        // debug
         // if (this.currentMino.idxMino === MINO_IDX.T_MINO) debug(this.currentMino.lastSRS);
 
         // 接地硬直中操作不能にする
@@ -211,7 +206,6 @@ export class WetrisCore {
             if (this.setDelay) await this.sleep(this.setDelay);
         }
         // debug("release")
-        // this.draw();
         await this.makeNewMino();
         this.isUsedHold = false;
         let ren = this.ren;

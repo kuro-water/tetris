@@ -63,9 +63,7 @@ export class MinoCore {
                 }
             }
         }
-        // error("ghostY not found");
         throw new Error("ghostY not found");
-        return -1; // error
     }
 
     /**
