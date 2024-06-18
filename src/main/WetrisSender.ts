@@ -1,8 +1,8 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-import { Field } from "./Field.class";
-import { nMinoCore } from "./nMinoCore";
-import { nWetrisCore } from "./nWetrisCore";
+import { Field } from "./Field";
+import { MinoCore } from "./MinoCore";
+import { WetrisCore } from "./WetrisCore";
 
 import {
     DRAW_FIELD_TOP,
@@ -18,7 +18,7 @@ import {
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
-export class nWetrisSender extends nWetrisCore {
+export class WetrisSender extends WetrisCore {
     sender: typeof IpcMainInvokeEvent.sender;
     setDelay = SET_DELAY;
     delDelay = DEL_DELAY;
@@ -222,7 +222,7 @@ export class nWetrisSender extends nWetrisCore {
             this.afterNextMinos = this.getTurn();
         }
 
-        this.currentMino = new nMinoCore(this.field, this.nextMinos.pop());
+        this.currentMino = new MinoCore(this.field, this.nextMinos.pop());
 
         if (this.currentMino.isGameOver) {
             this.drawField();

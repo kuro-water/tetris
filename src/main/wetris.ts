@@ -4,23 +4,19 @@ const { ipcMain, BrowserWindow, IpcMainInvokeEvent } = require("electron");
 // import { Mino } from "./Mino.class";
 // import { Wetris } from "./Wetris.class";
 // import { WetrisController } from "./WetrisController";
-import { nWetrisSender } from "./nWetrisSender";
+import { WetrisSender } from "./WetrisSender";
 import { Cpu } from "./Cpu.class";
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
-// let listWetris: Wetris[] = [];
-// let listWetris: WetrisController[] = [];
-let listWetris: nWetrisSender[] = [];
+let listWetris: WetrisSender[] = [];
 //
 
 export function handleWetris() {
     ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
         task("wetris starting...");
 
-        // listWetris.push(new Wetris(event.sender));
-        // listWetris.push(new WetrisController(event.sender));
-        listWetris.push(new nWetrisSender(event.sender));
+        listWetris.push(new WetrisSender(event.sender));
         // info(listWetris.length - 1); // idx
 
         return listWetris.length - 1; // idx

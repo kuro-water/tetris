@@ -12,13 +12,11 @@ import {
 
 const { IpcMainInvokeEvent } = require("electron");
 
-import { Field } from "./Field.class";
+import { Field } from "./Field";
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
 export class MinoCore {
-    sender: typeof IpcMainInvokeEvent.sender;
-
     field: Field;
 
     //基準ブロックの絶対座標(内部座標)
@@ -31,11 +29,12 @@ export class MinoCore {
 
     isGameOver = false;
 
-    constructor(field: Field, idxMino: MINO_IDX, sender: typeof IpcMainInvokeEvent.sender) {
+    constructor(field: Field, idxMino: MINO_IDX) {
         // task("mino constructor start.");
-        this.sender = sender;
         this.idxMino = idxMino;
         this.field = field;
+        // debug("idxMino:" + idxMino);
+        // debug("angle:" + this.angle);
         for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
             const x = minoPos.x + this.x;
             const y = minoPos.y + this.y;
@@ -43,36 +42,13 @@ export class MinoCore {
                 // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
                 //     debug(minoPos.x + this.x, minoPos.y + this.y);
                 // }
-                info("gameover");
-                info(`out:${x + this.x}, ${y + this.y}`);
+                // info("gameover");
+                // info(`out:${x + this.x}, ${y + this.y}`);
                 this.isGameOver = true;
             }
         }
-        this.drawMino();
         if (this.isGameOver) return;
         // task("mino constructor end.");
-    }
-
-    clearMino() {
-        if (this.sender === null) return;
-        this.blockPos().forEach((block) => {
-            this.sender.send(
-                "drawBlock",
-                { x: this.x + block.x, y: this.y + block.y - DRAW_FIELD_TOP },
-                BACKGROUND_COLOR
-            );
-        });
-    }
-
-    drawMino() {
-        if (this.sender === null) return;
-        this.blockPos().forEach((block) => {
-            this.sender.send(
-                "drawBlock",
-                { x: this.x + block.x, y: this.y + block.y - DRAW_FIELD_TOP },
-                MINO_COLORS[this.idxMino]
-            );
-        });
     }
 
     /**
@@ -87,31 +63,9 @@ export class MinoCore {
                 }
             }
         }
+        // error("ghostY not found");
+        throw new Error("ghostY not found");
         return -1; // error
-    }
-
-    /**
-     * ゴーストを描画する
-     * 別途現在地にも描画しないと上書きされる
-     */
-    drawGhostMino() {
-        if (this.sender === null) return;
-        this.blockPos().forEach((block) => {
-            this.sender.send(
-                "drawBlock",
-                { x: this.x + block.x, y: this.getGhostY() + block.y - DRAW_FIELD_TOP },
-                GHOST_COLORS[this.idxMino]
-            );
-        });
-    }
-
-    drawHoldMino() {
-        if (this.sender === null) return;
-        // debug("drawHoldMino");
-        this.sender.send("clearHoldContext");
-        this.blockPos().forEach((block) => {
-            this.sender.send("drawHoldBlock", block, MINO_COLORS[this.idxMino]);
-        });
     }
 
     /**
@@ -145,19 +99,7 @@ export class MinoCore {
         this.x = toX;
         this.y = toY;
 
-        if (this.sender === null) return true;
-
-        this.sender.send(
-            "reDrawMino",
-            blockPos,
-            { x: preX, y: preY - DRAW_FIELD_TOP },
-            { x: preX, y: preGhostY - DRAW_FIELD_TOP },
-            blockPos,
-            { x: this.x, y: this.y - DRAW_FIELD_TOP },
-            { x: this.x, y: this.getGhostY() - DRAW_FIELD_TOP },
-            this.idxMino
-        );
-
+        // info("moved");
         return true;
     }
 
@@ -209,19 +151,7 @@ export class MinoCore {
         this.x += move.x;
         this.y += move.y;
 
-        if (this.sender === null) return true;
-
-        this.sender.send(
-            "reDrawMino",
-            preBlockPos,
-            { x: preX, y: preY - DRAW_FIELD_TOP },
-            { x: preX, y: preGhostY - DRAW_FIELD_TOP },
-            postBlockPos,
-            { x: this.x, y: this.y - DRAW_FIELD_TOP },
-            { x: this.x, y: this.getGhostY() - DRAW_FIELD_TOP },
-            this.idxMino
-        );
-
+        // info("rotated");
         return true;
     }
 
@@ -292,6 +222,7 @@ export class MinoCore {
         this.blockPos().forEach((block) => {
             this.field.setBlock({ x: this.x + block.x, y: this.y + block.y });
         });
+        // info("set");
     }
 
     /**
@@ -320,10 +251,10 @@ export class MinoCore {
 
         //prettier-ignore
         const TSM_POS = [
-            [[1, -1], [-1, -1]],
-            [[1, 1], [1, -1]],
-            [[1, -1], [1, 1]],
-            [[-1, -1], [1, -1]]
+            [[ 1, -1], [-1, -1]],
+            [[ 1,  1], [ 1, -1]],
+            [[ 1, -1], [ 1,  1]],
+            [[-1, -1], [ 1, -1]]
         ];
         const [x1, x2] = TSM_POS[this.angle % 4][0];
         const [y1, y2] = TSM_POS[this.angle % 4][1];
