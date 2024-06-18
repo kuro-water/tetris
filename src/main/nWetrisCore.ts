@@ -46,7 +46,7 @@ export class nWetrisCore {
     lines = 0; // debug
 
     constructor() {
-        task("wetris constructor started.");
+        // task("wetris constructor started.");
         this.field = new Field();
         this.latestTime = Date.now();
         this.start();
@@ -54,7 +54,7 @@ export class nWetrisCore {
         // this.nextMinos = this.getTurn();
         // this.afterNextMinos = this.getTurn();
 
-        task("wetris constructor ended.");
+        // task("wetris constructor ended.");
     }
 
     start() {
@@ -75,7 +75,7 @@ export class nWetrisCore {
     getConfig = async () => {
         const config = await electronAPI.getConfig();
         this.keyMap = config.keyMap;
-        task("read:config");
+        // task("read:config");
     };
 
     mainloop = async () => {
@@ -83,13 +83,12 @@ export class nWetrisCore {
             // this.field.printField();
             await this.sleep(1000);
             if (!this.isMainloopActive) continue;
-            debug("mainloop");
-            // this.sender.send("test", "mainloop");
+            // debug("mainloop");
             if (!this.currentMino) {
                 // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
                 continue;
             }
-            if (this.currentMino.moveMino({ x: 0, y: 1 })) {
+            if (this.move({ x: 0, y: 1 })) {
                 this.isLocking = false;
                 this.countKSKS = 0;
             } else {
@@ -182,7 +181,7 @@ export class nWetrisCore {
         let lines;
 
         // debug
-        if (this.currentMino.idxMino === MINO_IDX.T_MINO) debug(this.currentMino.lastSRS);
+        // if (this.currentMino.idxMino === MINO_IDX.T_MINO) debug(this.currentMino.lastSRS);
 
         // 接地硬直中操作不能にする
         let settingMino = this.currentMino;
@@ -190,7 +189,7 @@ export class nWetrisCore {
         // debug("lock");
 
         settingMino.setMino();
-        info("set");
+        // info("set");
         // info("modeTspin:" + this.modeTspin);
         lines = this.field.clearLines();
         // info("l:", this.lines);
@@ -205,12 +204,11 @@ export class nWetrisCore {
                 this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
                 this.isBtB = !!this.modeTspin || lines === 4;
             }
-            // if (this.sender !== null)
-            await this.sleep(this.delDelay);
+            // Delayが0でもsleepしてしまうと止まってしまう
+            if (this.delDelay) await this.sleep(this.delDelay);
         } else {
             this.ren = -1;
-            // if (this.sender !== null)
-            await this.sleep(this.setDelay);
+            if (this.setDelay) await this.sleep(this.setDelay);
         }
         // debug("release")
         // this.draw();
@@ -237,31 +235,31 @@ export class nWetrisCore {
         score = Math.floor(score);
 
         if (lines === 4) {
-            info("Wetris");
+            // info("Wetris");
             score += 2000;
         } else if (modeTspin === 1) {
-            info("T-spin");
+            // info("T-spin");
             score += 1000 * lines;
         } else if (modeTspin === 2) {
-            info("T-spin mini");
+            // info("T-spin mini");
             score += 500 * lines;
         } else {
             // default
             score += 100 * lines;
         }
 
-        info("btb:" + isBtB);
+        // info("btb:" + isBtB);
         if (isBtB) {
             score *= 1.5;
             score = Math.floor(score);
-            info("BtB!");
+            // info("BtB!");
         }
 
         if (this.field.isPerfectClear()) {
-            info("ぱふぇ");
+            // info("ぱふぇ");
             score += 4000;
         }
-        info("+" + score);
+        // info("+" + score);
         this.score += score;
     }
 
@@ -318,11 +316,11 @@ export class nWetrisCore {
         if (!this.currentMino) return true;
 
         // 下へ動かせなければ接地
-        if (this.currentMino.moveMino({ x: 0, y: 1 })) {
+        if (this.move({ x: 0, y: 1 })) {
             this.isLocking = false;
             this.countKSKS = 0;
             this.score += 1;
-            info("score:" + this.score);
+            // info("score:" + this.score);
             return false;
         } else {
             this.lockDown();
@@ -338,7 +336,7 @@ export class nWetrisCore {
         this.score += 10;
 
         // ゴーストのy座標まで移動(接地)
-        this.currentMino.moveMino({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
+        this.move({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
 
         await this.set();
     };

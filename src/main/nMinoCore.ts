@@ -30,7 +30,7 @@ export class nMinoCore {
     isGameOver = false;
 
     constructor(field: Field, idxMino: MINO_IDX) {
-        task("mino constructor start.");
+        // task("mino constructor start.");
         this.idxMino = idxMino;
         this.field = field;
         // debug("idxMino:" + idxMino);
@@ -42,13 +42,13 @@ export class nMinoCore {
                 // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
                 //     debug(minoPos.x + this.x, minoPos.y + this.y);
                 // }
-                info("gameover");
-                info(`out:${x + this.x}, ${y + this.y}`);
+                // info("gameover");
+                // info(`out:${x + this.x}, ${y + this.y}`);
                 this.isGameOver = true;
             }
         }
         if (this.isGameOver) return;
-        task("mino constructor end.");
+        // task("mino constructor end.");
     }
 
     /**
@@ -63,7 +63,8 @@ export class nMinoCore {
                 }
             }
         }
-        error("ghostY not found?????");
+        // error("ghostY not found");
+        throw new Error("ghostY not found");
         return -1; // error
     }
 
@@ -98,7 +99,7 @@ export class nMinoCore {
         this.x = toX;
         this.y = toY;
 
-        info("moved");
+        // info("moved");
         return true;
     }
 
@@ -150,7 +151,7 @@ export class nMinoCore {
         this.x += move.x;
         this.y += move.y;
 
-        info("rotated");
+        // info("rotated");
         return true;
     }
 
@@ -221,7 +222,7 @@ export class nMinoCore {
         this.blockPos().forEach((block) => {
             this.field.setBlock({ x: this.x + block.x, y: this.y + block.y });
         });
-        info("set");
+        // info("set");
     }
 
     /**

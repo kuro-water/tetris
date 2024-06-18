@@ -5,8 +5,10 @@ import { nMinoCore } from "./nMinoCore";
 import { nWetrisCore } from "./nWetrisCore";
 
 import {
+    DRAW_FIELD_TOP,
     MINO_POS,
     MINO_COLORS,
+    GHOST_COLORS,
     LOCK_DOWN_DELAY,
     SET_DELAY,
     DEL_DELAY,
@@ -29,9 +31,7 @@ export class nWetrisSender extends nWetrisCore {
         this.clearHoldContext();
         this.clearNextContext();
 
-        this.makeNewMino();
-        this.mainloop();
-        this.isMainloopActive = true;
+        super.start();
     }
 
     start() {
@@ -41,6 +41,7 @@ export class nWetrisSender extends nWetrisCore {
         return;
     }
 
+    // ---------- フィールド描画関連 ----------
     clearFieldContext() {
         this.sender.send("clearFieldContext");
     }
@@ -52,33 +53,11 @@ export class nWetrisSender extends nWetrisCore {
     clearNextContext() {
         this.sender.send("clearNextContext");
     }
+
     drawField() {
         this.sender.send("drawField", this.field.field);
         // this.currentMino.drawGhostMino();
         // this.currentMino.drawMino();
-    }
-
-    makeNewMino(): void {
-        if (!this.nextMinos.length) {
-            // ネクストが空なら生成
-            if (!this.afterNextMinos.length) this.afterNextMinos = this.getTurn();
-            this.nextMinos = this.afterNextMinos;
-            this.afterNextMinos = this.getTurn();
-        }
-
-        this.currentMino = new nMinoCore(this.field, this.nextMinos.pop());
-
-        if (this.currentMino.isGameOver) {
-            this.drawField();
-            // this.currentMino.drawMino();
-            this.currentMino = null;
-            this.isMainloopActive = false;
-            return;
-        }
-        // info(this.nextMinos);
-        // info(this.afterNextMinos);
-        this.drawField();
-        this.drawNext();
     }
 
     drawNext() {
@@ -114,6 +93,152 @@ export class nWetrisSender extends nWetrisCore {
         // info("---------- end draw next ----------")
     }
 
+    // ---------- ミノ描画関連 ----------
+
+    drawMino() {
+        this.currentMino.blockPos().forEach((block) => {
+            this.sender.send(
+                "drawBlock",
+                {
+                    x: this.currentMino.x + block.x,
+                    y: this.currentMino.y + block.y - DRAW_FIELD_TOP,
+                },
+                MINO_COLORS[this.currentMino.idxMino]
+            );
+        });
+    }
+
+    /**
+     * ゴーストを描画する
+     * 別途現在地にも描画しないと上書きされる
+     */
+    drawGhostMino() {
+        this.currentMino.blockPos().forEach((block) => {
+            this.sender.send(
+                "drawBlock",
+                {
+                    x: this.currentMino.x + block.x,
+                    y: this.currentMino.getGhostY() + block.y - DRAW_FIELD_TOP,
+                },
+                GHOST_COLORS[this.currentMino.idxMino]
+            );
+        });
+    }
+
+    drawHoldMino() {
+        if (this.sender === null) return;
+        // debug("drawHoldMino");
+        this.sender.send("clearHoldContext");
+        this.currentMino.blockPos().forEach((block) => {
+            this.sender.send("drawHoldBlock", block, MINO_COLORS[this.currentMino.idxMino]);
+        });
+    }
+
+    // ---------- オーバーライド ----------
+
+    move(dif: position): boolean {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return false;
+
+        // 移動前の情報を格納
+        const prePos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const preGhostPos = {
+            x: this.currentMino.x,
+            y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
+        };
+
+        // 移動
+        if (!super.move(dif)) {
+            return false;
+        }
+
+        // 移動後の情報を格納
+        const postPos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const postGhostPos = {
+            x: this.currentMino.x,
+            y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
+        };
+
+        // 描画
+        this.sender.send(
+            "reDrawMino",
+            this.currentMino.blockPos(),
+            prePos,
+            preGhostPos,
+            this.currentMino.blockPos(),
+            postPos,
+            postGhostPos,
+            this.currentMino.idxMino
+        );
+
+        return true;
+    }
+
+    rotate(angle: number): boolean {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return false;
+
+        // 移動前の情報を格納
+        const prePos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const preGhostPos = {
+            x: this.currentMino.x,
+            y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
+        };
+        const preBlockPos: blocks = this.currentMino.blockPos().map((block) => ({ ...block }));
+
+        if (!super.rotate(angle)) {
+            return false;
+        }
+
+        // 移動後の情報を格納
+        const postPos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const postGhostPos = {
+            x: this.currentMino.x,
+            y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
+        };
+        const postBlockPos: blocks = this.currentMino.blockPos().map((block) => ({ ...block }));
+
+        // 描画
+        this.sender.send(
+            "reDrawMino",
+            preBlockPos,
+            prePos,
+            preGhostPos,
+            postBlockPos,
+            postPos,
+            postGhostPos,
+            this.currentMino.idxMino
+        );
+
+        return false;
+    }
+
+    // gameover関数に切り分けたらここにも反映
+    makeNewMino(): void {
+        if (!this.nextMinos.length) {
+            // ネクストが空なら生成
+            if (!this.afterNextMinos.length) this.afterNextMinos = this.getTurn();
+            this.nextMinos = this.afterNextMinos;
+            this.afterNextMinos = this.getTurn();
+        }
+
+        this.currentMino = new nMinoCore(this.field, this.nextMinos.pop());
+
+        if (this.currentMino.isGameOver) {
+            this.drawField();
+            // this.currentMino.drawMino();
+            this.currentMino = null;
+            this.isMainloopActive = false;
+            return;
+        }
+        // info(this.nextMinos);
+        // info(this.afterNextMinos);
+        this.drawField();
+        this.drawMino();
+        this.drawGhostMino();
+        this.drawNext();
+    }
+
     set = async () => {
         await super.set();
         let ren = this.ren;
@@ -132,7 +257,7 @@ export class nWetrisSender extends nWetrisCore {
     }
 
     hold() {
+        this.drawHoldMino();
         super.hold();
-        // this.currentMino.drawHoldMino();
     }
 }
