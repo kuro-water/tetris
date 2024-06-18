@@ -74,26 +74,17 @@ export class MinoCore {
     moveMino(dif: position): boolean {
         const toX = this.x + dif.x;
         const toY = this.y + dif.y;
-        // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
-        let blockPos: blocks = [];
 
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
-            if (
-                this.field.isFilled({
-                    x: toX + this.blockPos()[i].x,
-                    y: toY + this.blockPos()[i].y,
-                })
-            ) {
+            const pos: position = {
+                x: toX + this.blockPos()[i].x,
+                y: toY + this.blockPos()[i].y,
+            };
+            if (this.field.isFilled(pos)) {
                 return false;
             }
-            // ブロックの座標を格納(send用)
-            blockPos.push(Object.assign({}, this.blockPos()[i]));
         }
-
-        const preX = this.x;
-        const preY = this.y;
-        const preGhostY = this.getGhostY();
         this.x = toX;
         this.y = toY;
 
@@ -131,18 +122,6 @@ export class MinoCore {
             // 回転不可
             return false;
         }
-
-        // 移動前のブロックの座標を格納([[x,y],[x,y],[x,y],[x,y]])
-        let preBlockPos: blocks = [];
-        this.blockPos().forEach((block) => {
-            // 移動前の座標を格納しておく
-            preBlockPos.push(Object.assign({}, block));
-        });
-
-        // 回転前の座標を格納しておく
-        const preX = this.x;
-        const preY = this.y;
-        const preGhostY = this.getGhostY();
 
         // 回転処理を反映
         this.angle += dif;
