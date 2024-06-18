@@ -5,7 +5,7 @@ const { ipcMain, BrowserWindow, IpcMainInvokeEvent } = require("electron");
 // import { Wetris } from "./Wetris.class";
 // import { WetrisController } from "./WetrisController";
 import { WetrisSender } from "./WetrisSender";
-import { Cpu } from "./Cpu.class";
+import { Cpu } from "./Cpu";
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
