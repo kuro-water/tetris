@@ -56,8 +56,8 @@ export class WetrisSender extends WetrisCore {
 
     drawField() {
         this.sender.send("drawField", this.field.field);
-        // this.currentMino.drawGhostMino();
-        // this.currentMino.drawMino();
+        this.drawGhostMino();
+        this.drawMino();
     }
 
     drawNext() {
@@ -234,8 +234,6 @@ export class WetrisSender extends WetrisCore {
         // info(this.nextMinos);
         // info(this.afterNextMinos);
         this.drawField();
-        this.drawMino();
-        this.drawGhostMino();
         this.drawNext();
     }
 
