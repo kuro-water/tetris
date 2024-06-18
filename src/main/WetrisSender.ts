@@ -255,7 +255,19 @@ export class WetrisSender extends WetrisCore {
     }
 
     hold() {
+        // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
+        if (!this.currentMino) return;
+
+        if (this.isUsedHold) return;
+
         this.drawHoldMino();
-        super.hold();
+        this.isUsedHold = true;
+
+        if (this.holdMino !== undefined) {
+            this.nextMinos.push(this.holdMino);
+        }
+
+        this.holdMino = this.currentMino.idxMino;
+        this.makeNewMino();
     }
 }
