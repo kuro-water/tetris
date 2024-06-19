@@ -307,7 +307,7 @@ export class WetrisCore {
 
     /**
      *
-     * @returns true:接地した false:接地していない
+     * @returns true:移動できた false:移動できなかった（接地された可能性がある）
      */
     softDrop(): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
@@ -319,10 +319,10 @@ export class WetrisCore {
             this.countKSKS = 0;
             this.score += 1;
             // info("score:" + this.score);
-            return false;
+            return true;
         } else {
             this.lockDown();
-            return true;
+            return false;
         }
     }
 
