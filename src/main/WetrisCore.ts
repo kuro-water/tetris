@@ -29,10 +29,6 @@ export class WetrisCore {
     delDelay = 0;
     setDelay = 0;
 
-    // Record<key, value>
-    keyMap: Record<string, string> = {};
-    idInterval: Record<string, NodeJS.Timeout> = {};
-    isKeyDown: Record<string, boolean> = {};
     isUsedHold = false;
     countKSKS = 0;
 
@@ -67,12 +63,6 @@ export class WetrisCore {
      */
     sleep(waitTime: number) {
         return new Promise((resolve) => setTimeout(resolve, waitTime));
-    }
-
-    async getConfig() {
-        const config = await electronAPI.getConfig();
-        this.keyMap = config.keyMap;
-        // task("read:config");
     }
 
     async mainloop() {
