@@ -201,12 +201,12 @@ export class MinoCore {
      * 接地の可不の判定等は無いので注意
      */
     setMino() {
-        this.blocksPos().forEach((block) => {
+        for (const blockPos of this.blocksPos()) {
             this.field.setBlock({
-                x: this.pos.x + block.x,
-                y: this.pos.y + block.y,
+                x: this.pos.x + blockPos.x,
+                y: this.pos.y + blockPos.y,
             });
-        });
+        }
         // info("set");
     }
 

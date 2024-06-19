@@ -96,16 +96,16 @@ export class WetrisSender extends WetrisCore {
     // ---------- ミノ描画関連 ----------
 
     drawMino() {
-        this.currentMino.blocksPos().forEach((block) => {
+        for (const blockPos of this.currentMino.blocksPos()) {
             this.sender.send(
                 "drawBlock",
                 {
-                    x: this.currentMino.pos.x + block.x,
-                    y: this.currentMino.pos.y + block.y - DRAW_FIELD_TOP,
+                    x: this.currentMino.pos.x + blockPos.x,
+                    y: this.currentMino.pos.y + blockPos.y - DRAW_FIELD_TOP,
                 },
                 MINO_COLORS[this.currentMino.idxMino]
             );
-        });
+        }
     }
 
     /**
@@ -116,25 +116,25 @@ export class WetrisSender extends WetrisCore {
         // debug(`currentMino: ${this.currentMino}`);
         // debug(`minoIdx: ${this.currentMino.idxMino}`);
         // debug(`angle: ${this.currentMino.angle}`);
-        this.currentMino.blocksPos().forEach((block) => {
+        for (const blockPos of this.currentMino.blocksPos()) {
             this.sender.send(
                 "drawBlock",
                 {
-                    x: this.currentMino.pos.x + block.x,
-                    y: this.currentMino.getGhostY() + block.y - DRAW_FIELD_TOP,
+                    x: this.currentMino.pos.x + blockPos.x,
+                    y: this.currentMino.getGhostY() + blockPos.y - DRAW_FIELD_TOP,
                 },
                 GHOST_COLORS[this.currentMino.idxMino]
             );
-        });
+        }
     }
 
     drawHoldMino() {
         if (this.sender === null) return;
         // debug("drawHoldMino");
         this.sender.send("clearHoldContext");
-        this.currentMino.blocksPos().forEach((block) => {
-            this.sender.send("drawHoldBlock", block, MINO_COLORS[this.currentMino.idxMino]);
-        });
+        for (const blockPos of this.currentMino.blocksPos()) {
+            this.sender.send("drawHoldBlock", blockPos, MINO_COLORS[this.currentMino.idxMino]);
+        }
     }
 
     // ---------- オーバーライド ----------
