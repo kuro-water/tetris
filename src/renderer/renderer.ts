@@ -186,7 +186,7 @@ function drawBlock(block: position, color: string) {
 }
 ipcRenderer.on("drawBlock", drawBlock);
 
-function drawMino(minoPos: position, blocks: blocks, color: string) {
+function drawMino(minoPos: position, blocks: position[], color: string) {
     console.log("draw mino");
     for (const block of blocks) {
         drawBlock({ x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
@@ -198,10 +198,10 @@ ipcRenderer.on("drawMino", drawMino);
 ipcRenderer.on(
     "reDrawMino",
     (
-        preBlockPos: blocks,
+        preBlockPos: position[],
         preMinoPos: position,
         preGhostPos: position,
-        postBlockPos: blocks,
+        postBlockPos: position[],
         postMinoPos: position,
         postGhostPos: position,
         idxMino: number
