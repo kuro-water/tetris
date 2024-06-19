@@ -47,7 +47,7 @@ export class MinoCore {
                 this.isGameOver = true;
             }
         }
-        if (this.isGameOver) return;
+        // if (this.isGameOver) return;
         // task("mino constructor end.");
     }
 

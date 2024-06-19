@@ -113,6 +113,9 @@ export class WetrisSender extends WetrisCore {
      * 別途現在地にも描画しないと上書きされる
      */
     drawGhostMino() {
+        // debug(`currentMino: ${this.currentMino}`);
+        // debug(`minoIdx: ${this.currentMino.idxMino}`);
+        // debug(`angle: ${this.currentMino.angle}`);
         this.currentMino.blockPos().forEach((block) => {
             this.sender.send(
                 "drawBlock",
@@ -213,28 +216,22 @@ export class WetrisSender extends WetrisCore {
         return false;
     }
 
-    // gameover関数に切り分けたらここにも反映
     makeNewMino(): void {
-        if (!this.nextMinos.length) {
-            // ネクストが空なら生成
-            if (!this.afterNextMinos.length) this.afterNextMinos = this.getTurn();
-            this.nextMinos = this.afterNextMinos;
-            this.afterNextMinos = this.getTurn();
-        }
+        super.makeNewMino();
 
-        this.currentMino = new MinoCore(this.field, this.nextMinos.pop());
+        // gameover時を蹴る
+        if (this.currentMino === null) return;
 
-        if (this.currentMino.isGameOver) {
-            this.drawField();
-            // this.currentMino.drawMino();
-            this.currentMino = null;
-            this.isMainloopActive = false;
-            return;
-        }
-        // info(this.nextMinos);
-        // info(this.afterNextMinos);
         this.drawField();
         this.drawNext();
+    }
+
+    gameOver(): void {
+        info("gameover");
+        // debug(`before currentMino: ${this.currentMino}`);
+        this.drawField();
+        this.currentMino = null;
+        this.isMainloopActive = false;
     }
 
     set = async () => {

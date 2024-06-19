@@ -107,12 +107,16 @@ export class WetrisCore {
         this.currentMino = new MinoCore(this.field, this.nextMinos.pop());
 
         if (this.currentMino.isGameOver) {
-            this.currentMino = null;
-            this.isMainloopActive = false;
-            return;
+            this.gameOver();
         }
         // info(this.nextMinos);
         // info(this.afterNextMinos);
+    }
+
+    gameOver() {
+        this.currentMino = null;
+        this.isMainloopActive = false;
+        info("gameover");
     }
 
     getTurn(): MINO_IDX[] {
