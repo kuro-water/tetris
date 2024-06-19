@@ -69,13 +69,13 @@ export class WetrisCore {
         return new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
-    getConfig = async () => {
+    async getConfig() {
         const config = await electronAPI.getConfig();
         this.keyMap = config.keyMap;
         // task("read:config");
-    };
+    }
 
-    mainloop = async () => {
+    async mainloop() {
         while (" ω ") {
             // this.field.printField();
             await this.sleep(1000);
@@ -92,7 +92,7 @@ export class WetrisCore {
                 this.lockDown();
             }
         }
-    };
+    }
 
     makeNewMino() {
         if (!this.nextMinos.length) {
@@ -326,7 +326,7 @@ export class WetrisCore {
         }
     }
 
-    hardDrop = async () => {
+    async hardDrop() {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
@@ -337,7 +337,7 @@ export class WetrisCore {
         this.move({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
 
         await this.set();
-    };
+    }
 
     hold() {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため

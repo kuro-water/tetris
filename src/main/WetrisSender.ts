@@ -239,13 +239,13 @@ export class WetrisSender extends WetrisCore {
     }
 
     // @Override
-    set = async () => {
+    async set() {
         await super.set();
         let ren = this.ren;
         if (ren < 0) ren = 0;
         this.sender.send("setLabelScore", String("score:" + this.score));
         this.sender.send("setLabelRen", String("ren:" + ren));
-    };
+    }
 
     // @Override
     softDrop(): boolean {
