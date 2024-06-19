@@ -34,7 +34,7 @@ export class MinoCore {
         this.field = field;
         // debug("idxMino:" + idxMino);
         // debug("angle:" + this.angle);
-        for (const blockPos of MINO_POS[this.idxMino][this.angle % 4]) {
+        for (const blockPos of this.blocksPos()) {
             // const x = blockPos.x + this.pos.x;
             // const y = blockPos.y + this.pos.y;
             const pos = { x: this.pos.x + blockPos.x, y: this.pos.y + blockPos.y };
