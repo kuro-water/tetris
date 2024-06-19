@@ -96,7 +96,7 @@ export class WetrisSender extends WetrisCore {
     // ---------- ミノ描画関連 ----------
 
     drawMino() {
-        this.currentMino.blockPos().forEach((block) => {
+        this.currentMino.blocksPos().forEach((block) => {
             this.sender.send(
                 "drawBlock",
                 {
@@ -116,7 +116,7 @@ export class WetrisSender extends WetrisCore {
         // debug(`currentMino: ${this.currentMino}`);
         // debug(`minoIdx: ${this.currentMino.idxMino}`);
         // debug(`angle: ${this.currentMino.angle}`);
-        this.currentMino.blockPos().forEach((block) => {
+        this.currentMino.blocksPos().forEach((block) => {
             this.sender.send(
                 "drawBlock",
                 {
@@ -132,7 +132,7 @@ export class WetrisSender extends WetrisCore {
         if (this.sender === null) return;
         // debug("drawHoldMino");
         this.sender.send("clearHoldContext");
-        this.currentMino.blockPos().forEach((block) => {
+        this.currentMino.blocksPos().forEach((block) => {
             this.sender.send("drawHoldBlock", block, MINO_COLORS[this.currentMino.idxMino]);
         });
     }
@@ -166,10 +166,10 @@ export class WetrisSender extends WetrisCore {
         // 描画
         this.sender.send(
             "reDrawMino",
-            this.currentMino.blockPos(),
+            this.currentMino.blocksPos(),
             prePos,
             preGhostPos,
-            this.currentMino.blockPos(),
+            this.currentMino.blocksPos(),
             postPos,
             postGhostPos,
             this.currentMino.idxMino
@@ -189,7 +189,7 @@ export class WetrisSender extends WetrisCore {
             x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
-        const preBlockPos: blocks = this.currentMino.blockPos().map((block) => ({ ...block }));
+        const preBlockPos: blocks = this.currentMino.blocksPos().map((block) => ({ ...block }));
 
         if (!super.rotate(angle)) {
             return false;
@@ -201,7 +201,7 @@ export class WetrisSender extends WetrisCore {
             x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
-        const postBlockPos: blocks = this.currentMino.blockPos().map((block) => ({ ...block }));
+        const postBlockPos: blocks = this.currentMino.blocksPos().map((block) => ({ ...block }));
 
         // 描画
         this.sender.send(

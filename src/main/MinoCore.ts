@@ -24,7 +24,7 @@ export class MinoCore {
     idxMino: MINO_IDX;
     angle = 0;
     lastSRS: number;
-    blockPos = () => MINO_POS[this.idxMino][this.angle % 4];
+    blocksPos = () => MINO_POS[this.idxMino][this.angle % 4];
 
     isGameOver = false;
 
@@ -34,13 +34,13 @@ export class MinoCore {
         this.field = field;
         // debug("idxMino:" + idxMino);
         // debug("angle:" + this.angle);
-        for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-            // const x = minoPos.x + this.pos.x;
-            // const y = minoPos.y + this.pos.y;
-            const pos = { x: this.pos.x + minoPos.x, y: this.pos.y + minoPos.y };
+        for (const blockPos of MINO_POS[this.idxMino][this.angle % 4]) {
+            // const x = blockPos.x + this.pos.x;
+            // const y = blockPos.y + this.pos.y;
+            const pos = { x: this.pos.x + blockPos.x, y: this.pos.y + blockPos.y };
             if (this.field.isFilled(pos)) {
-                // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-                //     debug(minoPos.x + this.pos.x, minoPos.y + this.pos.y);
+                // for (const blockPos of MINO_POS[idxMino][this.angle % 4]) {
+                //     debug(blockPos.x + this.pos.x, blockPos.y + this.pos.y);
                 // }
                 // info("gameover");
                 // info(`out:${x + this.pos.x}, ${y + this.pos.y}`);
@@ -57,7 +57,7 @@ export class MinoCore {
      * */
     getGhostY(x = this.pos.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
-            for (const block of this.blockPos()) {
+            for (const block of this.blocksPos()) {
                 if (
                     this.field.isFilled({
                         x: x + block.x,
@@ -84,8 +84,8 @@ export class MinoCore {
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
             const pos: position = {
-                x: toPos.x + this.blockPos()[i].x,
-                y: toPos.y + this.blockPos()[i].y,
+                x: toPos.x + this.blocksPos()[i].x,
+                y: toPos.y + this.blocksPos()[i].y,
             };
             if (this.field.isFilled(pos)) {
                 return false;
@@ -201,7 +201,7 @@ export class MinoCore {
      * 接地の可不の判定等は無いので注意
      */
     setMino() {
-        this.blockPos().forEach((block) => {
+        this.blocksPos().forEach((block) => {
             this.field.setBlock({
                 x: this.pos.x + block.x,
                 y: this.pos.y + block.y,
