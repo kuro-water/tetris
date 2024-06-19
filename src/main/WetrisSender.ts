@@ -139,6 +139,7 @@ export class WetrisSender extends WetrisCore {
 
     // ---------- オーバーライド ----------
 
+    // @Override
     move(dif: position): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return false;
@@ -177,6 +178,7 @@ export class WetrisSender extends WetrisCore {
         return true;
     }
 
+    // @Override
     rotate(angle: number): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return false;
@@ -216,6 +218,7 @@ export class WetrisSender extends WetrisCore {
         return false;
     }
 
+    // @Override
     makeNewMino(): void {
         super.makeNewMino();
 
@@ -226,6 +229,7 @@ export class WetrisSender extends WetrisCore {
         this.drawNext();
     }
 
+    // @Override
     gameOver(): void {
         info("gameover");
         // debug(`before currentMino: ${this.currentMino}`);
@@ -234,6 +238,7 @@ export class WetrisSender extends WetrisCore {
         this.isMainloopActive = false;
     }
 
+    // @Override
     set = async () => {
         await super.set();
         let ren = this.ren;
@@ -242,6 +247,7 @@ export class WetrisSender extends WetrisCore {
         this.sender.send("setLabelRen", String("ren:" + ren));
     };
 
+    // @Override
     softDrop(): boolean {
         if (super.softDrop()) {
             return true;
@@ -251,6 +257,7 @@ export class WetrisSender extends WetrisCore {
         return false;
     }
 
+    // @Override
     hold() {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
