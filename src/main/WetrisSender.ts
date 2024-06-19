@@ -189,7 +189,7 @@ export class WetrisSender extends WetrisCore {
             x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
-        const preBlockPos: blocks = this.currentMino.blocksPos().map((block) => ({ ...block }));
+        const preBlockPos: position[] = this.currentMino.blocksPos().map((block) => ({ ...block }));
 
         if (!super.rotate(angle)) {
             return false;
@@ -201,7 +201,9 @@ export class WetrisSender extends WetrisCore {
             x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
-        const postBlockPos: blocks = this.currentMino.blocksPos().map((block) => ({ ...block }));
+        const postBlockPos: position[] = this.currentMino
+            .blocksPos()
+            .map((block) => ({ ...block }));
 
         // 描画
         this.sender.send(

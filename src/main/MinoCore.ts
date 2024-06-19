@@ -104,7 +104,7 @@ export class MinoCore {
      */
     rotateMino(dif = 1): boolean {
         // 回転後の block.x,y を格納([x,y],[x,y],[x,y],[x,y])
-        let postBlockPos: blocks = [];
+        let postBlockPos: position[] = [];
         // SRSにより移動する座標(x,y)
         let move: position = { x: 0, y: 0 };
 
@@ -141,7 +141,7 @@ export class MinoCore {
      *  returnが使いたいので別関数に分けた
      * @returns {bool} true:移動可 false:移動不可
      */
-    canRotate(dif: number, postBlockPos: blocks, move: position): boolean {
+    canRotate(dif: number, postBlockPos: position[], move: position): boolean {
         let wallKickData: position[][][];
 
         for (let i = 0; i < 4; i++) {

@@ -36,7 +36,3 @@ type position = {
     x: number;
     y: number;
 };
-type blocks = position[]; // [[x, y], [x, y], ...]
-// [position, position, position, position]
-// としたほうが強制力は上がるが、
-// a = []として後でpushする方法が使えなくなる
