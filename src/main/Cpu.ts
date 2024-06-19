@@ -92,7 +92,7 @@ export class Cpu {
                 this.trialWetris.isMainloopActive = false;
                 this.trialWetris.currentMino.idxMino = idxMino;
                 for (let i = 0; i < angle; i++) {
-                    this.trialWetris.currentMino.rotateMino();
+                    this.trialWetris.rotateRight();
                 }
                 // ミノもfield: Fieldを持ってる。field.field: number[][]を書き換えると、ミノのfieldも書き換わる
                 this.trialWetris.field.field = field.clone().field;
@@ -100,12 +100,12 @@ export class Cpu {
                 // this.trialWetris.field = field.clone();
                 // this.trialWetris.currentMino.field = this.trialWetris.field;
 
-                while (this.trialWetris.currentMino.moveMino({ x: -1, y: 0 }));
-                if (!this.trialWetris.currentMino.moveMino({ x: movement, y: 0 })) {
+                while (this.trialWetris.moveLeft());
+                if (!this.trialWetris.move({ x: movement, y: 0 })) {
                     // これ以上右に動かせない
                     break;
                 }
-                while (this.trialWetris.currentMino.moveMino({ x: 0, y: 1 }));
+                while (this.trialWetris.softDrop());
                 const pos = this.trialWetris.currentMino.pos;
                 await this.trialWetris.set();
 
