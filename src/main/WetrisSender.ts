@@ -100,8 +100,8 @@ export class WetrisSender extends WetrisCore {
             this.sender.send(
                 "drawBlock",
                 {
-                    x: this.currentMino.x + block.x,
-                    y: this.currentMino.y + block.y - DRAW_FIELD_TOP,
+                    x: this.currentMino.pos.x + block.x,
+                    y: this.currentMino.pos.y + block.y - DRAW_FIELD_TOP,
                 },
                 MINO_COLORS[this.currentMino.idxMino]
             );
@@ -120,7 +120,7 @@ export class WetrisSender extends WetrisCore {
             this.sender.send(
                 "drawBlock",
                 {
-                    x: this.currentMino.x + block.x,
+                    x: this.currentMino.pos.x + block.x,
                     y: this.currentMino.getGhostY() + block.y - DRAW_FIELD_TOP,
                 },
                 GHOST_COLORS[this.currentMino.idxMino]
@@ -145,9 +145,9 @@ export class WetrisSender extends WetrisCore {
         if (!this.currentMino) return false;
 
         // 移動前の情報を格納
-        const prePos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const prePos = { x: this.currentMino.pos.x, y: this.currentMino.pos.y - DRAW_FIELD_TOP };
         const preGhostPos = {
-            x: this.currentMino.x,
+            x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
 
@@ -157,9 +157,9 @@ export class WetrisSender extends WetrisCore {
         }
 
         // 移動後の情報を格納
-        const postPos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const postPos = { x: this.currentMino.pos.x, y: this.currentMino.pos.y - DRAW_FIELD_TOP };
         const postGhostPos = {
-            x: this.currentMino.x,
+            x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
 
@@ -184,9 +184,9 @@ export class WetrisSender extends WetrisCore {
         if (!this.currentMino) return false;
 
         // 移動前の情報を格納
-        const prePos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const prePos = { x: this.currentMino.pos.x, y: this.currentMino.pos.y - DRAW_FIELD_TOP };
         const preGhostPos = {
-            x: this.currentMino.x,
+            x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
         const preBlockPos: blocks = this.currentMino.blockPos().map((block) => ({ ...block }));
@@ -196,9 +196,9 @@ export class WetrisSender extends WetrisCore {
         }
 
         // 移動後の情報を格納
-        const postPos = { x: this.currentMino.x, y: this.currentMino.y - DRAW_FIELD_TOP };
+        const postPos = { x: this.currentMino.pos.x, y: this.currentMino.pos.y - DRAW_FIELD_TOP };
         const postGhostPos = {
-            x: this.currentMino.x,
+            x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
         const postBlockPos: blocks = this.currentMino.blockPos().map((block) => ({ ...block }));

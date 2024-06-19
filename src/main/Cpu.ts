@@ -57,8 +57,8 @@ export class Cpu {
             wetris.rotateRight();
             await wetris.sleep(ARR);
         }
-        while (wetris.currentMino.x !== fieldData.pos.x) {
-            const dif = fieldData.pos.x - wetris.currentMino.x;
+        while (wetris.currentMino.pos.x !== fieldData.pos.x) {
+            const dif = fieldData.pos.x - wetris.currentMino.pos.x;
             const wasMoved = dif < 0 ? await wetris.moveLeft() : await wetris.moveRight();
             if (!wasMoved) {
                 error("CPU: failed to move!");
@@ -106,10 +106,7 @@ export class Cpu {
                     break;
                 }
                 while (this.trialWetris.currentMino.moveMino({ x: 0, y: 1 }));
-                const pos = {
-                    x: this.trialWetris.currentMino.x,
-                    y: this.trialWetris.currentMino.y,
-                };
+                const pos = this.trialWetris.currentMino.pos;
                 await this.trialWetris.set();
 
                 const feldData: FieldData = {

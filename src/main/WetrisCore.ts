@@ -145,7 +145,7 @@ export class WetrisCore {
      */
     checkKSKS(): boolean {
         // 空中にいるなら何もしない
-        if (this.currentMino.y !== this.currentMino.getGhostY()) {
+        if (this.currentMino.pos.y !== this.currentMino.getGhostY()) {
             return false;
         }
 
@@ -330,11 +330,11 @@ export class WetrisCore {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
-        this.score += this.currentMino.getGhostY() - this.currentMino.y;
+        this.score += this.currentMino.getGhostY() - this.currentMino.pos.y;
         this.score += 10;
 
         // ゴーストのy座標まで移動(接地)
-        this.move({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.y });
+        this.move({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.pos.y });
 
         await this.set();
     }

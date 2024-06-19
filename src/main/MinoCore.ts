@@ -20,8 +20,7 @@ export class MinoCore {
     field: Field;
 
     //基準ブロックの絶対座標(内部座標)
-    x = 5;
-    y = DRAW_FIELD_TOP + 1;
+    pos: position = { x: 5, y: DRAW_FIELD_TOP + 1 };
     idxMino: MINO_IDX;
     angle = 0;
     lastSRS: number;
@@ -36,14 +35,15 @@ export class MinoCore {
         // debug("idxMino:" + idxMino);
         // debug("angle:" + this.angle);
         for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-            const x = minoPos.x + this.x;
-            const y = minoPos.y + this.y;
-            if (this.field.isFilled({ x: x, y: y })) {
+            // const x = minoPos.x + this.pos.x;
+            // const y = minoPos.y + this.pos.y;
+            const pos = { x: this.pos.x + minoPos.x, y: this.pos.y + minoPos.y };
+            if (this.field.isFilled(pos)) {
                 // for (const minoPos of MINO_POS[idxMino][this.angle % 4]) {
-                //     debug(minoPos.x + this.x, minoPos.y + this.y);
+                //     debug(minoPos.x + this.pos.x, minoPos.y + this.pos.y);
                 // }
                 // info("gameover");
-                // info(`out:${x + this.x}, ${y + this.y}`);
+                // info(`out:${x + this.pos.x}, ${y + this.pos.y}`);
                 this.isGameOver = true;
             }
         }
@@ -55,11 +55,16 @@ export class MinoCore {
      * ゴーストのy座標を返す
      * @param x 指定したx座標のゴーストを返す デフォルトでは現在地
      * */
-    getGhostY(x = this.x): number {
+    getGhostY(x = this.pos.x): number {
         for (let i = 1; INIT_FIELD.length; i++) {
             for (const block of this.blockPos()) {
-                if (this.field.isFilled({ x: x + block.x, y: this.y + block.y + i })) {
-                    return this.y + i - 1; // ぶつかる1つ手前がゴーストの位置
+                if (
+                    this.field.isFilled({
+                        x: x + block.x,
+                        y: this.pos.y + block.y + i,
+                    })
+                ) {
+                    return this.pos.y + i - 1; // ぶつかる1つ手前がゴーストの位置
                 }
             }
         }
@@ -72,21 +77,21 @@ export class MinoCore {
      * @return {bool} true:移動可(移動済) false:移動不可
      */
     moveMino(dif: position): boolean {
-        const toX = this.x + dif.x;
-        const toY = this.y + dif.y;
+        // const toX = this.pos.x + dif.x;
+        // const toY = this.pos.y + dif.y;
+        const toPos: position = { x: this.pos.x + dif.x, y: this.pos.y + dif.y };
 
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
             const pos: position = {
-                x: toX + this.blockPos()[i].x,
-                y: toY + this.blockPos()[i].y,
+                x: toPos.x + this.blockPos()[i].x,
+                y: toPos.y + this.blockPos()[i].y,
             };
             if (this.field.isFilled(pos)) {
                 return false;
             }
         }
-        this.x = toX;
-        this.y = toY;
+        this.pos = toPos;
 
         // info("moved");
         return true;
@@ -114,7 +119,7 @@ export class MinoCore {
                 x: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].x,
                 y: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].y,
             });
-            // debug("rotating x,y:" + (this.x + rotatedX[i]) + "," + (this.y + rotatedY[i]));
+            // debug("rotating x,y:" + (this.pos.x + rotatedX[i]) + "," + (this.pos.y + rotatedY[i]));
             // debug("x:" + rotatedX + "y:" + rotatedY);
         }
 
@@ -125,8 +130,8 @@ export class MinoCore {
 
         // 回転処理を反映
         this.angle += dif;
-        this.x += move.x;
-        this.y += move.y;
+        this.pos.x += move.x;
+        this.pos.y += move.y;
 
         // info("rotated");
         return true;
@@ -143,8 +148,8 @@ export class MinoCore {
             // 基本回転の検証
             if (
                 this.field.isFilled({
-                    x: this.x + postBlockPos[i].x,
-                    y: this.y + postBlockPos[i].y,
+                    x: this.pos.x + postBlockPos[i].x,
+                    y: this.pos.y + postBlockPos[i].y,
                 })
             ) {
                 // 埋まっているブロックがあればSRSを試す
@@ -170,12 +175,12 @@ export class MinoCore {
                 // 移動先の検証
                 if (
                     this.field.isFilled({
-                        x: this.x + postBlockPos[j].x + move.x,
-                        y: this.y + postBlockPos[j].y + move.y,
+                        x: this.pos.x + postBlockPos[j].x + move.x,
+                        y: this.pos.y + postBlockPos[j].y + move.y,
                     })
                 ) {
                     // debug("braek:" + i);
-                    // debug((this.x + postBlockPos[0][j] + move[0]) + "," + (this.y + postBlockPos[1][j] + move[1]))
+                    // debug((this.pos.x + postBlockPos[0][j] + move[0]) + "," + (this.pos.y + postBlockPos[1][j] + move[1]))
                     break;
                 }
                 if (j === 3) {
@@ -197,7 +202,10 @@ export class MinoCore {
      */
     setMino() {
         this.blockPos().forEach((block) => {
-            this.field.setBlock({ x: this.x + block.x, y: this.y + block.y });
+            this.field.setBlock({
+                x: this.pos.x + block.x,
+                y: this.pos.y + block.y,
+            });
         });
         // info("set");
     }
@@ -215,10 +223,10 @@ export class MinoCore {
         if (this.idxMino !== MINO_IDX.T_MINO) return 0;
 
         let filled_count = 0;
-        if (this.field.isFilled({ x: this.x + 1, y: this.y + 1 })) filled_count += 1;
-        if (this.field.isFilled({ x: this.x + 1, y: this.y - 1 })) filled_count += 1;
-        if (this.field.isFilled({ x: this.x - 1, y: this.y + 1 })) filled_count += 1;
-        if (this.field.isFilled({ x: this.x - 1, y: this.y - 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.pos.x + 1, y: this.pos.y + 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.pos.x + 1, y: this.pos.y - 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.pos.x - 1, y: this.pos.y + 1 })) filled_count += 1;
+        if (this.field.isFilled({ x: this.pos.x - 1, y: this.pos.y - 1 })) filled_count += 1;
         if (filled_count < 3) return 0;
 
         if (this.lastSRS === 3) return 1;
@@ -235,12 +243,12 @@ export class MinoCore {
         ];
         const [x1, x2] = TSM_POS[this.angle % 4][0];
         const [y1, y2] = TSM_POS[this.angle % 4][1];
-        if (!this.field.isFilled({ x: this.x + x1, y: this.y + y1 })) {
-            // debug("(x, y) = (" + (this.x + x1) + ", " + (this.y + y1) + ")");
+        if (!this.field.isFilled({ x: this.pos.x + x1, y: this.pos.y + y1 })) {
+            // debug("(x, y) = (" + (this.pos.x + x1) + ", " + (this.pos.y + y1) + ")");
             return 2;
         }
-        if (!this.field.isFilled({ x: this.x + x2, y: this.y + y2 })) {
-            // debug("(x, y) = (" + (this.x + x1) + ", " + (this.y + y2) + ")");
+        if (!this.field.isFilled({ x: this.pos.x + x2, y: this.pos.y + y2 })) {
+            // debug("(x, y) = (" + (this.pos.x + x1) + ", " + (this.pos.y + y2) + ")");
             return 2;
         }
 
