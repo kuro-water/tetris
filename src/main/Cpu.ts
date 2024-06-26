@@ -1,4 +1,4 @@
-import { Field } from "./Field";
+import { FieldCore } from "./FieldCore";
 import { WetrisCore } from "./WetrisCore";
 import { WetrisSender } from "./WetrisSender";
 
@@ -6,7 +6,7 @@ import { MINO_IDX, DRAW_FIELD_TOP, ARR } from "./constant";
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
-type FieldData = { field: Field; pos: position; idxMino: MINO_IDX; angle: number };
+type FieldData = { field: FieldCore; pos: position; idxMino: MINO_IDX; angle: number };
 
 /**
  * 評価基準値を求めた後のデータを格納する
@@ -68,7 +68,7 @@ export class Cpu {
         await wetris.hardDrop();
     }
 
-    async getBestField(idxMino: MINO_IDX, field: Field): Promise<FieldScore> {
+    async getBestField(idxMino: MINO_IDX, field: FieldCore): Promise<FieldScore> {
         // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
         const fieldDataList = await this.getAllFieldPattern(idxMino, field);
         const fieldInfoList = await Promise.all(
@@ -83,7 +83,7 @@ export class Cpu {
         return fieldScoreList.filter((item) => item.score === maxScore)[0];
     }
 
-    async getAllFieldPattern(idxMino: MINO_IDX, field: Field): Promise<FieldData[]> {
+    async getAllFieldPattern(idxMino: MINO_IDX, field: FieldCore): Promise<FieldData[]> {
         let fieldDataList: FieldData[] = [];
         for (let angle = 0; angle < 4; angle++) {
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる

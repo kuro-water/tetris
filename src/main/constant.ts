@@ -8,10 +8,10 @@ export enum MINO_IDX {
     Z_MINO = 6,
 }
 
-export const EMPTY_ROW = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
-export const FULL_ROW = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+export const EMPTY_ROW: row = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+export const FULL_ROW: row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
-export const INIT_FIELD = [
+export const INIT_FIELD: field = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],

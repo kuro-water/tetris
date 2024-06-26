@@ -5,14 +5,15 @@ import { success, error, warning, task, debug, info } from "./messageUtil";
  * field配列は[y][x]であることに注意
  * 事故防止のため原則メソッドからアクセスすること
  */
-export class Field {
-    field: number[][];
+export class FieldCore {
+    field: field;
 
     constructor() {
-        this.field = [];
-        for (let i = 0; i < INIT_FIELD.length; i++) {
-            this.field[i] = [...INIT_FIELD[i]];
-        }
+        // this.field = [];
+        // for (let i = 0; i < INIT_FIELD.length; i++) {
+        //     this.field[i] = [...INIT_FIELD[i]];
+        // }
+        this.field = INIT_FIELD.map((row) => [...row]) as field;
     }
 
     /**
@@ -66,24 +67,29 @@ export class Field {
      */
     clearLines(): number {
         let clearedLineCount = 0;
-        // 一番下の行は消さない
-        for (let y = 0; y < this.field.length - 1; y++) {
+        for (let y = this.field.length - 2; 0 < y; y--) {
             // 一列埋まっているかチェック
             if (this.field[y].findIndex((block) => block === 0) !== -1) {
                 continue;
             }
             info("clear:" + y);
-            // 一列消去
-            this.field.splice(y, 1);
-            this.field.unshift([...EMPTY_ROW]);
+            // 一行下に詰める
+            for (let i = y; 0 < i; i--) {
+                this.field[i] = [...this.field[i - 1]];
+            }
+            // 一番上を空にする
+            this.field[0] = [...EMPTY_ROW];
+            // 一行詰めたのでyを戻す
+            y++;
+
             clearedLineCount++;
         }
         return clearedLineCount;
     }
 
-    clone(): Field {
-        const newField = new Field();
-        newField.field = this.field.map((row) => [...row]);
+    clone(): FieldCore {
+        const newField = new FieldCore();
+        newField.field = this.field.map((row) => [...row]) as field;
         return newField;
     }
 }

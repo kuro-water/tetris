@@ -1,6 +1,6 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-import { Field } from "./Field";
+import { FieldCore } from "./FieldCore";
 import { MinoCore } from "./MinoCore";
 import { WetrisCore } from "./WetrisCore";
 

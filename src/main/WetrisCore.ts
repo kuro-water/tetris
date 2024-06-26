@@ -1,6 +1,6 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-import { Field } from "./Field";
+import { FieldCore } from "./FieldCore";
 import { MinoCore } from "./MinoCore";
 
 import {
@@ -21,7 +21,7 @@ export class WetrisCore {
     afterNextMinos: MINO_IDX[] = [];
     holdMino: MINO_IDX;
 
-    field: Field;
+    field: FieldCore;
 
     isLocking = false;
     latestTime: number;
@@ -43,7 +43,7 @@ export class WetrisCore {
 
     constructor() {
         // task("wetris constructor started.");
-        this.field = new Field();
+        this.field = new FieldCore();
         this.latestTime = Date.now();
         this.start();
 

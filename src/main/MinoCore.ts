@@ -12,12 +12,12 @@ import {
 
 const { IpcMainInvokeEvent } = require("electron");
 
-import { Field } from "./Field";
+import { FieldCore } from "./FieldCore";
 
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
 export class MinoCore {
-    field: Field;
+    field: FieldCore;
 
     //基準ブロックの絶対座標(内部座標)
     pos: position = { x: 5, y: DRAW_FIELD_TOP + 1 };
@@ -28,7 +28,7 @@ export class MinoCore {
 
     isGameOver = false;
 
-    constructor(field: Field, idxMino: MINO_IDX) {
+    constructor(field: FieldCore, idxMino: MINO_IDX) {
         // task("mino constructor start.");
         this.idxMino = idxMino;
         this.field = field;
