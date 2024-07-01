@@ -61,7 +61,7 @@ export const INIT_FIELD: field = [
 // 内部座標にDRAW_FIELD_TOP, DRAW_FIELD_LEFTを足すと描画上の座標になる
 export const DRAW_FIELD_TOP = 20;
 export const DRAW_FIELD_HEIGHT = 20;
-export const DRAW_FIELD_WITDH = 10;
+export const DRAW_FIELD_WIDTH = 10;
 export const DRAW_FIELD_LEFT = 1;
 
 // 参考：https://tetris.wiki/Super_Rotation_System

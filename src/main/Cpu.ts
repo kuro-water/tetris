@@ -13,14 +13,14 @@ type FieldData = { field: FieldCore; pos: position; idxMino: MINO_IDX; angle: nu
  * hole: 埋まっている穴の数
  * lidBlock: 下穴を埋めているブロックの数
  * height: 一番高い(内部的な値としては一番小さい)ブロックのy座標
- * requiedIMinoCount: 縦に3つ以上空いた穴の数 = 必要なIミノの数
+ * requiredIMinoCount: 縦に3つ以上空いた穴の数 = 必要なIミノの数
  */
 type FieldInfo = {
     fieldData: FieldData;
     hole: number;
     lidBlock: number;
     height: number;
-    requiedIMinoCount: number;
+    requiredIMinoCount: number;
 };
 
 type FieldScore = { fieldData: FieldData; score: number };
@@ -46,7 +46,7 @@ export class Cpu {
             // bestField.fieldData.field.printField();
             // debug(`hole: ${bestField.hole}`);
             // debug(`height: ${bestField.height}`);
-            // debug(`requiedIMinoCount: ${bestField.requiedIMinoCount}`);
+            // debug(`requiredIMinoCount: ${bestField.requiredIMinoCount}`);
 
             await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
         }
@@ -119,10 +119,10 @@ export class Cpu {
 
                 // // debug
                 // this.trialWetris.field.printField();
-                // this.getFieldInfo(feldData).then((fieldScore) => {
+                // this.getFieldInfo(fieldData).then((fieldScore) => {
                 //     debug(`hole: ${fieldScore.hole}`);
                 //     debug(`height: ${fieldScore.height}`);
-                //     debug(`requiedIMinoCount: ${fieldScore.requiedIMinoCount}`);
+                //     debug(`requiredIMinoCount: ${fieldScore.requiredIMinoCount}`);
                 //     debug(`pos: (${fieldScore.fieldData.pos.x}, ${fieldScore.fieldData.pos.y})`);
                 // });
             }
@@ -211,13 +211,13 @@ export class Cpu {
             }
         }
         // fieldData.field.printField();
-        // debug(`requiedIMinoCount: ${requiedIMinoCount}`);
+        // debug(`requiredIMinoCount: ${requiredIMinoCount}`);
         return {
             fieldData: fieldData,
             hole: hole,
             lidBlock: lidBlock,
             height: maxHeight,
-            requiedIMinoCount: requiedIMinoCount,
+            requiredIMinoCount: requiedIMinoCount,
         };
     }
 
@@ -226,7 +226,7 @@ export class Cpu {
 
         score -= fieldInfo.hole * 8;
         score += fieldInfo.height;
-        score -= fieldInfo.requiedIMinoCount * 2;
+        score -= fieldInfo.requiredIMinoCount * 2;
         score += fieldInfo.fieldData.pos.y;
 
         // 死にそうな高さは基本置かない

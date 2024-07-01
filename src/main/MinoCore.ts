@@ -42,7 +42,7 @@ export class MinoCore {
                 // for (const blockPos of MINO_POS[idxMino][this.angle % 4]) {
                 //     debug(blockPos.x + this.pos.x, blockPos.y + this.pos.y);
                 // }
-                // info("gameover");
+                // info("game over");
                 // info(`out:${x + this.pos.x}, ${y + this.pos.y}`);
                 this.isGameOver = true;
             }
@@ -74,7 +74,7 @@ export class MinoCore {
     /**
      * ミノを移動させる
      * 座標は 1/BLOCK_SIZE
-     * @return {bool} true:移動可(移動済) false:移動不可
+     * @return {boolean} true:移動可(移動済) false:移動不可
      */
     moveMino(dif: position): boolean {
         // const toX = this.pos.x + dif.x;
@@ -100,7 +100,7 @@ export class MinoCore {
     /**
      * ミノを回転させる
      * @param dif この値だけ右回転する 負なら左回転
-     * @return {bool} true:移動可(移動済) false:移動不可
+     * @return {boolean} true:移動可(移動済) false:移動不可
      */
     rotateMino(dif = 1): boolean {
         // 回転後の block.x,y を格納([x,y],[x,y],[x,y],[x,y])
@@ -139,7 +139,7 @@ export class MinoCore {
 
     /**
      *  returnが使いたいので別関数に分けた
-     * @returns {bool} true:移動可 false:移動不可
+     * @returns {boolean} true:移動可 false:移動不可
      */
     canRotate(dif: number, postBlockPos: position[], move: position): boolean {
         let wallKickData: position[][][];
@@ -179,7 +179,7 @@ export class MinoCore {
                         y: this.pos.y + postBlockPos[j].y + move.y,
                     })
                 ) {
-                    // debug("braek:" + i);
+                    // debug("break:" + i);
                     // debug((this.pos.x + postBlockPos[0][j] + move[0]) + "," + (this.pos.y + postBlockPos[1][j] + move[1]))
                     break;
                 }

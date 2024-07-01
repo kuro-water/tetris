@@ -70,7 +70,7 @@ export class WetrisCore {
             // this.field.printField();
             await this.sleep(1000);
             if (!this.isMainloopActive) continue;
-            // debug("mainloop");
+            // debug("main loop");
             if (!this.currentMino) {
                 // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
                 continue;
@@ -106,7 +106,7 @@ export class WetrisCore {
     gameOver() {
         this.currentMino = null;
         this.isMainloopActive = false;
-        info("gameover");
+        info("game over");
     }
 
     getTurn(): MINO_IDX[] {

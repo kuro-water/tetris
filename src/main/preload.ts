@@ -83,8 +83,8 @@ const DRAW_FIELD_TOP = 20;
 contextBridge.exposeInMainWorld("DRAW_FIELD_TOP", DRAW_FIELD_TOP);
 const DRAW_FIELD_HEIGHT = 20;
 contextBridge.exposeInMainWorld("DRAW_FIELD_HEIGHT", DRAW_FIELD_HEIGHT);
-const DRAW_FIELD_WITDH = 10;
-contextBridge.exposeInMainWorld("DRAW_FIELD_WITDH", DRAW_FIELD_WITDH);
+const DRAW_FIELD_WIDTH = 10;
+contextBridge.exposeInMainWorld("DRAW_FIELD_WIDTH", DRAW_FIELD_WIDTH);
 const DRAW_FIELD_LEFT = 1;
 contextBridge.exposeInMainWorld("DRAW_FIELD_LEFT", DRAW_FIELD_LEFT);
 
