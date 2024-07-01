@@ -9,10 +9,6 @@ export class FieldCore {
     field: field;
 
     constructor() {
-        // this.field = [];
-        // for (let i = 0; i < INIT_FIELD.length; i++) {
-        //     this.field[i] = [...INIT_FIELD[i]];
-        // }
         this.field = INIT_FIELD.map((row) => [...row]) as field;
     }
 
@@ -20,10 +16,6 @@ export class FieldCore {
      * debug
      */
     printField() {
-        // this.field.forEach((row) => {
-        //     row.forEach((block) => process.stdout.write(block ? "\x1b[34m1\x1b[0m" : "0"));
-        //     process.stdout.write("\n");
-        // });
         for (let i = 20; i < this.field.length; i++) {
             this.field[i].forEach((block) =>
                 process.stdout.write(block ? "\x1b[34m1\x1b[0m" : "0")
