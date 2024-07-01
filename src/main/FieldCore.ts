@@ -1,6 +1,7 @@
 import { EMPTY_ROW, INIT_FIELD } from "./constant";
 import { success, error, warning, task, debug, info } from "./messageUtil";
 
+// hello, from IntelliJ IDEA
 /**
  * field配列は[y][x]であることに注意
  * 事故防止のため原則メソッドからアクセスすること
