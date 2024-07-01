@@ -109,13 +109,13 @@ export class Cpu {
                 const pos = this.trialWetris.currentMino.pos;
                 await this.trialWetris.set();
 
-                const feldData: FieldData = {
+                const fieldData: FieldData = {
                     field: this.trialWetris.field.clone(),
                     pos: pos,
                     idxMino: idxMino,
                     angle: angle,
                 };
-                fieldDataList.push(feldData);
+                fieldDataList.push(fieldData);
 
                 // // debug
                 // this.trialWetris.field.printField();
@@ -133,7 +133,7 @@ export class Cpu {
     async getFieldInfo(fieldData: FieldData): Promise<FieldInfo> {
         let hole = 0;
         let lidBlock = 0;
-        let requiedIMinoCount = 0;
+        let requiredIMinoCount = 0;
         let maxHeight = fieldData.field.field.length - 1;
         // 全てのx座標について順に確かめていく
         for (let x = 1; x < fieldData.field.field[0].length - 1; x++) {
@@ -207,7 +207,7 @@ export class Cpu {
                 }
             }
             if (trenchCount >= 3) {
-                requiedIMinoCount++;
+                requiredIMinoCount++;
             }
         }
         // fieldData.field.printField();
@@ -217,7 +217,7 @@ export class Cpu {
             hole: hole,
             lidBlock: lidBlock,
             height: maxHeight,
-            requiredIMinoCount: requiedIMinoCount,
+            requiredIMinoCount: requiredIMinoCount,
         };
     }
 

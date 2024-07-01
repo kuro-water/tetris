@@ -251,7 +251,7 @@ function drawField(field: number[][]) {
     // console.log("j:" + this.field[0].length);
     for (let i = DRAW_FIELD_TOP; i < DRAW_FIELD_HEIGHT + DRAW_FIELD_TOP; i++) {
         // console.log(this.field[i])
-        for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WITDH; j++) {
+        for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WIDTH; j++) {
             if (field[i][j]) {
                 CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
             } else {
