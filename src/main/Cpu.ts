@@ -1,4 +1,4 @@
-import { ARR, DRAW_FIELD_TOP, MINO_IDX } from "./constant";
+import { ARR, DRAW_FIELD_TOP, MINO_IDX, sleep } from "./constant";
 import { FieldCore } from "./FieldCore";
 
 import { error, info } from "./messageUtil";
@@ -54,7 +54,7 @@ export class Cpu {
     async moveMinoToMatchField(wetris: WetrisSender, fieldData: FieldData) {
         while (wetris.currentMino.angle % 4 !== fieldData.angle % 4) {
             wetris.rotateRight();
-            await wetris.sleep(ARR);
+            await sleep(ARR);
         }
         while (wetris.currentMino.pos.x !== fieldData.pos.x) {
             const dif = fieldData.pos.x - wetris.currentMino.pos.x;
@@ -62,7 +62,7 @@ export class Cpu {
             if (!wasMoved) {
                 error("CPU: failed to move!");
             }
-            await wetris.sleep(ARR);
+            await sleep(ARR);
         }
         await wetris.hardDrop();
     }

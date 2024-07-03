@@ -1,4 +1,4 @@
-import { KSKS_LIMIT, LOCK_DOWN_DELAY, MINO_IDX, } from "./constant";
+import { KSKS_LIMIT, LOCK_DOWN_DELAY, MINO_IDX, sleep } from "./constant";
 import { FieldCore } from "./FieldCore";
 
 import { info } from "./messageUtil";
@@ -45,19 +45,10 @@ export class WetrisCore {
         this.isMainloopActive = true;
     }
 
-    /**
-     *  よくわからんけどスリープできるようになる。Promiseてなんやねん
-     * @param waitTime  ms
-     * @return Promise
-     */
-    sleep(waitTime: number) {
-        return new Promise((resolve) => setTimeout(resolve, waitTime));
-    }
-
     async mainloop() {
         while (" ω ") {
             // this.field.printField();
-            await this.sleep(1000);
+            await sleep(1000);
             if (!this.isMainloopActive) continue;
             // debug("main loop");
             if (!this.currentMino) {
@@ -183,13 +174,13 @@ export class WetrisCore {
                 this.isBtB = !!this.modeTspin || lines === 4;
             }
             // Delayが0でもsleepしてしまうと止まってしまう
-            if (this.delDelay) await this.sleep(this.delDelay);
+            if (this.delDelay) await sleep(this.delDelay);
         } else {
             this.ren = -1;
-            if (this.setDelay) await this.sleep(this.setDelay);
+            if (this.setDelay) await sleep(this.setDelay);
         }
         // debug("release")
-        await this.makeNewMino();
+        this.makeNewMino();
         this.isUsedHold = false;
     }
 

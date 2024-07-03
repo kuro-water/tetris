@@ -1,6 +1,6 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-import { DEL_DELAY, DRAW_FIELD_TOP, GHOST_COLORS, MINO_COLORS, MINO_IDX, MINO_POS, SET_DELAY, } from "./constant";
+import { DEL_DELAY, DRAW_FIELD_TOP, GHOST_COLORS, MINO_COLORS, MINO_IDX, MINO_POS, SET_DELAY } from "./constant";
 
 import { info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";

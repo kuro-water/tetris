@@ -205,3 +205,12 @@ export const SET_DELAY = 20; // 接地硬直
 export const DEL_DELAY = 100; // ライン消去時の硬直
 
 export const KSKS_LIMIT = 12;
+
+/**
+ *  よくわからんけどスリープできるようになる。Promiseてなんやねん
+ * @param waitTime  ms
+ * @return Promise
+ */
+export async function sleep(waitTime: number) {
+    return new Promise((resolve) => setTimeout(resolve, waitTime));
+}

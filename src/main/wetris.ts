@@ -3,10 +3,6 @@ const { ipcMain, IpcMainInvokeEvent } = require("electron");
 import { Cpu } from "./Cpu";
 
 import { task } from "./messageUtil";
-// import { Field } from "./Field.class";
-// import { Mino } from "./Mino.class";
-// import { Wetris } from "./Wetris.class";
-// import { WetrisController } from "./WetrisController";
 import { WetrisSender } from "./WetrisSender";
 
 let listWetris: WetrisSender[] = [];
