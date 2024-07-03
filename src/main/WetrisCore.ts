@@ -1,19 +1,8 @@
-const { IpcMainInvokeEvent } = require("electron");
-
+import { KSKS_LIMIT, LOCK_DOWN_DELAY, MINO_IDX, } from "./constant";
 import { FieldCore } from "./FieldCore";
+
+import { info } from "./messageUtil";
 import { MinoCore } from "./MinoCore";
-
-import {
-    MINO_POS,
-    MINO_COLORS,
-    LOCK_DOWN_DELAY,
-    SET_DELAY,
-    DEL_DELAY,
-    KSKS_LIMIT,
-    MINO_IDX,
-} from "./constant";
-
-import { success, error, warning, task, debug, info } from "./messageUtil";
 
 export class WetrisCore {
     currentMino: MinoCore;
@@ -202,8 +191,6 @@ export class WetrisCore {
         // debug("release")
         await this.makeNewMino();
         this.isUsedHold = false;
-        let ren = this.ren;
-        if (ren < 0) ren = 0;
     }
 
     /**

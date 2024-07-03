@@ -56,7 +56,7 @@ const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
     }
 })();
 
-window.addEventListener("beforeunload", (event) => {
+window.addEventListener("beforeunload", (_event) => {
     wetris.stop(idxWetris);
 });
 
@@ -128,11 +128,13 @@ function keyEvent(event: KeyboardEvent) {
 function setLabelScore(score: string) {
     LABEL_SCORE.innerText = score;
 }
+
 ipcRenderer.on("setLabelScore", setLabelScore);
 
 function setLabelRen(ren: string) {
     LABEL_REN.innerText = ren;
 }
+
 ipcRenderer.on("setLabelRen", setLabelRen);
 
 function clearFieldContext() {
@@ -158,6 +160,7 @@ function clearFieldContext() {
     // CANVAS_FIELD_CONTEXT.fillRect(220, 0, 20, 420);
     // CANVAS_FIELD_CONTEXT.fillRect(0, 400, 220, 20);
 }
+
 ipcRenderer.on("clearFieldContext", clearFieldContext);
 
 function clearHoldContext() {
@@ -165,12 +168,14 @@ function clearHoldContext() {
     CANVAS_HOLD_CONTEXT.fillStyle = BACKGROUND_COLOR;
     CANVAS_HOLD_CONTEXT.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
 }
+
 ipcRenderer.on("clearHoldContext", clearHoldContext);
 
 function clearNextContext() {
     CANVAS_NEXT_CONTEXT.fillStyle = BACKGROUND_COLOR;
     CANVAS_NEXT_CONTEXT.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
 }
+
 ipcRenderer.on("clearNextContext", clearNextContext);
 
 function drawBlock(block: position, color: string) {
@@ -184,6 +189,7 @@ function drawBlock(block: position, color: string) {
         BLOCK_SIZE
     );
 }
+
 ipcRenderer.on("drawBlock", drawBlock);
 
 function drawMino(minoPos: position, blocks: position[], color: string) {
@@ -192,6 +198,7 @@ function drawMino(minoPos: position, blocks: position[], color: string) {
         drawBlock({ x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
     }
 }
+
 ipcRenderer.on("drawMino", drawMino);
 
 // メインプロセスから起動するとラグでチカチカするのでこちらで処理
@@ -230,6 +237,7 @@ function drawNextBlock(block: position, color: string) {
         BLOCK_SIZE
     );
 }
+
 ipcRenderer.on("drawNextBlock", drawNextBlock);
 
 function drawHoldBlock(block: position, color: string) {
@@ -243,6 +251,7 @@ function drawHoldBlock(block: position, color: string) {
         BLOCK_SIZE
     );
 }
+
 ipcRenderer.on("drawHoldBlock", drawHoldBlock);
 
 function drawField(field: number[][]) {
@@ -267,4 +276,5 @@ function drawField(field: number[][]) {
         }
     }
 }
+
 ipcRenderer.on("drawField", drawField);

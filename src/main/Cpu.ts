@@ -1,10 +1,9 @@
+import { ARR, DRAW_FIELD_TOP, MINO_IDX } from "./constant";
 import { FieldCore } from "./FieldCore";
+
+import { error, info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";
 import { WetrisSender } from "./WetrisSender";
-
-import { MINO_IDX, DRAW_FIELD_TOP, ARR } from "./constant";
-
-import { success, error, warning, task, debug, info } from "./messageUtil";
 
 type FieldData = { field: FieldCore; pos: position; idxMino: MINO_IDX; angle: number };
 
@@ -100,12 +99,12 @@ export class Cpu {
                 // this.trialWetris.field = field.clone();
                 // this.trialWetris.currentMino.field = this.trialWetris.field;
 
-                while (this.trialWetris.moveLeft());
+                while (this.trialWetris.moveLeft()) ;
                 if (!this.trialWetris.move({ x: movement, y: 0 })) {
                     // これ以上右に動かせない
                     break;
                 }
-                while (this.trialWetris.softDrop());
+                while (this.trialWetris.softDrop()) ;
                 const pos = this.trialWetris.currentMino.pos;
                 await this.trialWetris.set();
 

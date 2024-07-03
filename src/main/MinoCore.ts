@@ -1,20 +1,5 @@
-import {
-    MINO_IDX,
-    INIT_FIELD,
-    DRAW_FIELD_TOP,
-    MINO_POS,
-    MINO_COLORS,
-    GHOST_COLORS,
-    SRS_TLJSZ,
-    SRS_I,
-    BACKGROUND_COLOR,
-} from "./constant";
-
-const { IpcMainInvokeEvent } = require("electron");
-
+import { DRAW_FIELD_TOP, INIT_FIELD, MINO_IDX, MINO_POS, SRS_I, SRS_TLJSZ, } from "./constant";
 import { FieldCore } from "./FieldCore";
-
-import { success, error, warning, task, debug, info } from "./messageUtil";
 
 export class MinoCore {
     field: FieldCore;
@@ -236,10 +221,10 @@ export class MinoCore {
 
         //prettier-ignore
         const TSM_POS = [
-            [[ 1, -1], [-1, -1]],
-            [[ 1,  1], [ 1, -1]],
-            [[ 1, -1], [ 1,  1]],
-            [[-1, -1], [ 1, -1]]
+            [[1, -1], [-1, -1]],
+            [[1, 1], [1, -1]],
+            [[1, -1], [1, 1]],
+            [[-1, -1], [1, -1]]
         ];
         const [x1, x2] = TSM_POS[this.angle % 4][0];
         const [y1, y2] = TSM_POS[this.angle % 4][1];

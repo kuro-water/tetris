@@ -1,5 +1,5 @@
-import {EMPTY_ROW, INIT_FIELD} from "./constant";
-import {success, error, warning, task, debug, info} from "./messageUtil";
+import { EMPTY_ROW, INIT_FIELD } from "./constant";
+import { info } from "./messageUtil";
 
 /**
  * field配列は[y][x]であることに注意

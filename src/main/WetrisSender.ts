@@ -1,22 +1,9 @@
 const { IpcMainInvokeEvent } = require("electron");
 
-import { FieldCore } from "./FieldCore";
-import { MinoCore } from "./MinoCore";
+import { DEL_DELAY, DRAW_FIELD_TOP, GHOST_COLORS, MINO_COLORS, MINO_IDX, MINO_POS, SET_DELAY, } from "./constant";
+
+import { info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";
-
-import {
-    DRAW_FIELD_TOP,
-    MINO_POS,
-    MINO_COLORS,
-    GHOST_COLORS,
-    LOCK_DOWN_DELAY,
-    SET_DELAY,
-    DEL_DELAY,
-    KSKS_LIMIT,
-    MINO_IDX,
-} from "./constant";
-
-import { success, error, warning, task, debug, info } from "./messageUtil";
 
 export class WetrisSender extends WetrisCore {
     sender: typeof IpcMainInvokeEvent.sender;
@@ -202,8 +189,8 @@ export class WetrisSender extends WetrisCore {
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
         const postBlockPos: position[] = this.currentMino
-            .blocksPos()
-            .map((block) => ({ ...block }));
+        .blocksPos()
+        .map((block) => ({ ...block }));
 
         // 描画
         this.sender.send(
