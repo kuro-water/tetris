@@ -47,6 +47,9 @@ export class Cpu {
             // debug(`height: ${bestField.height}`);
             // debug(`requiredIMinoCount: ${bestField.requiredIMinoCount}`);
 
+            if (!this.mainWetris.isMainloopActive) {
+                break;
+            }
             await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
         }
     }
