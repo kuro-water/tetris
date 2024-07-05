@@ -102,12 +102,14 @@ export class Cpu {
                 // this.trialWetris.field = field.clone();
                 // this.trialWetris.currentMino.field = this.trialWetris.field;
 
-                while (this.trialWetris.moveLeft()) ;
+                while (this.trialWetris.moveLeft()) {
+                }
                 if (!this.trialWetris.move({ x: movement, y: 0 })) {
                     // これ以上右に動かせない
                     break;
                 }
-                while (this.trialWetris.softDrop()) ;
+                while (this.trialWetris.softDrop()) {
+                }
                 const pos = this.trialWetris.currentMino.pos;
                 await this.trialWetris.set();
 
