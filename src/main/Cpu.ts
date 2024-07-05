@@ -77,7 +77,7 @@ export class Cpu {
             fieldDataList.map((fieldData) => this.getFieldInfo(fieldData))
         );
         const fieldScoreList = await Promise.all(
-            fieldInfoList.map((fieldInfo) => this.culcFieldScore(fieldInfo))
+            fieldInfoList.map((fieldInfo) => this.calcFieldScore(fieldInfo))
         );
 
         // 評価値が最大のフィールドを返す
@@ -225,7 +225,7 @@ export class Cpu {
         };
     }
 
-    async culcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
+    async calcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
         score -= fieldInfo.hole * 8;
