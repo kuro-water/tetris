@@ -25,8 +25,8 @@ type FieldInfo = {
 type FieldScore = { fieldData: FieldData; score: number };
 
 export class Cpu {
-    mainWetris: WetrisSender;
-    trialWetris: WetrisCore;
+    private readonly mainWetris: WetrisSender;
+    private trialWetris: WetrisCore;
 
     constructor(wetris: WetrisSender) {
         this.mainWetris = wetris;
@@ -35,7 +35,7 @@ export class Cpu {
         this.main();
     }
 
-    async main() {
+    private async main() {
         while (true) {
             const bestField = await this.getBestField(
                 this.mainWetris.currentMino.idxMino,
@@ -54,7 +54,7 @@ export class Cpu {
         }
     }
 
-    async moveMinoToMatchField(wetris: WetrisSender, fieldData: FieldData) {
+    private async moveMinoToMatchField(wetris: WetrisSender, fieldData: FieldData) {
         while (wetris.currentMino.angle % 4 !== fieldData.angle % 4) {
             wetris.rotateRight();
             await sleep(ARR);
@@ -70,7 +70,7 @@ export class Cpu {
         await wetris.hardDrop();
     }
 
-    async getBestField(idxMino: MINO_IDX, field: FieldCore): Promise<FieldScore> {
+    private async getBestField(idxMino: MINO_IDX, field: FieldCore): Promise<FieldScore> {
         // 一手で積めるフィールドを全探索し、そのフィールドの評価を行う
         const fieldDataList = await this.getAllFieldPattern(idxMino, field);
         const fieldInfoList = await Promise.all(
@@ -85,7 +85,7 @@ export class Cpu {
         return fieldScoreList.filter((item) => item.score === maxScore)[0];
     }
 
-    async getAllFieldPattern(idxMino: MINO_IDX, field: FieldCore): Promise<FieldData[]> {
+    private async getAllFieldPattern(idxMino: MINO_IDX, field: FieldCore): Promise<FieldData[]> {
         let fieldDataList: FieldData[] = [];
         for (let angle = 0; angle < 4; angle++) {
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる
@@ -134,7 +134,7 @@ export class Cpu {
         return fieldDataList;
     }
 
-    async getFieldInfo(fieldData: FieldData): Promise<FieldInfo> {
+    private async getFieldInfo(fieldData: FieldData): Promise<FieldInfo> {
         let hole = 0;
         let lidBlock = 0;
         let requiredIMinoCount = 0;
@@ -225,7 +225,7 @@ export class Cpu {
         };
     }
 
-    async calcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
+    private async calcFieldScore(fieldInfo: FieldInfo): Promise<FieldScore> {
         let score = 0;
 
         score -= fieldInfo.hole * 8;

@@ -2,16 +2,18 @@ import { DRAW_FIELD_TOP, INIT_FIELD, MINO_IDX, MINO_POS, SRS_I, SRS_TLJSZ, } fro
 import { FieldCore } from "./FieldCore";
 
 export class MinoCore {
-    field: FieldCore;
+    public field: FieldCore;
 
     //基準ブロックの絶対座標(内部座標)
-    pos: position = { x: 5, y: DRAW_FIELD_TOP + 1 };
-    idxMino: MINO_IDX;
-    angle = 0;
-    lastSRS: number;
-    blocksPos = () => MINO_POS[this.idxMino][this.angle % 4];
+    public pos: position = { x: 5, y: DRAW_FIELD_TOP + 1 };
+    public blocksPos = () => MINO_POS[this.idxMino][this.angle % 4];
 
-    isGameOver = false;
+    public idxMino: MINO_IDX;
+    public angle = 0;
+    public lastSRS: number;
+
+    public isGameOver = false;
+
 
     constructor(field: FieldCore, idxMino: MINO_IDX) {
         // task("mino constructor start.");
@@ -37,31 +39,11 @@ export class MinoCore {
     }
 
     /**
-     * ゴーストのy座標を返す
-     * @param x 指定したx座標のゴーストを返す デフォルトでは現在地
-     * */
-    getGhostY(x = this.pos.x): number {
-        for (let i = 1; INIT_FIELD.length; i++) {
-            for (const block of this.blocksPos()) {
-                if (
-                    this.field.isFilled({
-                        x: x + block.x,
-                        y: this.pos.y + block.y + i,
-                    })
-                ) {
-                    return this.pos.y + i - 1; // ぶつかる1つ手前がゴーストの位置
-                }
-            }
-        }
-        throw new Error("ghostY not found");
-    }
-
-    /**
      * ミノを移動させる
      * 座標は 1/BLOCK_SIZE
      * @return {boolean} true:移動可(移動済) false:移動不可
      */
-    moveMino(dif: position): boolean {
+    public moveMino(dif: position): boolean {
         // const toX = this.pos.x + dif.x;
         // const toY = this.pos.y + dif.y;
         const toPos: position = { x: this.pos.x + dif.x, y: this.pos.y + dif.y };
@@ -87,7 +69,7 @@ export class MinoCore {
      * @param dif この値だけ右回転する 負なら左回転
      * @return {boolean} true:移動可(移動済) false:移動不可
      */
-    rotateMino(dif = 1): boolean {
+    public rotateMino(dif = 1): boolean {
         // 回転後の block.x,y を格納([x,y],[x,y],[x,y],[x,y])
         let postBlockPos: position[] = [];
         // SRSにより移動する座標(x,y)
@@ -126,7 +108,7 @@ export class MinoCore {
      *  returnが使いたいので別関数に分けた
      * @returns {boolean} true:移動可 false:移動不可
      */
-    canRotate(dif: number, postBlockPos: position[], move: position): boolean {
+    private canRotate(dif: number, postBlockPos: position[], move: position): boolean {
         let wallKickData: position[][][];
 
         for (let i = 0; i < 4; i++) {
@@ -185,7 +167,7 @@ export class MinoCore {
      * ミノを接地する。
      * 接地の可不の判定等は無いので注意
      */
-    setMino() {
+    public setMino() {
         for (const blockPos of this.blocksPos()) {
             this.field.setBlock({
                 x: this.pos.x + blockPos.x,
@@ -204,7 +186,8 @@ export class MinoCore {
      * 参考：https://tetris-matome.com/judgment/
      * @returns 1:Tspin, 2:Tspin mini
      */
-    getModeTspin(): number {
+
+    public getModeTspin(): number {
         if (this.idxMino !== MINO_IDX.T_MINO) return 0;
 
         let filled_count = 0;
@@ -238,5 +221,25 @@ export class MinoCore {
         }
 
         return 1;
+    }
+
+    /**
+     * ゴーストのy座標を返す
+     * @param x 指定したx座標のゴーストを返す デフォルトでは現在地
+     * */
+    public getGhostY(x = this.pos.x): number {
+        for (let i = 1; INIT_FIELD.length; i++) {
+            for (const block of this.blocksPos()) {
+                if (
+                    this.field.isFilled({
+                        x: x + block.x,
+                        y: this.pos.y + block.y + i,
+                    })
+                ) {
+                    return this.pos.y + i - 1; // ぶつかる1つ手前がゴーストの位置
+                }
+            }
+        }
+        throw new Error("ghostY not found");
     }
 }
