@@ -1,67 +1,58 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-        <meta
+<html lang="ja">
+<head>
+    <meta charset="UTF-8"/>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
             http-equiv="Content-Security-Policy"
             content="default-src 'self'; script-src 'self'"
-        />
-        <title>wetris</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="./bulma.min.css" />
-        <link rel="stylesheet" href="./settings.css" />
-        <link rel="stylesheet" href="./buttons.css" />
-    </head>
+    />
+    <title>wetris</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="./bulma.min.css"/>
+    <link rel="stylesheet" href="./settings.css"/>
+    <link rel="stylesheet" href="./buttons.css"/>
+</head>
 
-    <body>
-        <div id="divButtons">
-            <a class="button" href="index.html">戻る</a>
-            <a class="button" id="save">キー設定を保存</a>
-            <a class="button" id="init">初期設定に戻す</a>
-        </div>
-        <div id="divkeyConfig">
-            <!-- <div id="text_div">
-                <a>aaaaa</a>
-            </div>
-            <div id="key_div">
-                <a>bbbbb</a>
-            </div>
-            <div id="empty_div">
-                <a>a</a>
-            </div> -->
-            <table>
-                <tr>
-                    <td>左へ移動</td>
-                    <td><input id="moveLeft" type="text" value="" readonly /></td>
-                </tr>
-                <tr>
-                    <td>右へ移動</td>
-                    <td><input id="moveRight" type="text" value="" readonly /></td>
-                </tr>
-                <tr>
-                    <td>ソフトドロップ</td>
-                    <td><input id="softDrop" type="text" value="" readonly /></td>
-                </tr>
-                <tr>
-                    <td>ハードドロップ</td>
-                    <td><input id="hardDrop" type="text" value="" readonly /></td>
-                </tr>
-                <tr>
-                    <td>左に回転</td>
-                    <td><input id="rotateLeft" type="text" value="" readonly /></td>
-                </tr>
-                <tr>
-                    <td>右に回転</td>
-                    <td><input id="rotateRight" type="text" value="" readonly /></td>
-                </tr>
-                <tr>
-                    <td>ホールド</td>
-                    <td><input id="hold" type="text" value="" readonly /></td>
-                </tr>
-            </table>
-        </div>
-    </body>
+<body>
+<div id="divButtons">
+    <a class="button" href="./index.html">戻る</a>
+    <a class="button" id="save">キー設定を保存</a>
+    <a class="button" id="init">初期設定に戻す</a>
+</div>
+<div id="divkeyConfig">
+    <table>
+        <tr>
+            <td>左へ移動</td>
+            <td><label for="moveLeft"></label><input id="moveLeft" type="text" value="" readonly/></td>
+        </tr>
+        <tr>
+            <td>右へ移動</td>
+            <td><label for="moveRight"></label><input id="moveRight" type="text" value="" readonly/></td>
+        </tr>
+        <tr>
+            <td>ソフトドロップ</td>
+            <td><label for="softDrop"></label><input id="softDrop" type="text" value="" readonly/></td>
+        </tr>
+        <tr>
+            <td>ハードドロップ</td>
+            <td><label for="hardDrop"></label><input id="hardDrop" type="text" value="" readonly/></td>
+        </tr>
+        <tr>
+            <td>左に回転</td>
+            <td><label for="rotateLeft"></label><input id="rotateLeft" type="text" value="" readonly/></td>
+        </tr>
+        <tr>
+            <td>右に回転</td>
+            <td><label for="rotateRight"></label><input id="rotateRight" type="text" value="" readonly/></td>
+        </tr>
+        <tr>
+            <td>ホールド</td>
+            <td><label for="hold"></label><input id="hold" type="text" value="" readonly/></td>
+        </tr>
+    </table>
+</div>
+</body>
 
-    <script src="settings.js" type="module"></script>
+<script src="./settings.js" type="module"></script>
 </html>
