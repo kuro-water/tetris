@@ -10,10 +10,16 @@ canvas {
     margin: 10px;
 }
 
-#labelPlayerScore,
-#labelPlayerRen {
+label {
     display: block;
     text-align: center;
     font-size: 20px;
     margin-top: 10px;
+}
+
+#player,
+#cpu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

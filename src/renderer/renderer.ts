@@ -45,31 +45,31 @@ const player: PlayerInfo = {
     labelScore: document.getElementById("labelPlayerScore") as HTMLLabelElement,
     labelRen: document.getElementById("labelPlayerRen") as HTMLLabelElement,
 };
+// const cpu: PlayerInfo = {
+//     idx: 1,
+//     canvasField: document.getElementById("canvasField") as HTMLCanvasElement,
+//     canvasHold: document.getElementById("canvasHold") as HTMLCanvasElement,
+//     canvasNext: document.getElementById("canvasNext") as HTMLCanvasElement,
+//     canvasFieldContext: (document.getElementById("canvasField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+//     canvasHoldContext: (document.getElementById("canvasHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+//     canvasNextContext: (document.getElementById("canvasNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+//     labelScore: document.getElementById("labelScore") as HTMLLabelElement,
+//     labelRen: document.getElementById("labelRen") as HTMLLabelElement,
+// };
 const cpu: PlayerInfo = {
     idx: 1,
-    canvasField: document.getElementById("canvasField") as HTMLCanvasElement,
-    canvasHold: document.getElementById("canvasHold") as HTMLCanvasElement,
-    canvasNext: document.getElementById("canvasNext") as HTMLCanvasElement,
-    canvasFieldContext: (document.getElementById("canvasField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    canvasHoldContext: (document.getElementById("canvasHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    canvasNextContext: (document.getElementById("canvasNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    labelScore: document.getElementById("labelScore") as HTMLLabelElement,
-    labelRen: document.getElementById("labelRen") as HTMLLabelElement,
+    canvasField: document.getElementById("canvasCpuField") as HTMLCanvasElement,
+    canvasHold: document.getElementById("canvasCpuHold") as HTMLCanvasElement,
+    canvasNext: document.getElementById("canvasCpuNext") as HTMLCanvasElement,
+    canvasFieldContext: (document.getElementById("canvasCpuField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    canvasHoldContext: (document.getElementById("canvasCpuHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    canvasNextContext: (document.getElementById("canvasCpuNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    labelScore: document.getElementById("labelCpuScore") as HTMLLabelElement,
+    labelRen: document.getElementById("labelCpuRen") as HTMLLabelElement,
 };
 playerList[player.idx] = player;
 playerList[cpu.idx] = cpu;
 console.dir(playerList);
-// const cpu: PlayerInfo = {
-//     idx: undefined,
-//     canvasField: document.getElementById("canvasCpuField") as HTMLCanvasElement,
-//     canvasHold: document.getElementById("canvasCpuHold") as HTMLCanvasElement,
-//     canvasNext: document.getElementById("canvasCpuNext") as HTMLCanvasElement,
-//     canvasFieldContext: (document.getElementById("canvasCpuField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-//     canvasHoldContext: (document.getElementById("canvasCpuHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-//     canvasNextContext: (document.getElementById("canvasCpuNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-//     labelScore: document.getElementById("labelCpuScore") as HTMLLabelElement,
-//     labelRen: document.getElementById("labelCpuRen") as HTMLLabelElement,
-// };
 (async function constructor() {
     console.log("renderer started.");
     const path = window.location.pathname;
@@ -81,6 +81,7 @@ console.dir(playerList);
 
     } else if (path.includes("cpu.html")) {
         console.log("this is cpu.html");
+        wetris.start(player.idx);
         wetris.start(cpu.idx);
         wetris.startCpu(cpu.idx);
     }
