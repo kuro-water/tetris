@@ -5,7 +5,7 @@ export class MinoCore {
     public field: FieldCore;
 
     //基準ブロックの絶対座標(内部座標)
-    public pos: position = { x: 5, y: DRAW_FIELD_TOP + 1 };
+    public pos: Position = { x: 5, y: DRAW_FIELD_TOP + 1 };
     public blocksPos = () => MINO_POS[this.idxMino][this.angle % 4];
 
     public idxMino: MINO_IDX;
@@ -43,14 +43,14 @@ export class MinoCore {
      * 座標は 1/BLOCK_SIZE
      * @return {boolean} true:移動可(移動済) false:移動不可
      */
-    public moveMino(dif: position): boolean {
+    public moveMino(dif: Position): boolean {
         // const toX = this.pos.x + dif.x;
         // const toY = this.pos.y + dif.y;
-        const toPos: position = { x: this.pos.x + dif.x, y: this.pos.y + dif.y };
+        const toPos: Position = { x: this.pos.x + dif.x, y: this.pos.y + dif.y };
 
         for (let i = 0; i < 4; i++) {
             // 移動先の検証
-            const pos: position = {
+            const pos: Position = {
                 x: toPos.x + this.blocksPos()[i].x,
                 y: toPos.y + this.blocksPos()[i].y,
             };
@@ -71,9 +71,9 @@ export class MinoCore {
      */
     public rotateMino(dif = 1): boolean {
         // 回転後の block.x,y を格納([x,y],[x,y],[x,y],[x,y])
-        let postBlockPos: position[] = [];
+        let postBlockPos: Position[] = [];
         // SRSにより移動する座標(x,y)
-        let move: position = { x: 0, y: 0 };
+        let move: Position = { x: 0, y: 0 };
 
         while (this.angle <= 0) {
             // -1%4は3ではなく-1と出てしまうため、正の数にする
@@ -108,8 +108,8 @@ export class MinoCore {
      *  returnが使いたいので別関数に分けた
      * @returns {boolean} true:移動可 false:移動不可
      */
-    private canRotate(dif: number, postBlockPos: position[], move: position): boolean {
-        let wallKickData: position[][][];
+    private canRotate(dif: number, postBlockPos: Position[], move: Position): boolean {
+        let wallKickData: Position[][][];
 
         for (let i = 0; i < 4; i++) {
             // 基本回転の検証

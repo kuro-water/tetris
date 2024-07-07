@@ -178,7 +178,7 @@ function clearNextContext() {
 
 ipcRenderer.on("clearNextContext", clearNextContext);
 
-function drawBlock(block: position, color: string) {
+function drawBlock(block: Position, color: string) {
     // console.log("draw block");
     // console.log("x:" + x + ",y:" + y + ",color:" + color);
     CANVAS_FIELD_CONTEXT.fillStyle = color;
@@ -192,7 +192,7 @@ function drawBlock(block: position, color: string) {
 
 ipcRenderer.on("drawBlock", drawBlock);
 
-function drawMino(minoPos: position, blocks: position[], color: string) {
+function drawMino(minoPos: Position, blocks: Position[], color: string) {
     console.log("draw mino");
     for (const block of blocks) {
         drawBlock({ x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
@@ -205,12 +205,12 @@ ipcRenderer.on("drawMino", drawMino);
 ipcRenderer.on(
     "reDrawMino",
     (
-        preBlockPos: position[],
-        preMinoPos: position,
-        preGhostPos: position,
-        postBlockPos: position[],
-        postMinoPos: position,
-        postGhostPos: position,
+        preBlockPos: Position[],
+        preMinoPos: Position,
+        preGhostPos: Position,
+        postBlockPos: Position[],
+        postMinoPos: Position,
+        postGhostPos: Position,
         idxMino: number
     ) => {
         console.log("move");
@@ -228,7 +228,7 @@ ipcRenderer.on(
     }
 );
 
-function drawNextBlock(block: position, color: string) {
+function drawNextBlock(block: Position, color: string) {
     CANVAS_NEXT_CONTEXT.fillStyle = color;
     CANVAS_NEXT_CONTEXT.fillRect(
         block.x * BLOCK_SIZE,
@@ -240,7 +240,7 @@ function drawNextBlock(block: position, color: string) {
 
 ipcRenderer.on("drawNextBlock", drawNextBlock);
 
-function drawHoldBlock(block: position, color: string) {
+function drawHoldBlock(block: Position, color: string) {
     // console.log("draw hold block");
     // console.log("x:" + x + ",y:" + y + ",color:" + color);
     CANVAS_HOLD_CONTEXT.fillStyle = color;

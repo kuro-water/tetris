@@ -39,7 +39,7 @@ export class WetrisSender extends WetrisCore {
     }
 
     // @Override
-    public move(dif: position): boolean {
+    public move(dif: Position): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return false;
 
@@ -88,7 +88,7 @@ export class WetrisSender extends WetrisCore {
             x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
-        const preBlockPos: position[] = this.currentMino.blocksPos().map((block) => ({ ...block }));
+        const preBlockPos: Position[] = this.currentMino.blocksPos().map((block) => ({ ...block }));
 
         if (!super.rotate(angle)) {
             return false;
@@ -100,7 +100,7 @@ export class WetrisSender extends WetrisCore {
             x: this.currentMino.pos.x,
             y: this.currentMino.getGhostY() - DRAW_FIELD_TOP,
         };
-        const postBlockPos: position[] = this.currentMino
+        const postBlockPos: Position[] = this.currentMino
         .blocksPos()
         .map((block) => ({ ...block }));
 
@@ -205,7 +205,7 @@ export class WetrisSender extends WetrisCore {
             let idxMino = nextMinos.pop() as MINO_IDX;
 
             for (let j = 0; j < MINO_POS[idxMino][0].length; j++) {
-                const block: position = {
+                const block: Position = {
                     x: MINO_POS[idxMino][0][j].x,
                     y: MINO_POS[idxMino][0][j].y,
                 };

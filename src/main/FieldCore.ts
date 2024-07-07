@@ -6,15 +6,15 @@ import { info } from "./messageUtil";
  * 事故防止のため原則メソッドからアクセスすること
  */
 export class FieldCore {
-    public field: field;
+    public field: Field;
 
     constructor() {
-        this.field = INIT_FIELD.map((row) => [...row]) as field;
+        this.field = INIT_FIELD.map((row) => [...row]) as Field;
     }
 
     public clone(): FieldCore {
         const newField = new FieldCore();
-        newField.field = this.field.map((row) => [...row]) as field;
+        newField.field = this.field.map((row) => [...row]) as Field;
         return newField;
     }
 
@@ -30,11 +30,11 @@ export class FieldCore {
         }
     }
 
-    public setBlock(pos: position) {
+    public setBlock(pos: Position) {
         this.field[pos.y][pos.x] = 1;
     }
 
-    public removeBlock(pos: position) {
+    public removeBlock(pos: Position) {
         this.field[pos.y][pos.x] = 0;
     }
 
@@ -42,7 +42,7 @@ export class FieldCore {
      * 指定した座標の真偽値を返す
      * @returns {boolean} true:すでに存在する
      */
-    public isFilled(pos: position): boolean {
+    public isFilled(pos: Position): boolean {
         // debug("checking at (%d,%d)", x, y)
         if (pos.x < 0 || 11 < pos.x || pos.y < 0 || this.field.length < pos.y) return true;
         return !!this.field[pos.y][pos.x]; //number to boolean

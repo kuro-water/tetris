@@ -8,10 +8,10 @@ export enum MINO_IDX {
     Z_MINO = 6,
 }
 
-export const EMPTY_ROW: row = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
-export const FULL_ROW: row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+export const EMPTY_ROW: Row = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+export const FULL_ROW: Row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
-export const INIT_FIELD: field = [
+export const INIT_FIELD: Field = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -68,7 +68,7 @@ export const DRAW_FIELD_LEFT = 1;
 // 画像を見ながら座標をベタ打ちした。こうでないとSRSの動作が難しい
 // How Guideline move Really Works
 // prettier-ignore
-export const MINO_POS: position[][][] = [
+export const MINO_POS: Position[][][] = [
     [ // I
         [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],
         [{ x: 1, y: -1 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 2 }],
@@ -114,7 +114,7 @@ export const MINO_POS: position[][][] = [
 ];
 
 // prettier-ignore
-export const SRS_TLJSZ: position[][][] = [
+export const SRS_TLJSZ: Position[][][] = [
     [
         [],
         [{ x: -1, y: 0 }, { x: -1, y: -1 }, { x: 0, y: 2 }, { x: -1, y: 2 }],
@@ -141,7 +141,7 @@ export const SRS_TLJSZ: position[][][] = [
     ],
 ];
 // prettier-ignore
-export const SRS_I: position[][][] = [
+export const SRS_I: Position[][][] = [
     [
         [],
         [{ x: -2, y: 0 }, { x: 1, y: 0 }, { x: -2, y: 1 }, { x: 1, y: -2 }],

@@ -5,7 +5,7 @@ import { error, info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";
 import { WetrisSender } from "./WetrisSender";
 
-type FieldData = { field: FieldCore; pos: position; idxMino: MINO_IDX; angle: number };
+type FieldData = { field: FieldCore; pos: Position; idxMino: MINO_IDX; angle: number };
 
 /**
  * 評価基準値を求めた後のデータを格納する

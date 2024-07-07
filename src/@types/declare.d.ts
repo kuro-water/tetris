@@ -1,5 +1,3 @@
-
-
 type KeyMap = {
     moveLeft: string;
     moveRight: string;
@@ -14,18 +12,18 @@ type Config = {
     keyMap: KeyMap;
 };
 
-type position = {
+type Position = {
     x: number;
     y: number;
 };
 
 // Tuple<number, number>のとき、number[]を返す(number extends N == trueとなる)
 // それ以外のとき、_TupleOfを呼び出す
-type Tuple<T, N extends number> = number extends N ? T[] : _TupleOf<T, N, []>;
+type Tuple<T, N extends number> = number extends N ? T[] : TupleOf<T, N, []>;
 // (R["length"] === N)になるまで再帰でタプルを作成
-type _TupleOf<T, N extends number, R extends unknown[]> = R["length"] extends N
+type TupleOf<T, N extends number, R extends unknown[]> = R["length"] extends N
     ? R
-    : _TupleOf<T, N, [T, ...R]>;
+    : TupleOf<T, N, [T, ...R]>;
 
-type row = Tuple<number, 12>;
-type field = Tuple<row, 41>;
+type Row = Tuple<number, 12>;
+type Field = Tuple<Row, 41>;

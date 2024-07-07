@@ -72,7 +72,7 @@ export class WetrisCore {
     }
 
 
-    public move(dif: position): boolean {
+    public move(dif: Position): boolean {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return false;
 
