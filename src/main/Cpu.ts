@@ -55,7 +55,7 @@ export class Cpu {
     }
 
     private async moveMinoToMatchField(wetris: WetrisSender, fieldData: FieldData) {
-        while (wetris.currentMino.angle % 4 !== fieldData.angle % 4) {
+        while (wetris.currentMino.angle.angle !== fieldData.angle % 4) {
             wetris.rotateRight();
             await sleep(ARR);
         }

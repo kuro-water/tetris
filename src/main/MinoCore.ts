@@ -1,3 +1,4 @@
+import { Angle } from "./Angle";
 import { DRAW_FIELD_TOP, INIT_FIELD, MINO_IDX, MINO_POS, SRS_I, SRS_TLJSZ, } from "./constant";
 import { FieldCore } from "./FieldCore";
 
@@ -6,10 +7,10 @@ export class MinoCore {
 
     //基準ブロックの絶対座標(内部座標)
     public pos: Position = { x: 5, y: DRAW_FIELD_TOP + 1 };
-    public blocksPos = () => MINO_POS[this.idxMino][this.angle % 4];
+    public blocksPos = () => MINO_POS[this.idxMino][this.angle.angle];
 
     public idxMino: MINO_IDX;
-    public angle = 0;
+    public angle = new Angle(0);
     public lastSRS: number;
 
     public isGameOver = false;
@@ -75,28 +76,29 @@ export class MinoCore {
         // SRSにより移動する座標(x,y)
         let move: Position = { x: 0, y: 0 };
 
-        while (this.angle <= 0) {
-            // -1%4は3ではなく-1と出てしまうため、正の数にする
-            this.angle += 4;
-        }
+        // while (this.angle <= 0) {
+        //     // -1%4は3ではなく-1と出てしまうため、正の数にする
+        //     this.angle += 4;
+        // }
+        const newAngle = new Angle(this.angle.angle + dif);
 
         for (let i = 0; i < 4; i++) {
             // 基本回転
             postBlockPos.push({
-                x: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].x,
-                y: MINO_POS[this.idxMino][(this.angle + dif) % 4][i].y,
+                x: MINO_POS[this.idxMino][newAngle.angle][i].x,
+                y: MINO_POS[this.idxMino][newAngle.angle][i].y,
             });
             // debug("rotating x,y:" + (this.pos.x + rotatedX[i]) + "," + (this.pos.y + rotatedY[i]));
             // debug("x:" + rotatedX + "y:" + rotatedY);
         }
 
-        if (!this.canRotate(dif, postBlockPos, move)) {
+        if (!this.canRotate(newAngle, postBlockPos, move)) {
             // 回転不可
             return false;
         }
 
         // 回転処理を反映
-        this.angle += dif;
+        this.angle.angle = newAngle.angle;
         this.pos.x += move.x;
         this.pos.y += move.y;
 
@@ -108,7 +110,7 @@ export class MinoCore {
      *  returnが使いたいので別関数に分けた
      * @returns {boolean} true:移動可 false:移動不可
      */
-    private canRotate(dif: number, postBlockPos: Position[], move: Position): boolean {
+    private canRotate(newAngle: Angle, postBlockPos: Position[], move: Position): boolean {
         let wallKickData: Position[][][];
 
         for (let i = 0; i < 4; i++) {
@@ -135,8 +137,8 @@ export class MinoCore {
 
         for (let i = 0; i < 4; i++) {
             // SRSの動作
-            move.x = wallKickData[this.angle % 4][(this.angle + dif) % 4][i].x;
-            move.y = wallKickData[this.angle % 4][(this.angle + dif) % 4][i].y;
+            move.x = wallKickData[this.angle.angle][newAngle.angle][i].x;
+            move.y = wallKickData[this.angle.angle][newAngle.angle][i].y;
             // debug("moved:" + move);
             for (let j = 0; j < 4; j++) {
                 // 移動先の検証
@@ -209,8 +211,8 @@ export class MinoCore {
             [[1, -1], [1, 1]],
             [[-1, -1], [1, -1]]
         ];
-        const [x1, x2] = TSM_POS[this.angle % 4][0];
-        const [y1, y2] = TSM_POS[this.angle % 4][1];
+        const [x1, x2] = TSM_POS[this.angle.angle][0];
+        const [y1, y2] = TSM_POS[this.angle.angle][1];
         if (!this.field.isFilled({ x: this.pos.x + x1, y: this.pos.y + y1 })) {
             // debug("(x, y) = (" + (this.pos.x + x1) + ", " + (this.pos.y + y1) + ")");
             return 2;
