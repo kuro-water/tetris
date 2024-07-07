@@ -17,26 +17,3 @@ declare class wetris {
     static hold(idx: number): null;
     static getField(idx: number): Promise<number[][]>;
 }
-
-type KeyMap = {
-    moveLeft: string;
-    moveRight: string;
-    softDrop: string;
-    hardDrop: string;
-    rotateLeft: string;
-    rotateRight: string;
-    hold: string;
-};
-type Config = {
-    keyMode: string;
-    keyMap: KeyMap;
-};
-
-type position = {
-    x: number;
-    y: number;
-};
-type blocks = position[]; // [[x, y], [x, y], ...]
-// [position, position, position, position]
-// としたほうが強制力は上がるが、
-// a = []として後でpushする方法が使えなくなる

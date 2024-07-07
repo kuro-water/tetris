@@ -3,10 +3,9 @@ type IpcMainInvokeEvent = typeof IpcMainInvokeEvent;
 const path = require("path");
 const Store = require("electron-store");
 const store = new Store();
-import { handleWetris } from "./wetris";
 import * as initConfig from "./initConfig.json";
-
-import { success, error, warning, task, debug, info } from "./messageUtil";
+import { info } from "./messageUtil";
+import { handleWetris } from "./wetris";
 
 // console.dir(store.store, { depth: null });
 
@@ -18,17 +17,17 @@ if (require("electron-squirrel-startup")) {
 const CONFIG_KEY = "config";
 if (!store.has(CONFIG_KEY)) store.set(CONFIG_KEY, initConfig);
 
-ipcMain.handle("getInitConfig", async (event: IpcMainInvokeEvent): Promise<Config> => {
+ipcMain.handle("getInitConfig", async (_event: IpcMainInvokeEvent): Promise<Config> => {
     return initConfig;
 });
 
-ipcMain.handle("getConfig", async (event: IpcMainInvokeEvent): Promise<Config> => {
+ipcMain.handle("getConfig", async (_event: IpcMainInvokeEvent): Promise<Config> => {
     const data: Config = store.get(CONFIG_KEY);
-    // info(`got ${CONFIG_KEY} : ${JSON.stringify(data)}`);
+    info(`got ${CONFIG_KEY} : ${JSON.stringify(data)}`);
     return data;
 });
 
-ipcMain.handle("saveConfig", async (event: IpcMainInvokeEvent, data: Config): Promise<void> => {
+ipcMain.handle("saveConfig", async (_event: IpcMainInvokeEvent, data: Config): Promise<void> => {
     store.set(CONFIG_KEY, data);
     // info(`saved ${CONFIG_KEY} : ${JSON.stringify(data)}`);
 });
