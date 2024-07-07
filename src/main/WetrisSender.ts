@@ -7,6 +7,7 @@ import { WetrisCore } from "./WetrisCore";
 
 export class WetrisSender extends WetrisCore {
     private readonly sender: typeof IpcMainInvokeEvent.sender;
+    private readonly idx: number;
     setDelay = SET_DELAY;
     delDelay = DEL_DELAY;
 
@@ -18,9 +19,10 @@ export class WetrisSender extends WetrisCore {
         return;
     }
 
-    constructor(sender: typeof IpcMainInvokeEvent.sender) {
+    constructor(sender: typeof IpcMainInvokeEvent.sender, idx: number) {
         super();
         this.sender = sender;
+        this.idx = idx;
 
         this.clearFieldContext();
         this.clearHoldContext();
@@ -65,6 +67,7 @@ export class WetrisSender extends WetrisCore {
         // 描画
         this.sender.send(
             "reDrawMino",
+            this.idx,
             this.currentMino.blocksPos(),
             prePos,
             preGhostPos,
@@ -107,6 +110,7 @@ export class WetrisSender extends WetrisCore {
         // 描画
         this.sender.send(
             "reDrawMino",
+            this.idx,
             preBlockPos,
             prePos,
             preGhostPos,
@@ -125,7 +129,7 @@ export class WetrisSender extends WetrisCore {
             return true;
         }
 
-        this.sender.send("setLabelScore", String("score:" + this.score));
+        this.sender.send("setLabelScore", this.idx, String("score:" + this.score));
         return false;
     }
 
@@ -152,8 +156,8 @@ export class WetrisSender extends WetrisCore {
         await super.set();
         let ren = this.ren;
         if (ren < 0) ren = 0;
-        this.sender.send("setLabelScore", String("score:" + this.score));
-        this.sender.send("setLabelRen", String("ren:" + ren));
+        this.sender.send("setLabelScore", this.idx, String("score:" + this.score));
+        this.sender.send("setLabelRen", this.idx, String("ren:" + ren));
     }
 
     // @Override
@@ -169,19 +173,19 @@ export class WetrisSender extends WetrisCore {
 
     // ---------- フィールド描画関連 ----------
     private clearFieldContext() {
-        this.sender.send("clearFieldContext");
+        this.sender.send("clearFieldContext", this.idx);
     }
 
     private clearHoldContext() {
-        this.sender.send("clearHoldContext");
+        this.sender.send("clearHoldContext", this.idx);
     }
 
     private clearNextContext() {
-        this.sender.send("clearNextContext");
+        this.sender.send("clearNextContext", this.idx);
     }
 
     private drawField() {
-        this.sender.send("drawField", this.field.field);
+        this.sender.send("drawField", this.idx, this.field.field);
         this.drawGhostMino();
         this.drawMino();
     }
@@ -211,6 +215,7 @@ export class WetrisSender extends WetrisCore {
                 };
                 this.sender.send(
                     "drawNextBlock",
+                    this.idx,
                     { x: 1 + block.x, y: 1 + i * 4 + block.y },
                     MINO_COLORS[idxMino]
                 );
@@ -218,6 +223,7 @@ export class WetrisSender extends WetrisCore {
         }
         // info("---------- end draw next ----------")
     }
+
     // ---------- フィールド描画関連終わり ----------
 
     // ---------- ミノ描画関連 ----------
@@ -225,6 +231,7 @@ export class WetrisSender extends WetrisCore {
         for (const blockPos of this.currentMino.blocksPos()) {
             this.sender.send(
                 "drawBlock",
+                this.idx,
                 {
                     x: this.currentMino.pos.x + blockPos.x,
                     y: this.currentMino.pos.y + blockPos.y - DRAW_FIELD_TOP,
@@ -245,6 +252,7 @@ export class WetrisSender extends WetrisCore {
         for (const blockPos of this.currentMino.blocksPos()) {
             this.sender.send(
                 "drawBlock",
+                this.idx,
                 {
                     x: this.currentMino.pos.x + blockPos.x,
                     y: this.currentMino.getGhostY() + blockPos.y - DRAW_FIELD_TOP,
@@ -257,10 +265,11 @@ export class WetrisSender extends WetrisCore {
     private drawHoldMino() {
         if (this.sender === null) return;
         // debug("drawHoldMino");
-        this.sender.send("clearHoldContext");
+        this.sender.send("clearHoldContext", this.idx);
         for (const blockPos of this.currentMino.blocksPos()) {
-            this.sender.send("drawHoldBlock", blockPos, MINO_COLORS[this.currentMino.idxMino]);
+            this.sender.send("drawHoldBlock", this.idx, blockPos, MINO_COLORS[this.currentMino.idxMino]);
         }
     }
+
     // ---------- ミノ描画関連終わり ----------
 }

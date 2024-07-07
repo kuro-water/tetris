@@ -2,19 +2,22 @@ const { ipcMain, IpcMainInvokeEvent } = require("electron");
 
 import { Cpu } from "./Cpu";
 
-import { task } from "./messageUtil";
+import { debug, task } from "./messageUtil";
 import { WetrisSender } from "./WetrisSender";
 
 let listWetris: WetrisSender[] = [];
 
 export function handleWetris() {
-    ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
+    ipcMain.handle("start", (event: typeof IpcMainInvokeEvent, idx: number): void => {
         task("wetris starting...");
 
-        listWetris.push(new WetrisSender(event.sender));
-        // info(listWetris.length - 1); // idx
-
-        return listWetris.length - 1; // idx
+        if (listWetris[idx]) {
+            listWetris[idx].isMainloopActive = false;
+            listWetris[idx] = null;
+            task("stop:" + idx);
+        }
+        listWetris[idx] = (new WetrisSender(event.sender, idx));
+        debug("start:" + idx);
     });
 
     ipcMain.handle("startCpu", (_event: typeof IpcMainInvokeEvent, idx: number): void => {

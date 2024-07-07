@@ -10,8 +10,8 @@ canvas {
     margin: 10px;
 }
 
-#labelScore,
-#labelRen {
+#labelPlayerScore,
+#labelPlayerRen {
     display: block;
     text-align: center;
     font-size: 20px;

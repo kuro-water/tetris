@@ -2,62 +2,97 @@ ipcRenderer.on("test", (arg1: string, arg2: string) => {
     console.log("received:" + arg1 + "," + arg2);
 });
 
-let idxWetris: number;
-
-// let keyMap = {
-//     moveLeft: "KeyA",
-//     moveRight: "KeyD",
-//     softDrop: "KeyS",
-//     hardDrop: "KeyW",
-//     rotateLeft: "ArrowLeft",
-//     rotateRight: "ArrowRight",
-//     hold: "ArrowUp",
-// };
-// let keyMap = {
-//     moveLeft: "ArrowLeft",
-//     moveRight: "ArrowRight",
-//     softDrop: "ArrowDown",
-//     hardDrop: "Space",
-//     rotateLeft: "KeyZ",
-//     rotateRight: "ArrowUp",
-//     hold: "KeyV",
-// };
 let keyMap: KeyMap;
 
 // Record<key, value>
 let idInterval: Record<string, NodeJS.Timeout> = {};
 let isKeyDown: Record<string, boolean> = {};
 
-const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
-const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
-const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
+type PlayerInfo = {
+    idx: number;
+    canvasField: HTMLCanvasElement;
+    canvasHold: HTMLCanvasElement;
+    canvasNext: HTMLCanvasElement;
+    canvasFieldContext: CanvasRenderingContext2D;
+    canvasHoldContext: CanvasRenderingContext2D;
+    canvasNextContext: CanvasRenderingContext2D;
+    labelScore: HTMLLabelElement;
+    labelRen: HTMLLabelElement;
+}
 
-const CANVAS_FIELD_CONTEXT = CANVAS_FIELD.getContext("2d") as CanvasRenderingContext2D;
-const CANVAS_HOLD_CONTEXT = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
-const CANVAS_NEXT_CONTEXT = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
 
-const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
-const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
+// const playerList[idx].canvasField = document.getElementById("canvasField") as HTMLCanvasElement;
+// const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
+// const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
 
+// const CANVAS_FIELD_CONTEXT = playerList[idx].canvasField.getContext("2d") as CanvasRenderingContext2D;
+// const playerList[idx].canvasHoldContext = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
+// const playerList[idx].canvasNextContext = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
+
+// const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
+// const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
+
+
+const playerList: (PlayerInfo)[] = [];
+const player: PlayerInfo = {
+    idx: 0,
+    canvasField: document.getElementById("canvasPlayerField") as HTMLCanvasElement,
+    canvasHold: document.getElementById("canvasPlayerHold") as HTMLCanvasElement,
+    canvasNext: document.getElementById("canvasPlayerNext") as HTMLCanvasElement,
+    canvasFieldContext: (document.getElementById("canvasPlayerField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    canvasHoldContext: (document.getElementById("canvasPlayerHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    canvasNextContext: (document.getElementById("canvasPlayerNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    labelScore: document.getElementById("labelPlayerScore") as HTMLLabelElement,
+    labelRen: document.getElementById("labelPlayerRen") as HTMLLabelElement,
+};
+const cpu: PlayerInfo = {
+    idx: 1,
+    canvasField: document.getElementById("canvasField") as HTMLCanvasElement,
+    canvasHold: document.getElementById("canvasHold") as HTMLCanvasElement,
+    canvasNext: document.getElementById("canvasNext") as HTMLCanvasElement,
+    canvasFieldContext: (document.getElementById("canvasField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    canvasHoldContext: (document.getElementById("canvasHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    canvasNextContext: (document.getElementById("canvasNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+    labelScore: document.getElementById("labelScore") as HTMLLabelElement,
+    labelRen: document.getElementById("labelRen") as HTMLLabelElement,
+};
+playerList[player.idx] = player;
+playerList[cpu.idx] = cpu;
+console.dir(playerList);
+// const cpu: PlayerInfo = {
+//     idx: undefined,
+//     canvasField: document.getElementById("canvasCpuField") as HTMLCanvasElement,
+//     canvasHold: document.getElementById("canvasCpuHold") as HTMLCanvasElement,
+//     canvasNext: document.getElementById("canvasCpuNext") as HTMLCanvasElement,
+//     canvasFieldContext: (document.getElementById("canvasCpuField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+//     canvasHoldContext: (document.getElementById("canvasCpuHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+//     canvasNextContext: (document.getElementById("canvasCpuNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
+//     labelScore: document.getElementById("labelCpuScore") as HTMLLabelElement,
+//     labelRen: document.getElementById("labelCpuRen") as HTMLLabelElement,
+// };
 (async function constructor() {
     console.log("renderer started.");
-
     const path = window.location.pathname;
-    if (path.includes("cpu.html")) {
-        console.log("this is cpu.html");
-        await getConfig();
-        idxWetris = await wetris.start();
-        wetris.startCpu(idxWetris);
-    } else if (path.includes("wetris.html")) {
+    await getConfig();
+
+    if (path.includes("wetris.html")) {
         console.log("this is wetris.html");
-        await getConfig();
-        idxWetris = await wetris.start();
-        // console.log(idxWetris);
+        wetris.start(player.idx);
+
+    } else if (path.includes("cpu.html")) {
+        console.log("this is cpu.html");
+        wetris.start(cpu.idx);
+        wetris.startCpu(cpu.idx);
     }
 })();
 
+
 window.addEventListener("beforeunload", (_event) => {
-    wetris.stop(idxWetris);
+    playerList.forEach((player) => {
+        if (player.idx) {
+            wetris.stop(player.idx);
+        }
+    });
 });
 
 /**
@@ -108,13 +143,13 @@ document.onkeyup = (event) => {
 
 function keyEvent(event: KeyboardEvent) {
     const actions = {
-        [keyMap.moveLeft]: () => wetris.moveLeft(idxWetris),
-        [keyMap.moveRight]: () => wetris.moveRight(idxWetris),
-        [keyMap.softDrop]: () => wetris.softDrop(idxWetris),
-        [keyMap.hardDrop]: () => wetris.hardDrop(idxWetris),
-        [keyMap.rotateLeft]: () => wetris.rotateLeft(idxWetris),
-        [keyMap.rotateRight]: () => wetris.rotateRight(idxWetris),
-        [keyMap.hold]: () => wetris.hold(idxWetris),
+        [keyMap.moveLeft]: () => wetris.moveLeft(player.idx),
+        [keyMap.moveRight]: () => wetris.moveRight(player.idx),
+        [keyMap.softDrop]: () => wetris.softDrop(player.idx),
+        [keyMap.hardDrop]: () => wetris.hardDrop(player.idx),
+        [keyMap.rotateLeft]: () => wetris.rotateLeft(player.idx),
+        [keyMap.rotateRight]: () => wetris.rotateRight(player.idx),
+        [keyMap.hold]: () => wetris.hold(player.idx),
     };
 
     const action = actions[event.code];
@@ -125,64 +160,82 @@ function keyEvent(event: KeyboardEvent) {
     }
 }
 
-function setLabelScore(score: string) {
-    LABEL_SCORE.innerText = score;
+function setLabelScore(idx: number, score: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on setLabelScore\nidx : ${idx}`);
+    }
+    playerList[idx].labelScore.innerText = score;
 }
 
 ipcRenderer.on("setLabelScore", setLabelScore);
 
-function setLabelRen(ren: string) {
-    LABEL_REN.innerText = ren;
+function setLabelRen(idx: number, ren: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on setLabelRen\nidx : ${idx}`);
+    }
+    playerList[idx].labelRen.innerText = ren;
 }
 
 ipcRenderer.on("setLabelRen", setLabelRen);
 
-function clearFieldContext() {
+function clearFieldContext(idx: number) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on clearFieldContext\nidx : ${idx}`);
+    }
     console.log("clearFieldContext");
-    drawField(INIT_FIELD);
+    drawField(idx, INIT_FIELD);
 
-    CANVAS_FIELD_CONTEXT.fillStyle = FRAME_COLOR;
-    CANVAS_FIELD_CONTEXT.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
-    CANVAS_FIELD_CONTEXT.fillRect(
+    playerList[idx].canvasFieldContext.fillStyle = FRAME_COLOR;
+    playerList[idx].canvasFieldContext.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
+    playerList[idx].canvasFieldContext.fillRect(
         FIELD_CANVAS_SIZE[2] - BLOCK_SIZE,
         0,
         BLOCK_SIZE,
         FIELD_CANVAS_SIZE[3]
     );
-    CANVAS_FIELD_CONTEXT.fillRect(
+    playerList[idx].canvasFieldContext.fillRect(
         0,
         FIELD_CANVAS_SIZE[3] - BLOCK_SIZE,
         FIELD_CANVAS_SIZE[2],
         BLOCK_SIZE
     );
     // 行っているのは以下と同等の操作
-    // CANVAS_FIELD_CONTEXT.fillRect(0, 0, 20, 420);
-    // CANVAS_FIELD_CONTEXT.fillRect(220, 0, 20, 420);
-    // CANVAS_FIELD_CONTEXT.fillRect(0, 400, 220, 20);
+    // playerList[idx].canvasFieldContext.fillRect(0, 0, 20, 420);
+    // playerList[idx].canvasFieldContext.fillRect(220, 0, 20, 420);
+    // playerList[idx].canvasFieldContext.fillRect(0, 400, 220, 20);
 }
 
 ipcRenderer.on("clearFieldContext", clearFieldContext);
 
-function clearHoldContext() {
+function clearHoldContext(idx: number) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on clearHoldContext\nidx : ${idx}`);
+    }
     console.log("clearHoldContext");
-    CANVAS_HOLD_CONTEXT.fillStyle = BACKGROUND_COLOR;
-    CANVAS_HOLD_CONTEXT.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
+    playerList[idx].canvasHoldContext.fillStyle = BACKGROUND_COLOR;
+    playerList[idx].canvasHoldContext.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
 }
 
 ipcRenderer.on("clearHoldContext", clearHoldContext);
 
-function clearNextContext() {
-    CANVAS_NEXT_CONTEXT.fillStyle = BACKGROUND_COLOR;
-    CANVAS_NEXT_CONTEXT.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
+function clearNextContext(idx: number) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on clearNextContext\nidx : ${idx}`);
+    }
+    playerList[idx].canvasNextContext.fillStyle = BACKGROUND_COLOR;
+    playerList[idx].canvasNextContext.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
 }
 
 ipcRenderer.on("clearNextContext", clearNextContext);
 
-function drawBlock(block: Position, color: string) {
+function drawBlock(idx: number, block: Position, color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawBlock\nidx : ${idx}`);
+    }
     // console.log("draw block");
     // console.log("x:" + x + ",y:" + y + ",color:" + color);
-    CANVAS_FIELD_CONTEXT.fillStyle = color;
-    CANVAS_FIELD_CONTEXT.fillRect(
+    playerList[idx].canvasFieldContext.fillStyle = color;
+    playerList[idx].canvasFieldContext.fillRect(
         block.x * BLOCK_SIZE,
         block.y * BLOCK_SIZE,
         BLOCK_SIZE,
@@ -192,10 +245,13 @@ function drawBlock(block: Position, color: string) {
 
 ipcRenderer.on("drawBlock", drawBlock);
 
-function drawMino(minoPos: Position, blocks: Position[], color: string) {
+function drawMino(idx: number, minoPos: Position, blocks: Position[], color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawMino\nidx : ${idx}`);
+    }
     console.log("draw mino");
     for (const block of blocks) {
-        drawBlock({ x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
+        drawBlock(idx, { x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
     }
 }
 
@@ -204,33 +260,39 @@ ipcRenderer.on("drawMino", drawMino);
 // メインプロセスから起動するとラグでチカチカするのでこちらで処理
 ipcRenderer.on(
     "reDrawMino",
-    (
-        preBlockPos: Position[],
-        preMinoPos: Position,
-        preGhostPos: Position,
-        postBlockPos: Position[],
-        postMinoPos: Position,
-        postGhostPos: Position,
-        idxMino: number
+    (idx: number,
+     preBlockPos: Position[],
+     preMinoPos: Position,
+     preGhostPos: Position,
+     postBlockPos: Position[],
+     postMinoPos: Position,
+     postGhostPos: Position,
+     idxMino: number
     ) => {
+        if (playerList[idx] === undefined) {
+            throw new Error(`playerList[idxWetris] is undefined on reDrawMino\nidx : ${idx}`);
+        }
         console.log("move");
         for (const pos of preBlockPos) {
-            drawBlock({ x: preGhostPos.x + pos.x, y: preGhostPos.y + pos.y }, BACKGROUND_COLOR);
-            drawBlock({ x: preMinoPos.x + pos.x, y: preMinoPos.y + pos.y }, BACKGROUND_COLOR);
+            drawBlock(idx, { x: preGhostPos.x + pos.x, y: preGhostPos.y + pos.y }, BACKGROUND_COLOR);
+            drawBlock(idx, { x: preMinoPos.x + pos.x, y: preMinoPos.y + pos.y }, BACKGROUND_COLOR);
         }
         for (const pos of postBlockPos) {
             drawBlock(
-                { x: postGhostPos.x + pos.x, y: postGhostPos.y + pos.y },
+                idx, { x: postGhostPos.x + pos.x, y: postGhostPos.y + pos.y },
                 GHOST_COLORS[idxMino]
             );
-            drawBlock({ x: postMinoPos.x + pos.x, y: postMinoPos.y + pos.y }, MINO_COLORS[idxMino]);
+            drawBlock(idx, { x: postMinoPos.x + pos.x, y: postMinoPos.y + pos.y }, MINO_COLORS[idxMino]);
         }
     }
 );
 
-function drawNextBlock(block: Position, color: string) {
-    CANVAS_NEXT_CONTEXT.fillStyle = color;
-    CANVAS_NEXT_CONTEXT.fillRect(
+function drawNextBlock(idx: number, block: Position, color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawNextBlock\nidx : ${idx}`);
+    }
+    playerList[idx].canvasNextContext.fillStyle = color;
+    playerList[idx].canvasNextContext.fillRect(
         block.x * BLOCK_SIZE,
         block.y * BLOCK_SIZE,
         BLOCK_SIZE,
@@ -240,11 +302,14 @@ function drawNextBlock(block: Position, color: string) {
 
 ipcRenderer.on("drawNextBlock", drawNextBlock);
 
-function drawHoldBlock(block: Position, color: string) {
+function drawHoldBlock(idx: number, block: Position, color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawHoldBlock\nidx : ${idx}`);
+    }
     // console.log("draw hold block");
     // console.log("x:" + x + ",y:" + y + ",color:" + color);
-    CANVAS_HOLD_CONTEXT.fillStyle = color;
-    CANVAS_HOLD_CONTEXT.fillRect(
+    playerList[idx].canvasHoldContext.fillStyle = color;
+    playerList[idx].canvasHoldContext.fillRect(
         (1 + block.x) * BLOCK_SIZE,
         (1 + block.y) * BLOCK_SIZE,
         BLOCK_SIZE,
@@ -254,7 +319,10 @@ function drawHoldBlock(block: Position, color: string) {
 
 ipcRenderer.on("drawHoldBlock", drawHoldBlock);
 
-function drawField(field: number[][]) {
+function drawField(idx: number, field: number[][]) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawField\nidx : ${idx}`);
+    }
     console.log("draw field");
     // console.log("i:" + this.field.length);
     // console.log("j:" + this.field[0].length);
@@ -262,11 +330,11 @@ function drawField(field: number[][]) {
         // console.log(this.field[i])
         for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WIDTH; j++) {
             if (field[i][j]) {
-                CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
+                playerList[idx].canvasFieldContext.fillStyle = PLACED_MINO_COLOR;
             } else {
-                CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+                playerList[idx].canvasFieldContext.fillStyle = BACKGROUND_COLOR;
             }
-            CANVAS_FIELD_CONTEXT.fillRect(
+            playerList[idx].canvasFieldContext.fillRect(
                 j * BLOCK_SIZE,
                 (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
                 BLOCK_SIZE,
