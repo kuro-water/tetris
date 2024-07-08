@@ -1,5 +1,3 @@
-import { DAS } from "../main/constant";
-
 type PlayerInfo = {
     idx: number;
     canvasField?: HTMLCanvasElement;
