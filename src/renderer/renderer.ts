@@ -1,75 +1,41 @@
+type PlayerInfo = {
+    idx: number;
+    canvasField?: HTMLCanvasElement;
+    canvasHold?: HTMLCanvasElement;
+    canvasNext?: HTMLCanvasElement;
+    canvasFieldContext?: CanvasRenderingContext2D;
+    canvasHoldContext?: CanvasRenderingContext2D;
+    canvasNextContext?: CanvasRenderingContext2D;
+    labelScore?: HTMLLabelElement;
+    labelRen?: HTMLLabelElement;
+};
+
+type IdList = [string, string, string, string, string];
+
 ipcRenderer.on("test", (arg1: string, arg2: string) => {
     console.log("received:" + arg1 + "," + arg2);
 });
 
-let keyMap: KeyMap;
-
-// Record<key, value>
-let idInterval: Record<string, NodeJS.Timeout> = {};
-let isKeyDown: Record<string, boolean> = {};
-
-type PlayerInfo = {
-    idx: number;
-    canvasField: HTMLCanvasElement;
-    canvasHold: HTMLCanvasElement;
-    canvasNext: HTMLCanvasElement;
-    canvasFieldContext: CanvasRenderingContext2D;
-    canvasHoldContext: CanvasRenderingContext2D;
-    canvasNextContext: CanvasRenderingContext2D;
-    labelScore: HTMLLabelElement;
-    labelRen: HTMLLabelElement;
-}
-
-
-// const playerList[idx].canvasField = document.getElementById("canvasField") as HTMLCanvasElement;
-// const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
-// const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
-
-// const CANVAS_FIELD_CONTEXT = playerList[idx].canvasField.getContext("2d") as CanvasRenderingContext2D;
-// const playerList[idx].canvasHoldContext = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
-// const playerList[idx].canvasNextContext = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
-
-// const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
-// const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
-
-
 const playerList: (PlayerInfo)[] = [];
-const player: PlayerInfo = {
-    idx: 0,
-    canvasField: document.getElementById("canvasPlayerField") as HTMLCanvasElement,
-    canvasHold: document.getElementById("canvasPlayerHold") as HTMLCanvasElement,
-    canvasNext: document.getElementById("canvasPlayerNext") as HTMLCanvasElement,
-    canvasFieldContext: (document.getElementById("canvasPlayerField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    canvasHoldContext: (document.getElementById("canvasPlayerHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    canvasNextContext: (document.getElementById("canvasPlayerNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    labelScore: document.getElementById("labelPlayerScore") as HTMLLabelElement,
-    labelRen: document.getElementById("labelPlayerRen") as HTMLLabelElement,
-};
-// const cpu: PlayerInfo = {
-//     idx: 1,
-//     canvasField: document.getElementById("canvasField") as HTMLCanvasElement,
-//     canvasHold: document.getElementById("canvasHold") as HTMLCanvasElement,
-//     canvasNext: document.getElementById("canvasNext") as HTMLCanvasElement,
-//     canvasFieldContext: (document.getElementById("canvasField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-//     canvasHoldContext: (document.getElementById("canvasHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-//     canvasNextContext: (document.getElementById("canvasNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-//     labelScore: document.getElementById("labelScore") as HTMLLabelElement,
-//     labelRen: document.getElementById("labelRen") as HTMLLabelElement,
-// };
-const cpu: PlayerInfo = {
-    idx: 1,
-    canvasField: document.getElementById("canvasCpuField") as HTMLCanvasElement,
-    canvasHold: document.getElementById("canvasCpuHold") as HTMLCanvasElement,
-    canvasNext: document.getElementById("canvasCpuNext") as HTMLCanvasElement,
-    canvasFieldContext: (document.getElementById("canvasCpuField") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    canvasHoldContext: (document.getElementById("canvasCpuHold") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    canvasNextContext: (document.getElementById("canvasCpuNext") as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D,
-    labelScore: document.getElementById("labelCpuScore") as HTMLLabelElement,
-    labelRen: document.getElementById("labelCpuRen") as HTMLLabelElement,
-};
+const player: PlayerInfo = { idx: 0 };
+const cpu: PlayerInfo = { idx: 1 }
 playerList[player.idx] = player;
 playerList[cpu.idx] = cpu;
-console.dir(playerList);
+
+const PlayerIdList: IdList = ["canvasPlayerField", "canvasPlayerHold", "canvasPlayerNext", "labelPlayerScore", "labelPlayerRen"];
+const CpuIdList: IdList = ["canvasCpuField", "canvasCpuHold", "canvasCpuNext", "labelCpuScore", "labelCpuRen"];
+
+const getElement = (playerInfo: PlayerInfo, idList: IdList) => {
+    playerInfo.canvasField = document.getElementById(idList[0]) as HTMLCanvasElement;
+    playerInfo.canvasHold = document.getElementById(idList[1]) as HTMLCanvasElement;
+    playerInfo.canvasNext = document.getElementById(idList[2]) as HTMLCanvasElement;
+    playerInfo.canvasFieldContext = (document.getElementById(idList[0]) as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+    playerInfo.canvasHoldContext = (document.getElementById(idList[1]) as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+    playerInfo.canvasNextContext = (document.getElementById(idList[2]) as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+    playerInfo.labelScore = document.getElementById(idList[3]) as HTMLLabelElement;
+    playerInfo.labelRen = document.getElementById(idList[4]) as HTMLLabelElement;
+}
+
 (async function constructor() {
     console.log("renderer started.");
     const path = window.location.pathname;
@@ -77,10 +43,13 @@ console.dir(playerList);
 
     if (path.includes("wetris.html")) {
         console.log("this is wetris.html");
+        getElement(player, PlayerIdList);
         wetris.start(player.idx);
 
     } else if (path.includes("cpu.html")) {
         console.log("this is cpu.html");
+        getElement(player, PlayerIdList);
+        getElement(cpu, CpuIdList);
         wetris.start(player.idx);
         wetris.start(cpu.idx);
         wetris.startCpu(cpu.idx);
@@ -104,6 +73,12 @@ window.addEventListener("beforeunload", (_event) => {
 function sleep(waitTime: number) {
     return new Promise((resolve) => setTimeout(resolve, waitTime));
 }
+
+let keyMap: KeyMap;
+
+// Record<key, value>
+let idInterval: Record<string, NodeJS.Timeout> = {};
+let isKeyDown: Record<string, boolean> = {};
 
 async function getConfig() {
     const config = await electronAPI.getConfig();
