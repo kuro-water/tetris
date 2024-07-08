@@ -1,3 +1,5 @@
+import { DAS } from "../main/constant";
+
 type PlayerInfo = {
     idx: number;
     canvasField?: HTMLCanvasElement;
@@ -65,15 +67,6 @@ window.addEventListener("beforeunload", (_event) => {
     });
 });
 
-/**
- *  よくわからんけどスリープできるようになる。Promiseてなんやねん
- * @param waitTime  ミリ秒
- * @return Promise
- */
-function sleep(waitTime: number) {
-    return new Promise((resolve) => setTimeout(resolve, waitTime));
-}
-
 let keyMap: KeyMap;
 
 // Record<key, value>
@@ -94,7 +87,7 @@ document.onkeydown = async (event) => {
     isKeyDown[event.code] = true;
 
     keyEvent(event);
-    await sleep(DAS);
+    await new Promise((resolve) => setTimeout(resolve, DAS));
 
     // ハードドロップは長押し無効
     if (event.code === keyMap.hardDrop) return;
