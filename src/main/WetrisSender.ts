@@ -5,11 +5,19 @@ import { DEL_DELAY, DRAW_FIELD_TOP, GHOST_COLORS, MINO_COLORS, MINO_IDX, MINO_PO
 import { info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";
 
+type Attack = (idx: number, lines: number, ren: number, modeTspin: number, isBtB: boolean) => void;
+
 export class WetrisSender extends WetrisCore {
     private readonly sender: typeof IpcMainInvokeEvent.sender;
     private readonly idx: number;
+
     setDelay = SET_DELAY;
     delDelay = DEL_DELAY;
+
+    // 外部から変更できる攻撃処理
+    private attack: Attack = (sender: typeof IpcMainInvokeEvent.sender, score: number) => {
+    };
+    public attackedLineBuffer: number[] = [];
 
 
     protected start() {
@@ -29,6 +37,12 @@ export class WetrisSender extends WetrisCore {
         this.clearNextContext();
 
         super.start();
+    }
+
+    // @Override
+    protected async mainloop() {
+        // debug(this.attackedLineBuffer);
+        await super.mainloop();
     }
 
     // @Override
@@ -154,10 +168,17 @@ export class WetrisSender extends WetrisCore {
     // @Override
     public async set() {
         await super.set();
+
         let ren = this.ren;
         if (ren < 0) ren = 0;
         this.sender.send("setLabelScore", this.idx, String("score:" + this.score));
         this.sender.send("setLabelRen", this.idx, String("ren:" + ren));
+    }
+
+    // @Override
+    protected addScore(lines: number, ren: number, modeTspin: number, isBtB: boolean) {
+        super.addScore(lines, ren, modeTspin, isBtB);
+        this.attack(this.idx, lines, ren, modeTspin, isBtB);
     }
 
     // @Override
@@ -272,4 +293,11 @@ export class WetrisSender extends WetrisCore {
     }
 
     // ---------- ミノ描画関連終わり ----------
+
+    // ---------- 対戦関連 ----------
+    public setAttackMethod(method: Attack) {
+        this.attack = method;
+    }
+
+    // ---------- 対戦関連終わり ----------
 }

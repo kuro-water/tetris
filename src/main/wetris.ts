@@ -1,5 +1,4 @@
 const { ipcMain, IpcMainInvokeEvent } = require("electron");
-
 import { Cpu } from "./Cpu";
 
 import { debug, task } from "./messageUtil";
@@ -18,6 +17,39 @@ export function handleWetris() {
         }
         listWetris[idx] = (new WetrisSender(event.sender, idx));
         debug("start:" + idx);
+
+        listWetris[idx].setAttackMethod((idx: number, lines: number, ren: number, modeTspin: number, isBtB: boolean) => {
+            if (lines <= 0) {
+                throw new Error("lines must be positive number");
+            }
+            let power = 0;
+
+            // 基本火力
+            power += lines - 1;
+
+            // renボーナス
+            power += 2 < ren ? ren - 2 : 0;
+
+            // wetris, Tspinボーナス
+            if (lines === 4) {
+                power += 2;
+            }
+            else if (modeTspin === 1) {
+                power += lines + 1;
+            }
+
+            // BtBボーナス
+            if (isBtB) {
+                power += 1;
+            }
+            debug(`power:${power}, lines:${lines}, ren:${ren}, modeTspin:${modeTspin}, isBtB:${isBtB}`);
+
+            listWetris.forEach((wetris, i) => {
+                if (i !== idx) {
+                    wetris.attackedLineBuffer.push(power);
+                }
+            });
+        });
     });
 
     ipcMain.handle("startCpu", (_event: typeof IpcMainInvokeEvent, idx: number): void => {
