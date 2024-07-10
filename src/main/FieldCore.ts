@@ -1,4 +1,4 @@
-import { EMPTY_ROW, INIT_FIELD } from "./constant";
+import { EMPTY_ROW, FULL_ROW, INIT_FIELD } from "./constant";
 import { info } from "./messageUtil";
 
 /**
@@ -83,5 +83,22 @@ export class FieldCore {
             clearedLineCount++;
         }
         return clearedLineCount;
+    }
+
+    public addCheese(num: number) {
+        for (let i = 0; i < num; i++) {
+            // フィールドの一番上を消去
+            this.field.shift();
+            // 床を消し、チーズを追加してから床を戻す
+            this.field.pop();
+            this.field.push(this.getCheeseRow());
+            this.field.push([...FULL_ROW]);
+        }
+    }
+
+    private getCheeseRow(): Row {
+        const row: Row = [...FULL_ROW];
+        row[Math.floor(Math.random() * 10) + 1] = 0;
+        return row;
     }
 }

@@ -169,6 +169,12 @@ export class WetrisSender extends WetrisCore {
     public async set() {
         await super.set();
 
+        if (this.attackedLineBuffer.length) {
+            this.attackedLineBuffer.forEach((line => this.field.addCheese(line)));
+            this.attackedLineBuffer = [];
+            this.drawField();
+        }
+
         let ren = this.ren;
         if (ren < 0) ren = 0;
         this.sender.send("setLabelScore", this.idx, String("score:" + this.score));
