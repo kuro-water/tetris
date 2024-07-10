@@ -52,6 +52,7 @@ export class WetrisSender extends WetrisCore {
         this.drawField();
         this.currentMino = null;
         this.isMainloopActive = false;
+        this.sender.send("gameOver", this.idx);
     }
 
     // @Override

@@ -14,10 +14,10 @@ type PlayerInfo = {
 type ElementIdList = [string, string, string, string, string];
 // ---------- 型宣言終わり ----------
 
-// ---------- wetris開始処理 ----------
+// ---------- wetris処理 ----------
 const playerList: PlayerInfo[] = [];
 const player: PlayerInfo = { idx: 0 };
-const cpu: PlayerInfo = { idx: 1 }
+const cpu: PlayerInfo = { idx: 1 };
 
 const PlayerIdList: ElementIdList = ["canvasPlayerField", "canvasPlayerHold", "canvasPlayerNext", "labelPlayerScore", "labelPlayerRen"];
 const CpuIdList: ElementIdList = ["canvasCpuField", "canvasCpuHold", "canvasCpuNext", "labelCpuScore", "labelCpuRen"];
@@ -67,7 +67,7 @@ function getElement(playerInfo: PlayerInfo, idList: ElementIdList) {
         playerList[cpu.idx] = cpu;
     }
 })();
-// ---------- wetris開始処理終わり ----------
+// ---------- wetris処理終わり ----------
 
 // ---------- イベント処理 ----------
 window.addEventListener("beforeunload", (_event) => {
@@ -146,6 +146,34 @@ function keyEvent(event: KeyboardEvent) {
 // ---------- キー入力受付終わり ----------
 
 // ---------- 描画処理 ----------
+function gameOver(idx: number) {
+    playerList.forEach((_, i) => {
+        if (i !== idx) {
+            wetris.stop(i);
+            setCanvasStr(i, "WIN");
+        } else {
+            setCanvasStr(i, "LOSE");
+        }
+        playerList[i].canvasFieldContext = null;
+    });
+}
+
+ipcRenderer.on("gameOver", gameOver);
+
+function setCanvasStr(idx: number, str: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on setLabelScore\nidx : ${idx}`);
+    }
+    const canvas = playerList[idx].canvasField;
+    const context = playerList[idx].canvasFieldContext;
+    context.textAlign = "center";
+    context.font = "50px sans-serif";
+    context.fillStyle = "black";
+    context.fillText(str, canvas.width / 2, canvas.height / 2);
+}
+
+ipcRenderer.on("setCanvasStr", setCanvasStr);
+
 /**
  * @description スコアを反映
  * @param {number} idx
@@ -395,4 +423,5 @@ function drawField(idx: number, field: number[][]) {
 }
 
 ipcRenderer.on("drawField", drawField);
+
 // ---------- 描画処理終わり ----------
