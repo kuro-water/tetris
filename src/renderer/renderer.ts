@@ -47,15 +47,23 @@ function getElement(playerInfo: PlayerInfo, idList: ElementIdList) {
     keyMap = (await electronAPI.getConfig()).keyMap;
 
     const path = window.location.pathname;
-    if (path.includes("wetris.html")) {
-        console.log("this is wetris.html");
+    if (path.includes("soloPlay.html")) {
+        console.log("this is soloPlay.html");
 
         getElement(player, PlayerIdList);
         wetris.start(player.idx);
         playerList[player.idx] = player;
     }
-    else if (path.includes("cpu.html")) {
-        console.log("this is cpu.html");
+    else if (path.includes("soloCpu.html")) {
+        console.log("this is soloCpu.html");
+
+        getElement(cpu, CpuIdList);
+        wetris.start(cpu.idx);
+        wetris.startCpu(cpu.idx);
+        playerList[cpu.idx] = cpu;
+    }
+    else if (path.includes("playWithCpu.html")) {
+        console.log("this is playWithCpu.html");
 
         getElement(player, PlayerIdList);
         wetris.start(player.idx);
@@ -151,7 +159,8 @@ function gameOver(idx: number) {
         if (i !== idx) {
             wetris.stop(i);
             setCanvasStr(i, "WIN");
-        } else {
+        }
+        else {
             setCanvasStr(i, "LOSE");
         }
         playerList[i].canvasFieldContext = null;
