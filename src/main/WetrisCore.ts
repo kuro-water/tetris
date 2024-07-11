@@ -8,7 +8,7 @@ export class WetrisCore {
     public currentMino: MinoCore;
     public nextMinos: MINO_IDX[] = [];
     public afterNextMinos: MINO_IDX[] = [];
-    public holdMino: MINO_IDX;
+    public idxHoldMino: MINO_IDX;
 
     public field: FieldCore;
 
@@ -167,11 +167,11 @@ export class WetrisCore {
         if (this.isUsedHold) return;
         this.isUsedHold = true;
 
-        if (this.holdMino !== undefined) {
-            this.nextMinos.push(this.holdMino);
+        if (this.idxHoldMino !== undefined) {
+            this.nextMinos.push(this.idxHoldMino);
         }
 
-        this.holdMino = this.currentMino.idxMino;
+        this.idxHoldMino = this.currentMino.idxMino;
         this.makeNewMino();
         // info("hold");
     }

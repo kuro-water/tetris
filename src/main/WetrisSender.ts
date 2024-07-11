@@ -158,11 +158,11 @@ export class WetrisSender extends WetrisCore {
         this.drawHoldMino();
         this.isUsedHold = true;
 
-        if (this.holdMino !== undefined) {
-            this.nextMinos.push(this.holdMino);
+        if (this.idxHoldMino !== undefined) {
+            this.nextMinos.push(this.idxHoldMino);
         }
 
-        this.holdMino = this.currentMino.idxMino;
+        this.idxHoldMino = this.currentMino.idxMino;
         this.makeNewMino();
     }
 
