@@ -37,20 +37,27 @@ export class Cpu {
 
     private async main() {
         while (true) {
+            // フィールドの評価値を求める
             const bestField = await this.getBestField(
                 this.mainWetris.currentMino.idxMino,
                 this.mainWetris.field
             );
+            const holdMino = this.mainWetris.idxHoldMino !== undefined ? this.mainWetris.idxHoldMino : this.mainWetris.nextMinos[0];
+            const bestFieldUsedHold = await this.getBestField(holdMino, this.mainWetris.field);
 
-            // bestField.fieldData.field.printField();
-            // debug(`hole: ${bestField.hole}`);
-            // debug(`height: ${bestField.height}`);
-            // debug(`requiredIMinoCount: ${bestField.requiredIMinoCount}`);
-
+            // ゲーム終了時には終了
             if (!this.mainWetris.isMainloopActive) {
                 break;
             }
-            await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
+
+            // 動かす
+            if (bestFieldUsedHold.score < bestField.score) {
+                await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
+            }
+            else {
+                this.mainWetris.hold();
+                await this.moveMinoToMatchField(this.mainWetris, bestFieldUsedHold.fieldData);
+            }
         }
     }
 
@@ -206,7 +213,8 @@ export class Cpu {
                     fieldData.field.isFilled({ x: x + 1, y: y })
                 ) {
                     trenchCount++;
-                } else {
+                }
+                else {
                     break;
                 }
             }
