@@ -19,9 +19,6 @@ contextBridge.exposeInMainWorld("wetris", {
     rotateLeft: (idx: number) => ipcRenderer.invoke("rotateLeft", idx),
     rotateRight: (idx: number) => ipcRenderer.invoke("rotateRight", idx),
     hold: (idx: number) => ipcRenderer.invoke("hold", idx),
-    printField: (idx: number) => ipcRenderer.invoke("printField", idx),
-    getField: (idx: number) => ipcRenderer.invoke("getField", idx),
-    getLength: () => ipcRenderer.invoke("getLength"),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {

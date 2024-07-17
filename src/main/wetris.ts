@@ -1,7 +1,7 @@
 const { ipcMain, IpcMainInvokeEvent } = require("electron");
 import { Cpu } from "./Cpu";
 
-import { debug, task } from "./messageUtil";
+import { task } from "./messageUtil";
 import { WetrisSender } from "./WetrisSender";
 
 let listWetris: WetrisSender[] = [];
@@ -11,12 +11,10 @@ export function handleWetris() {
         task("wetris starting...");
 
         if (listWetris[idx]) {
-            listWetris[idx].isMainloopActive = false;
-            listWetris[idx] = null;
-            task("stop:" + idx);
+            stop(null, idx);
         }
         listWetris[idx] = (new WetrisSender(event.sender, idx));
-        debug("start:" + idx);
+        // debug("start:" + idx);
 
         listWetris[idx].setAttackMethod((idx: number, lines: number, ren: number, modeTspin: number, isBtB: boolean) => {
             if (lines <= 0) {
@@ -42,7 +40,7 @@ export function handleWetris() {
             if (isBtB) {
                 power += 1;
             }
-            debug(`power:${power}, lines:${lines}, ren:${ren}, modeTspin:${modeTspin}, isBtB:${isBtB}`);
+            // debug(`power:${power}, lines:${lines}, ren:${ren}, modeTspin:${modeTspin}, isBtB:${isBtB}`);
 
             listWetris.forEach((wetris, i) => {
                 if (i !== idx && wetris !== null) {
@@ -56,12 +54,12 @@ export function handleWetris() {
         new Cpu(listWetris[idx]);
     });
 
-    ipcMain.handle("stop", (_event: typeof IpcMainInvokeEvent, idx: number) => {
+    const stop = (_event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].isMainloopActive = false;
-        // listWetris[idx] = null;
         listWetris.splice(idx, 1);
         task("stop:" + idx);
-    });
+    };
+    ipcMain.handle("stop", stop);
 
     ipcMain.handle("moveLeft", (_event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].moveLeft();

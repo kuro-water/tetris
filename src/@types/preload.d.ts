@@ -26,6 +26,4 @@ declare class wetris {
     static rotateRight(idx: number): null;
 
     static hold(idx: number): null;
-
-    static getField(idx: number): Promise<number[][]>;
 }

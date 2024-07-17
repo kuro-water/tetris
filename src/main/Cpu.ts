@@ -47,9 +47,7 @@ export class Cpu {
             const bestFieldUsedHold = await this.getBestField(holdMino, this.mainWetris.field);
 
             // ゲーム終了時には終了
-            if (!this.mainWetris.isMainloopActive) {
-                break;
-            }
+            if (!this.mainWetris.isMainloopActive) break;
 
             // 動かす
             if (bestFieldUsedHold.score < bestField.score) {
@@ -68,6 +66,7 @@ export class Cpu {
     private async moveMinoToMatchField(wetris: WetrisSender, fieldData: FieldData) {
         while (wetris.currentMino.angle.angle !== fieldData.angle.angle % 4) {
             if (Math.abs(fieldData.angle.angle - fieldData.angle.angle) === 3) {
+                // 左回転の方が速い
                 wetris.rotateLeft();
             }
             else {
@@ -77,7 +76,7 @@ export class Cpu {
         }
         while (wetris.currentMino.pos.x !== fieldData.pos.x) {
             const dif = fieldData.pos.x - wetris.currentMino.pos.x;
-            const wasMoved = dif < 0 ? await wetris.moveLeft() : await wetris.moveRight();
+            const wasMoved = dif < 0 ? wetris.moveLeft() : wetris.moveRight();
             if (!wasMoved) {
                 error("CPU: failed to move!");
             }
@@ -254,7 +253,7 @@ export class Cpu {
         // 死にそうな高さは基本置かない
         if (fieldInfo.height - DRAW_FIELD_TOP < 5) {
             info("Too high!");
-            score *= 0 < score ? 0.01 : 100;
+            score *= (0 < score ? 0.01 : 100);
         }
 
         return { fieldData: fieldInfo.fieldData, score: score };
