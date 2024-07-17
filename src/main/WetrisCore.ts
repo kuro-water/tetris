@@ -8,11 +8,11 @@ export class WetrisCore {
     public currentMino: MinoCore;
     public nextMinos: MINO_IDX[] = [];
     public afterNextMinos: MINO_IDX[] = [];
-    public holdMino: MINO_IDX;
+    public idxHoldMino: MINO_IDX;
 
     public field: FieldCore;
 
-    private isLocking = false;
+    protected isLocking = false;
     private latestTime: number;
 
     protected delDelay = 0;
@@ -23,8 +23,9 @@ export class WetrisCore {
 
     protected score = 0;
     protected ren = 0;
-    private modeTspin = 0;
-    private isBtB = false;
+    // 0: not Tspin 1:Tspin, 2:Tspin mini
+    protected modeTspin = 0;
+    protected isBtB = false;
 
     public isMainloopActive: boolean;
 
@@ -33,7 +34,7 @@ export class WetrisCore {
 
     protected start() {
         this.makeNewMino();
-        this.mainloop();
+        this.callMainloop();
         this.isMainloopActive = true;
     }
 
@@ -46,22 +47,29 @@ export class WetrisCore {
         // task("wetris constructor ended.");
     }
 
-    private async mainloop() {
+    private async callMainloop() {
         while (" ω ") {
-            // this.field.printField();
             await sleep(1000);
-            if (!this.isMainloopActive) continue;
-            // debug("main loop");
-            if (!this.currentMino) {
-                // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
-                continue;
+            if (!this.isMainloopActive) {
+                return;
             }
-            if (this.move({ x: 0, y: 1 })) {
-                this.isLocking = false;
-                this.countKSKS = 0;
-            } else {
-                this.lockDown();
-            }
+            await this.mainloop();
+        }
+    }
+
+    protected async mainloop() {
+        // this.field.printField();
+        // debug("main loop");
+        if (!this.currentMino) {
+            // 接地硬直中はcurrentMinoが存在せずTypeErrorとなる
+            return;
+        }
+        if (this.move({ x: 0, y: 1 })) {
+            this.isLocking = false;
+            this.countKSKS = 0;
+        }
+        else {
+            this.lockDown();
         }
     }
 
@@ -81,6 +89,7 @@ export class WetrisCore {
             this.isLocking = false;
             this.modeTspin = 0;
             this.countKSKS += 1;
+            // debug("moved");
             return true;
         }
         return false;
@@ -131,7 +140,8 @@ export class WetrisCore {
             this.score += 1;
             // info("score:" + this.score);
             return true;
-        } else {
+        }
+        else {
             this.lockDown();
             return false;
         }
@@ -141,12 +151,12 @@ export class WetrisCore {
         // 接地硬直中に入力されるとcurrentMinoが存在せずTypeErrorとなるため
         if (!this.currentMino) return;
 
-        this.score += this.currentMino.getGhostY() - this.currentMino.pos.y;
+        // this.score += this.currentMino.getGhostY() - this.currentMino.pos.y;
         this.score += 10;
 
-        // ゴーストのy座標まで移動(接地)
-        this.move({ x: 0, y: this.currentMino.getGhostY() - this.currentMino.pos.y });
-
+        // 接地
+        while (this.softDrop()) {
+        }
         await this.set();
     }
 
@@ -157,16 +167,19 @@ export class WetrisCore {
         if (this.isUsedHold) return;
         this.isUsedHold = true;
 
-        if (this.holdMino !== undefined) {
-            this.nextMinos.push(this.holdMino);
+        if (this.idxHoldMino !== undefined) {
+            this.nextMinos.push(this.idxHoldMino);
         }
 
-        this.holdMino = this.currentMino.idxMino;
+        this.idxHoldMino = this.currentMino.idxMino;
         this.makeNewMino();
         // info("hold");
     }
 
     public async set() {
+        if (this.currentMino === null) {
+            return;
+        }
         let lines;
 
         // if (this.currentMino.idxMino === MINO_IDX.T_MINO) debug(this.currentMino.lastSRS);
@@ -188,13 +201,15 @@ export class WetrisCore {
             if (this.isBtB) {
                 this.isBtB = !!this.modeTspin || lines === 4;
                 this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
-            } else {
+            }
+            else {
                 this.addScore(lines, this.ren, this.modeTspin, this.isBtB);
                 this.isBtB = !!this.modeTspin || lines === 4;
             }
             // Delayが0でもsleepしてしまうと止まってしまう
             if (this.delDelay) await sleep(this.delDelay);
-        } else {
+        }
+        else {
             this.ren = -1;
             if (this.setDelay) await sleep(this.setDelay);
         }
@@ -267,7 +282,7 @@ export class WetrisCore {
     /**
      * 接地硬直の処理
      */
-    private lockDown() {
+    protected lockDown() {
         if (!this.isLocking) {
             this.latestTime = Date.now();
             this.isLocking = true;
@@ -288,7 +303,7 @@ export class WetrisCore {
      * BtB      ： 1.5 * (基礎得点+T-spin+Wetris)
      * PC       ： +4000
      */
-    private addScore(lines: number, ren: number, modeTspin: number, isBtB: boolean) {
+    protected addScore(lines: number, ren: number, modeTspin: number, isBtB: boolean) {
         let score = 0;
 
         // 適当にいい感じの二次関数 0renで0, 1renで100, 20renで4800くらい
@@ -298,15 +313,18 @@ export class WetrisCore {
         score = Math.floor(score);
 
         if (lines === 4) {
-            // info("Wetris");
+            info("Wetris");
             score += 2000;
-        } else if (modeTspin === 1) {
-            // info("T-spin");
+        }
+        else if (modeTspin === 1) {
+            info("T-spin");
             score += 1000 * lines;
-        } else if (modeTspin === 2) {
-            // info("T-spin mini");
+        }
+        else if (modeTspin === 2) {
+            info("T-spin mini");
             score += 500 * lines;
-        } else {
+        }
+        else {
             // default
             score += 100 * lines;
         }

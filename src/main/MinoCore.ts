@@ -188,7 +188,6 @@ export class MinoCore {
      * 参考：https://tetris-matome.com/judgment/
      * @returns 1:Tspin, 2:Tspin mini
      */
-
     public getModeTspin(): number {
         if (this.idxMino !== MINO_IDX.T_MINO) return 0;
 

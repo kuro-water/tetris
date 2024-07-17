@@ -1,188 +1,292 @@
-ipcRenderer.on("test", (arg1: string, arg2: string) => {
-    console.log("received:" + arg1 + "," + arg2);
-});
+// ---------- 型宣言 ----------
+type PlayerInfo = {
+    readonly idx: number;
+    canvasField?: HTMLCanvasElement;
+    canvasHold?: HTMLCanvasElement;
+    canvasNext?: HTMLCanvasElement;
+    canvasFieldContext?: CanvasRenderingContext2D;
+    canvasHoldContext?: CanvasRenderingContext2D;
+    canvasNextContext?: CanvasRenderingContext2D;
+    labelScore?: HTMLLabelElement;
+    labelRen?: HTMLLabelElement;
+};
 
-let idxWetris: number;
+type ElementIdList = [string, string, string, string, string];
+// ---------- 型宣言終わり ----------
 
-// let keyMap = {
-//     moveLeft: "KeyA",
-//     moveRight: "KeyD",
-//     softDrop: "KeyS",
-//     hardDrop: "KeyW",
-//     rotateLeft: "ArrowLeft",
-//     rotateRight: "ArrowRight",
-//     hold: "ArrowUp",
-// };
-// let keyMap = {
-//     moveLeft: "ArrowLeft",
-//     moveRight: "ArrowRight",
-//     softDrop: "ArrowDown",
-//     hardDrop: "Space",
-//     rotateLeft: "KeyZ",
-//     rotateRight: "ArrowUp",
-//     hold: "KeyV",
-// };
+// ---------- wetris処理 ----------
+const playerList: PlayerInfo[] = [];
+const player: PlayerInfo = { idx: 0 };
+const cpu: PlayerInfo = { idx: 1 };
+
+const PlayerIdList: ElementIdList = ["canvasPlayerField", "canvasPlayerHold", "canvasPlayerNext", "labelPlayerScore", "labelPlayerRen"];
+const CpuIdList: ElementIdList = ["canvasCpuField", "canvasCpuHold", "canvasCpuNext", "labelCpuScore", "labelCpuRen"];
+
 let keyMap: KeyMap;
 
-// Record<key, value>
-let idInterval: Record<string, NodeJS.Timeout> = {};
-let isKeyDown: Record<string, boolean> = {};
-
-const CANVAS_FIELD = document.getElementById("canvasField") as HTMLCanvasElement;
-const CANVAS_HOLD = document.getElementById("canvasHold") as HTMLCanvasElement;
-const CANVAS_NEXT = document.getElementById("canvasNext") as HTMLCanvasElement;
-
-const CANVAS_FIELD_CONTEXT = CANVAS_FIELD.getContext("2d") as CanvasRenderingContext2D;
-const CANVAS_HOLD_CONTEXT = CANVAS_HOLD.getContext("2d") as CanvasRenderingContext2D;
-const CANVAS_NEXT_CONTEXT = CANVAS_NEXT.getContext("2d") as CanvasRenderingContext2D;
-
-const LABEL_SCORE = document.getElementById("labelScore") as HTMLLabelElement;
-const LABEL_REN = document.getElementById("labelRen") as HTMLLabelElement;
+/**
+ * getElement
+ * @description PlayerInfoにHTML要素を格納する
+ * @returns void
+ * @param playerInfo
+ * @param idList
+ */
+function getElement(playerInfo: PlayerInfo, idList: ElementIdList) {
+    playerInfo.canvasField = document.getElementById(idList[0]) as HTMLCanvasElement;
+    playerInfo.canvasHold = document.getElementById(idList[1]) as HTMLCanvasElement;
+    playerInfo.canvasNext = document.getElementById(idList[2]) as HTMLCanvasElement;
+    playerInfo.canvasFieldContext = (document.getElementById(idList[0]) as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+    playerInfo.canvasHoldContext = (document.getElementById(idList[1]) as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+    playerInfo.canvasNextContext = (document.getElementById(idList[2]) as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+    playerInfo.labelScore = document.getElementById(idList[3]) as HTMLLabelElement;
+    playerInfo.labelRen = document.getElementById(idList[4]) as HTMLLabelElement;
+}
 
 (async function constructor() {
     console.log("renderer started.");
+    keyMap = (await electronAPI.getConfig()).keyMap;
 
     const path = window.location.pathname;
-    if (path.includes("cpu.html")) {
-        console.log("this is cpu.html");
-        await getConfig();
-        idxWetris = await wetris.start();
-        wetris.startCpu(idxWetris);
-    } else if (path.includes("wetris.html")) {
-        console.log("this is wetris.html");
-        await getConfig();
-        idxWetris = await wetris.start();
-        // console.log(idxWetris);
+    if (path.includes("soloPlay.html")) {
+        console.log("this is soloPlay.html");
+
+        getElement(player, PlayerIdList);
+        wetris.start(player.idx);
+        playerList[player.idx] = player;
+    }
+    else if (path.includes("soloCpu.html")) {
+        console.log("this is soloCpu.html");
+
+        getElement(cpu, CpuIdList);
+        wetris.start(cpu.idx);
+        wetris.startCpu(cpu.idx);
+        playerList[cpu.idx] = cpu;
+    }
+    else if (path.includes("playWithCpu.html")) {
+        console.log("this is playWithCpu.html");
+
+        getElement(player, PlayerIdList);
+        wetris.start(player.idx);
+        playerList[player.idx] = player;
+
+        getElement(cpu, CpuIdList);
+        wetris.start(cpu.idx);
+        wetris.startCpu(cpu.idx);
+        playerList[cpu.idx] = cpu;
     }
 })();
+// ---------- wetris処理終わり ----------
 
+// ---------- イベント処理 ----------
 window.addEventListener("beforeunload", (_event) => {
-    wetris.stop(idxWetris);
+    playerList.forEach(player => wetris.stop(player.idx));
 });
+// ---------- イベント処理終わり ----------
 
-/**
- *  よくわからんけどスリープできるようになる。Promiseてなんやねん
- * @param waitTime  ミリ秒
- * @return Promise
- */
-function sleep(waitTime: number) {
-    return new Promise((resolve) => setTimeout(resolve, waitTime));
-}
+// ---------- キー入力受付 ----------
 
-async function getConfig() {
-    const config = await electronAPI.getConfig();
-    keyMap = config.keyMap;
-    console.log("read:config");
-}
+// Record<keycode, value>
+const idInterval: Record<string, NodeJS.Timeout> = {};
+const isKeyDown: Record<string, boolean> = {};
 
 document.onkeydown = async (event) => {
     // console.log("down:" + event.code);
 
     // 押下中ならreturn
     if (isKeyDown[event.code]) return;
+
+    // 処理を実行
     isKeyDown[event.code] = true;
-
     keyEvent(event);
-    await sleep(DAS);
+    await new Promise((resolve) => setTimeout(resolve, DAS));
 
-    // ハードドロップは長押し無効
+    // ハードドロップは長押しでもループ実行しないのでreturn
     if (event.code === keyMap.hardDrop) return;
 
-    // 離されていたらreturn
+    // 既に離されていたらreturn
     if (!isKeyDown[event.code]) return;
 
     // 既にsetIntervalが動いていたらreturn
     if (idInterval[event.code] !== undefined) return;
 
+    // 33ms毎にループ実行する、非同期
     idInterval[event.code] = setInterval(() => {
         keyEvent(event);
-    }, ARR); // 33ms毎にループ実行する、非同期
+    }, ARR);
 };
 
 document.onkeyup = (event) => {
-    clearInterval(idInterval[event.code]); // 変数の中身はただのIDであり、clearしないと止まらない
+    // ループを止める
+    clearInterval(idInterval[event.code]);
     idInterval[event.code] = undefined;
     isKeyDown[event.code] = false;
     // console.log("up:" + event.code);
 };
 
+/**
+ * keyEvent
+ * @description キー入力に対する処理を行う
+ * @returns void
+ * @param event
+ */
 function keyEvent(event: KeyboardEvent) {
+    // KeyMapと関数の対応
+    // KeyMapはconstructorで取得
     const actions = {
-        [keyMap.moveLeft]: () => wetris.moveLeft(idxWetris),
-        [keyMap.moveRight]: () => wetris.moveRight(idxWetris),
-        [keyMap.softDrop]: () => wetris.softDrop(idxWetris),
-        [keyMap.hardDrop]: () => wetris.hardDrop(idxWetris),
-        [keyMap.rotateLeft]: () => wetris.rotateLeft(idxWetris),
-        [keyMap.rotateRight]: () => wetris.rotateRight(idxWetris),
-        [keyMap.hold]: () => wetris.hold(idxWetris),
+        [keyMap.moveLeft]: () => wetris.moveLeft(player.idx),
+        [keyMap.moveRight]: () => wetris.moveRight(player.idx),
+        [keyMap.softDrop]: () => wetris.softDrop(player.idx),
+        [keyMap.hardDrop]: () => wetris.hardDrop(player.idx),
+        [keyMap.rotateLeft]: () => wetris.rotateLeft(player.idx),
+        [keyMap.rotateRight]: () => wetris.rotateRight(player.idx),
+        [keyMap.hold]: () => wetris.hold(player.idx),
     };
 
     const action = actions[event.code];
     if (action) {
         action();
-    } else {
+    }
+    else {
         console.log("unknown key");
     }
 }
 
-function setLabelScore(score: string) {
-    LABEL_SCORE.innerText = score;
+// ---------- キー入力受付終わり ----------
+
+// ---------- 描画処理 ----------
+function gameOver(idx: number) {
+    playerList.forEach((_, i) => {
+        if (i !== idx) {
+            wetris.stop(i);
+            setCanvasStr(i, "WIN");
+        }
+        else {
+            setCanvasStr(i, "LOSE");
+        }
+        playerList[i].canvasFieldContext = null;
+    });
+}
+
+ipcRenderer.on("gameOver", gameOver);
+
+function setCanvasStr(idx: number, str: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on setLabelScore\nidx : ${idx}`);
+    }
+    const canvas = playerList[idx].canvasField;
+    const context = playerList[idx].canvasFieldContext;
+    context.textAlign = "center";
+    context.font = "50px sans-serif";
+    context.fillStyle = "black";
+    context.fillText(str, canvas.width / 2, canvas.height / 2);
+}
+
+ipcRenderer.on("setCanvasStr", setCanvasStr);
+
+/**
+ * @description スコアを反映
+ * @param {number} idx
+ * @param {string} score
+ */
+function setLabelScore(idx: number, score: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on setLabelScore\nidx : ${idx}`);
+    }
+    playerList[idx].labelScore.innerText = score;
 }
 
 ipcRenderer.on("setLabelScore", setLabelScore);
 
-function setLabelRen(ren: string) {
-    LABEL_REN.innerText = ren;
+/**
+ * @description renを反映
+ * @param {number} idx
+ * @param {string} ren
+ */
+function setLabelRen(idx: number, ren: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on setLabelRen\nidx : ${idx}`);
+    }
+    playerList[idx].labelRen.innerText = ren;
 }
 
 ipcRenderer.on("setLabelRen", setLabelRen);
 
-function clearFieldContext() {
+/**
+ * @description フィールドの描画エリアを初期化
+ * @param {number} idx
+ */
+function clearFieldContext(idx: number) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on clearFieldContext\nidx : ${idx}`);
+    }
     console.log("clearFieldContext");
-    drawField(INIT_FIELD);
+    drawField(idx, INIT_FIELD);
 
-    CANVAS_FIELD_CONTEXT.fillStyle = FRAME_COLOR;
-    CANVAS_FIELD_CONTEXT.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
-    CANVAS_FIELD_CONTEXT.fillRect(
+    playerList[idx].canvasFieldContext.fillStyle = FRAME_COLOR;
+    playerList[idx].canvasFieldContext.fillRect(0, 0, BLOCK_SIZE, FIELD_CANVAS_SIZE[3]);
+    playerList[idx].canvasFieldContext.fillRect(
         FIELD_CANVAS_SIZE[2] - BLOCK_SIZE,
         0,
         BLOCK_SIZE,
         FIELD_CANVAS_SIZE[3]
     );
-    CANVAS_FIELD_CONTEXT.fillRect(
+    playerList[idx].canvasFieldContext.fillRect(
         0,
         FIELD_CANVAS_SIZE[3] - BLOCK_SIZE,
         FIELD_CANVAS_SIZE[2],
         BLOCK_SIZE
     );
     // 行っているのは以下と同等の操作
-    // CANVAS_FIELD_CONTEXT.fillRect(0, 0, 20, 420);
-    // CANVAS_FIELD_CONTEXT.fillRect(220, 0, 20, 420);
-    // CANVAS_FIELD_CONTEXT.fillRect(0, 400, 220, 20);
+    // playerList[idx].canvasFieldContext.fillRect(0, 0, 20, 420);
+    // playerList[idx].canvasFieldContext.fillRect(220, 0, 20, 420);
+    // playerList[idx].canvasFieldContext.fillRect(0, 400, 220, 20);
 }
 
 ipcRenderer.on("clearFieldContext", clearFieldContext);
 
-function clearHoldContext() {
+/**
+ * @description ホールドの描画エリアを初期化
+ * @param {number} idx
+ */
+function clearHoldContext(idx: number) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on clearHoldContext\nidx : ${idx}`);
+    }
     console.log("clearHoldContext");
-    CANVAS_HOLD_CONTEXT.fillStyle = BACKGROUND_COLOR;
-    CANVAS_HOLD_CONTEXT.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
+    playerList[idx].canvasHoldContext.fillStyle = BACKGROUND_COLOR;
+    playerList[idx].canvasHoldContext.fillRect(...(HOLD_CANVAS_SIZE as [number, number, number, number]));
 }
 
 ipcRenderer.on("clearHoldContext", clearHoldContext);
 
-function clearNextContext() {
-    CANVAS_NEXT_CONTEXT.fillStyle = BACKGROUND_COLOR;
-    CANVAS_NEXT_CONTEXT.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
+/**
+ * @description ネクストの描画エリアを初期化
+ * @param {number} idx
+ */
+function clearNextContext(idx: number) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on clearNextContext\nidx : ${idx}`);
+    }
+    playerList[idx].canvasNextContext.fillStyle = BACKGROUND_COLOR;
+    playerList[idx].canvasNextContext.fillRect(...(NEXT_CANVAS_SIZE as [number, number, number, number]));
 }
 
 ipcRenderer.on("clearNextContext", clearNextContext);
 
-function drawBlock(block: Position, color: string) {
+/**
+ * @description 1ブロック描画
+ * @param {number} idx
+ * @param {Position} block
+ * @param {string} color
+ */
+function drawBlock(idx: number, block: Position, color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawBlock\nidx : ${idx}`);
+    }
     // console.log("draw block");
     // console.log("x:" + x + ",y:" + y + ",color:" + color);
-    CANVAS_FIELD_CONTEXT.fillStyle = color;
-    CANVAS_FIELD_CONTEXT.fillRect(
+    playerList[idx].canvasFieldContext.fillStyle = color;
+    playerList[idx].canvasFieldContext.fillRect(
         block.x * BLOCK_SIZE,
         block.y * BLOCK_SIZE,
         BLOCK_SIZE,
@@ -192,45 +296,77 @@ function drawBlock(block: Position, color: string) {
 
 ipcRenderer.on("drawBlock", drawBlock);
 
-function drawMino(minoPos: Position, blocks: Position[], color: string) {
+/**
+ * @description ミノを描画
+ * @param {number} idx
+ * @param {Position} minoPos
+ * @param {Position[]} blocks
+ * @param {string} color
+ */
+function drawMino(idx: number, minoPos: Position, blocks: Position[], color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawMino\nidx : ${idx}`);
+    }
     console.log("draw mino");
     for (const block of blocks) {
-        drawBlock({ x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
+        drawBlock(idx, { x: minoPos.x + block.x, y: minoPos.y + block.y }, color);
     }
 }
 
 ipcRenderer.on("drawMino", drawMino);
 
-// メインプロセスから起動するとラグでチカチカするのでこちらで処理
-ipcRenderer.on(
-    "reDrawMino",
-    (
-        preBlockPos: Position[],
-        preMinoPos: Position,
-        preGhostPos: Position,
-        postBlockPos: Position[],
-        postMinoPos: Position,
-        postGhostPos: Position,
-        idxMino: number
-    ) => {
-        console.log("move");
-        for (const pos of preBlockPos) {
-            drawBlock({ x: preGhostPos.x + pos.x, y: preGhostPos.y + pos.y }, BACKGROUND_COLOR);
-            drawBlock({ x: preMinoPos.x + pos.x, y: preMinoPos.y + pos.y }, BACKGROUND_COLOR);
-        }
-        for (const pos of postBlockPos) {
-            drawBlock(
-                { x: postGhostPos.x + pos.x, y: postGhostPos.y + pos.y },
-                GHOST_COLORS[idxMino]
-            );
-            drawBlock({ x: postMinoPos.x + pos.x, y: postMinoPos.y + pos.y }, MINO_COLORS[idxMino]);
-        }
+/**
+ * @description 描画済ミノを消し、新しい座標に描画しなおす
+ * メインプロセスから起動するとラグでチカチカするのでこちらで処理
+ * @param {number} idx
+ * @param {Position[]} preBlockPos
+ * @param {Position} preMinoPos
+ * @param {Position} preGhostPos
+ * @param {Position[]} postBlockPos
+ * @param {Position} postMinoPos
+ * @param {Position} postGhostPos
+ * @param {number} idxMino
+ */
+function reDrawMino(idx: number,
+                    preBlockPos: Position[],
+                    preMinoPos: Position,
+                    preGhostPos: Position,
+                    postBlockPos: Position[],
+                    postMinoPos: Position,
+                    postGhostPos: Position,
+                    idxMino: number
+) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on reDrawMino\nidx : ${idx}`);
     }
-);
+    console.log("move");
+    for (const pos of preBlockPos) {
+        drawBlock(idx, { x: preGhostPos.x + pos.x, y: preGhostPos.y + pos.y }, BACKGROUND_COLOR);
+        drawBlock(idx, { x: preMinoPos.x + pos.x, y: preMinoPos.y + pos.y }, BACKGROUND_COLOR);
+    }
+    for (const pos of postBlockPos) {
+        drawBlock(
+            idx, { x: postGhostPos.x + pos.x, y: postGhostPos.y + pos.y },
+            GHOST_COLORS[idxMino]
+        );
+        drawBlock(idx, { x: postMinoPos.x + pos.x, y: postMinoPos.y + pos.y }, MINO_COLORS[idxMino]);
+    }
+}
 
-function drawNextBlock(block: Position, color: string) {
-    CANVAS_NEXT_CONTEXT.fillStyle = color;
-    CANVAS_NEXT_CONTEXT.fillRect(
+ipcRenderer.on("reDrawMino", reDrawMino);
+
+/**
+ * @description ネクストの描画エリアにミノを描画
+ * @param {number} idx
+ * @param {Position} block
+ * @param {string} color
+ */
+function drawNextBlock(idx: number, block: Position, color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawNextBlock\nidx : ${idx}`);
+    }
+    playerList[idx].canvasNextContext.fillStyle = color;
+    playerList[idx].canvasNextContext.fillRect(
         block.x * BLOCK_SIZE,
         block.y * BLOCK_SIZE,
         BLOCK_SIZE,
@@ -240,11 +376,20 @@ function drawNextBlock(block: Position, color: string) {
 
 ipcRenderer.on("drawNextBlock", drawNextBlock);
 
-function drawHoldBlock(block: Position, color: string) {
+/**
+ * @description ホールドの描画エリアにミノを描画
+ * @param {number} idx
+ * @param {Position} block
+ * @param {string} color
+ */
+function drawHoldBlock(idx: number, block: Position, color: string) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawHoldBlock\nidx : ${idx}`);
+    }
     // console.log("draw hold block");
     // console.log("x:" + x + ",y:" + y + ",color:" + color);
-    CANVAS_HOLD_CONTEXT.fillStyle = color;
-    CANVAS_HOLD_CONTEXT.fillRect(
+    playerList[idx].canvasHoldContext.fillStyle = color;
+    playerList[idx].canvasHoldContext.fillRect(
         (1 + block.x) * BLOCK_SIZE,
         (1 + block.y) * BLOCK_SIZE,
         BLOCK_SIZE,
@@ -254,7 +399,15 @@ function drawHoldBlock(block: Position, color: string) {
 
 ipcRenderer.on("drawHoldBlock", drawHoldBlock);
 
-function drawField(field: number[][]) {
+/**
+ * @description 指定されたフィールドを描画
+ * @param {number} idx
+ * @param {number[][]} field
+ */
+function drawField(idx: number, field: number[][]) {
+    if (playerList[idx] === undefined) {
+        throw new Error(`playerList[idxWetris] is undefined on drawField\nidx : ${idx}`);
+    }
     console.log("draw field");
     // console.log("i:" + this.field.length);
     // console.log("j:" + this.field[0].length);
@@ -262,11 +415,12 @@ function drawField(field: number[][]) {
         // console.log(this.field[i])
         for (let j = DRAW_FIELD_LEFT; j < DRAW_FIELD_LEFT + DRAW_FIELD_WIDTH; j++) {
             if (field[i][j]) {
-                CANVAS_FIELD_CONTEXT.fillStyle = PLACED_MINO_COLOR;
-            } else {
-                CANVAS_FIELD_CONTEXT.fillStyle = BACKGROUND_COLOR;
+                playerList[idx].canvasFieldContext.fillStyle = PLACED_MINO_COLOR;
             }
-            CANVAS_FIELD_CONTEXT.fillRect(
+            else {
+                playerList[idx].canvasFieldContext.fillStyle = BACKGROUND_COLOR;
+            }
+            playerList[idx].canvasFieldContext.fillRect(
                 j * BLOCK_SIZE,
                 (i - DRAW_FIELD_TOP) * BLOCK_SIZE,
                 BLOCK_SIZE,
@@ -278,3 +432,5 @@ function drawField(field: number[][]) {
 }
 
 ipcRenderer.on("drawField", drawField);
+
+// ---------- 描画処理終わり ----------

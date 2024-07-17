@@ -1,5 +1,4 @@
 const { ipcMain, IpcMainInvokeEvent } = require("electron");
-
 import { Cpu } from "./Cpu";
 
 import { task } from "./messageUtil";
@@ -8,24 +7,59 @@ import { WetrisSender } from "./WetrisSender";
 let listWetris: WetrisSender[] = [];
 
 export function handleWetris() {
-    ipcMain.handle("start", (event: typeof IpcMainInvokeEvent): number => {
+    ipcMain.handle("start", (event: typeof IpcMainInvokeEvent, idx: number): void => {
         task("wetris starting...");
 
-        listWetris.push(new WetrisSender(event.sender));
-        // info(listWetris.length - 1); // idx
+        if (listWetris[idx]) {
+            stop(null, idx);
+        }
+        listWetris[idx] = (new WetrisSender(event.sender, idx));
+        // debug("start:" + idx);
 
-        return listWetris.length - 1; // idx
+        listWetris[idx].setAttackMethod((idx: number, lines: number, ren: number, modeTspin: number, isBtB: boolean) => {
+            if (lines <= 0) {
+                throw new Error("lines must be positive number");
+            }
+            let power = 0;
+
+            // 基本火力
+            power += lines - 1;
+
+            // renボーナス
+            power += 2 < ren ? ren - 2 : 0;
+
+            // wetris, Tspinボーナス
+            if (lines === 4) {
+                power += 2;
+            }
+            else if (modeTspin === 1) {
+                power += lines + 1;
+            }
+
+            // BtBボーナス
+            if (isBtB) {
+                power += 1;
+            }
+            // debug(`power:${power}, lines:${lines}, ren:${ren}, modeTspin:${modeTspin}, isBtB:${isBtB}`);
+
+            listWetris.forEach((wetris, i) => {
+                if (i !== idx && wetris !== null) {
+                    wetris.attackedLineBuffer.push(power);
+                }
+            });
+        });
     });
 
     ipcMain.handle("startCpu", (_event: typeof IpcMainInvokeEvent, idx: number): void => {
         new Cpu(listWetris[idx]);
     });
 
-    ipcMain.handle("stop", (_event: typeof IpcMainInvokeEvent, idx: number) => {
+    const stop = (_event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].isMainloopActive = false;
-        listWetris[idx] = null;
+        listWetris.splice(idx, 1);
         task("stop:" + idx);
-    });
+    };
+    ipcMain.handle("stop", stop);
 
     ipcMain.handle("moveLeft", (_event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].moveLeft();

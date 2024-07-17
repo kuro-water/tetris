@@ -1,3 +1,4 @@
+import { Angle } from "./Angle";
 import { ARR, DRAW_FIELD_TOP, MINO_IDX, sleep } from "./constant";
 import { FieldCore } from "./FieldCore";
 
@@ -5,7 +6,7 @@ import { error, info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";
 import { WetrisSender } from "./WetrisSender";
 
-type FieldData = { field: FieldCore; pos: Position; idxMino: MINO_IDX; angle: number };
+type FieldData = { field: FieldCore; pos: Position; idxMino: MINO_IDX; angle: Angle };
 
 /**
  * 評価基準値を求めた後のデータを格納する
@@ -37,31 +38,45 @@ export class Cpu {
 
     private async main() {
         while (true) {
+            // フィールドの評価値を求める
             const bestField = await this.getBestField(
                 this.mainWetris.currentMino.idxMino,
                 this.mainWetris.field
             );
+            const holdMino = this.mainWetris.idxHoldMino === undefined ? this.mainWetris.nextMinos[this.mainWetris.nextMinos.length - 1] : this.mainWetris.idxHoldMino;
+            const bestFieldUsedHold = await this.getBestField(holdMino, this.mainWetris.field);
 
-            // bestField.fieldData.field.printField();
-            // debug(`hole: ${bestField.hole}`);
-            // debug(`height: ${bestField.height}`);
-            // debug(`requiredIMinoCount: ${bestField.requiredIMinoCount}`);
+            // ゲーム終了時には終了
+            if (!this.mainWetris.isMainloopActive) break;
 
-            if (!this.mainWetris.isMainloopActive) {
-                break;
+            // 動かす
+            if (bestFieldUsedHold.score < bestField.score) {
+                // bestField.fieldData.field.printField();
+                await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
             }
-            await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
+            else {
+                // debug("I wanna hold");
+                // bestFieldUsedHold.fieldData.field.printField();
+                this.mainWetris.hold();
+                await this.moveMinoToMatchField(this.mainWetris, bestFieldUsedHold.fieldData);
+            }
         }
     }
 
     private async moveMinoToMatchField(wetris: WetrisSender, fieldData: FieldData) {
-        while (wetris.currentMino.angle.angle !== fieldData.angle % 4) {
-            wetris.rotateRight();
+        while (wetris.currentMino.angle.angle !== fieldData.angle.angle % 4) {
+            if (Math.abs(fieldData.angle.angle - fieldData.angle.angle) === 3) {
+                // 左回転の方が速い
+                wetris.rotateLeft();
+            }
+            else {
+                wetris.rotateRight();
+            }
             await sleep(ARR);
         }
         while (wetris.currentMino.pos.x !== fieldData.pos.x) {
             const dif = fieldData.pos.x - wetris.currentMino.pos.x;
-            const wasMoved = dif < 0 ? await wetris.moveLeft() : await wetris.moveRight();
+            const wasMoved = dif < 0 ? wetris.moveLeft() : wetris.moveRight();
             if (!wasMoved) {
                 error("CPU: failed to move!");
             }
@@ -87,13 +102,14 @@ export class Cpu {
 
     private async getAllFieldPattern(idxMino: MINO_IDX, field: FieldCore): Promise<FieldData[]> {
         let fieldDataList: FieldData[] = [];
-        for (let angle = 0; angle < 4; angle++) {
+        for (let i = 0; i < 4; i++) {
+            const angle = new Angle(i);
             // 左から順に、移動可能な全てのx座標における一番下に接地した場合を調べる
             for (let movement = 0; ; movement++) {
                 this.trialWetris = new WetrisCore();
                 this.trialWetris.isMainloopActive = false;
                 this.trialWetris.currentMino.idxMino = idxMino;
-                for (let i = 0; i < angle; i++) {
+                for (let j = 0; j < angle.angle; j++) {
                     this.trialWetris.rotateRight();
                 }
                 // ミノもfield: Fieldを持ってる。field.field: number[][]を書き換えると、ミノのfieldも書き換わる
@@ -206,7 +222,8 @@ export class Cpu {
                     fieldData.field.isFilled({ x: x + 1, y: y })
                 ) {
                     trenchCount++;
-                } else {
+                }
+                else {
                     break;
                 }
             }
@@ -236,7 +253,7 @@ export class Cpu {
         // 死にそうな高さは基本置かない
         if (fieldInfo.height - DRAW_FIELD_TOP < 5) {
             info("Too high!");
-            score *= 0 < score ? 0.01 : 100;
+            score *= (0 < score ? 0.01 : 100);
         }
 
         return { fieldData: fieldInfo.fieldData, score: score };
