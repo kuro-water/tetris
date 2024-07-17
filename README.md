@@ -1,8 +1,8 @@
-# Wetris
+# Wetris v2.0.0
 
 ## ダウンロード
 
-https://github.com/kuro-water/wetris/releases/tag/v1.1.1
+[ダウンロードはこちらから](https://github.com/kuro-water/wetris/releases/tag/v2.0.0)
 
 ## 操作方法
 
@@ -13,12 +13,4 @@ https://github.com/kuro-water/wetris/releases/tag/v1.1.1
 -   X : 右回転
 -   C :ホールド
 
-キーコンフィグは変更できます
-
-## 開発環境
-
-npm 10.1.0<br>
-node 20.9.0<br>
-electron 27.0.3<br>
-tsc 5.2.2<br>
-electron-builder 24.9.1<br>
+キーコンフィグは変更できます。
