@@ -1,7 +1,7 @@
 import { ARR, DRAW_FIELD_TOP, MINO_IDX, sleep } from "./constant";
 import { FieldCore } from "./FieldCore";
 
-import { debug, error, info } from "./messageUtil";
+import { error, info } from "./messageUtil";
 import { WetrisCore } from "./WetrisCore";
 import { WetrisSender } from "./WetrisSender";
 
@@ -52,12 +52,12 @@ export class Cpu {
 
             // 動かす
             if (bestFieldUsedHold.score < bestField.score) {
-                bestField.fieldData.field.printField();
+                // bestField.fieldData.field.printField();
                 await this.moveMinoToMatchField(this.mainWetris, bestField.fieldData);
             }
             else {
-                debug("I wanna hold");
-                bestFieldUsedHold.fieldData.field.printField();
+                // debug("I wanna hold");
+                // bestFieldUsedHold.fieldData.field.printField();
                 this.mainWetris.hold();
                 await this.moveMinoToMatchField(this.mainWetris, bestFieldUsedHold.fieldData);
             }
