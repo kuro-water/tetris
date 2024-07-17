@@ -43,7 +43,8 @@ const createWindow = () => {
         height: 720,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
-        },
+            devTools: false //デバッグツールを開かない
+        }
     });
 
     // and load the index.html of the app.
