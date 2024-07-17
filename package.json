@@ -1,6 +1,6 @@
 {
     "name": "wetris",
-    "version": "1.9.0-alpha",
+    "version": "2.0.0",
     "description": "",
     "main": "src/main/main.js",
     "scripts": {
