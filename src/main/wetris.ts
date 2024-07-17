@@ -45,7 +45,7 @@ export function handleWetris() {
             debug(`power:${power}, lines:${lines}, ren:${ren}, modeTspin:${modeTspin}, isBtB:${isBtB}`);
 
             listWetris.forEach((wetris, i) => {
-                if (i !== idx) {
+                if (i !== idx && wetris !== null) {
                     wetris.attackedLineBuffer.push(power);
                 }
             });
@@ -58,7 +58,8 @@ export function handleWetris() {
 
     ipcMain.handle("stop", (_event: typeof IpcMainInvokeEvent, idx: number) => {
         listWetris[idx].isMainloopActive = false;
-        listWetris[idx] = null;
+        // listWetris[idx] = null;
+        listWetris.splice(idx, 1);
         task("stop:" + idx);
     });
 
