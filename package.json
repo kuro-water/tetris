@@ -1,46 +1,46 @@
 {
-    "name": "wetris",
-    "version": "2.0.0",
-    "description": "",
-    "main": "src/main/main.js",
-    "scripts": {
-        "start": "tsc && electron .",
-        "package": "electron-forge package",
-        "make": "electron-forge make",
-        "publish": "electron-forge publish",
-        "lint": "echo \"No linting configured\"",
-        "build": "tsc && npx electron-builder --win --x64"
+    "name" : "wetris",
+    "version" : "2.0.0",
+    "description" : "",
+    "main" : "src/main/main.js",
+    "scripts" : {
+        "start" : "tsc && electron .",
+        "package" : "electron-forge package",
+        "make" : "electron-forge make",
+        "publish" : "electron-forge publish",
+        "lint" : "echo \"No linting configured\"",
+        "build" : "tsc && npx electron-builder --win --x64"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-        "electron": "^27.0.3",
-        "ts-loader": "^9.5.0",
-        "typed-query-selector": "^2.11.0",
-        "typescript": "^5.2.2",
-        "webpack": "^5.89.0",
-        "webpack-cli": "^5.1.4"
+    "keywords" : [],
+    "author" : "",
+    "license" : "ISC",
+    "devDependencies" : {
+        "electron" : "31.2.1",
+        "ts-loader" : "^9.5.1",
+        "typed-query-selector" : "^2.11.0",
+        "typescript" : "^5.5.3",
+        "webpack" : "^5.89.0",
+        "webpack-cli" : "^5.1.4"
     },
-    "build": {
-        "appId": "com.electron.yourapp",
-        "directories": {
-            "output": "dist"
+    "build" : {
+        "appId" : "wetris",
+        "directories" : {
+            "output" : "dist"
         },
-        "files": [
+        "files" : [
             "assets",
             "src",
             "package.json",
             "package-lock.json"
         ],
-        "nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true
+        "nsis" : {
+            "oneClick" : false,
+            "allowToChangeInstallationDirectory" : true
         }
     },
-    "dependencies": {
-        "dayjs": "^1.11.10",
-        "electron-squirrel-startup": "^1.0.0",
-        "electron-store": "^8.1.0"
+    "dependencies" : {
+        "dayjs" : "^1.11.11",
+        "electron-squirrel-startup" : "^1.0.0",
+        "electron-store" : "^8.1.0"
     }
 }
