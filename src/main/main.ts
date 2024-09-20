@@ -6,6 +6,7 @@ const store = new Store();
 import * as initConfig from "./initConfig.json";
 import { info } from "./messageUtil";
 import { handleWetris } from "./wetris";
+import {handleSocketTest} from "./socketTest";
 
 // console.dir(store.store, { depth: null });
 
@@ -33,6 +34,7 @@ ipcMain.handle("saveConfig", async (_event: IpcMainInvokeEvent, data: Config): P
 });
 
 handleWetris();
+handleSocketTest();
 
 const createWindow = () => {
     // Create the browser window.

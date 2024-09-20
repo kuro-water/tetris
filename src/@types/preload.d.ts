@@ -27,3 +27,7 @@ declare class wetris {
 
     static hold(idx: number): null;
 }
+
+declare class socket {
+    static get(): Promise<string>;
+}

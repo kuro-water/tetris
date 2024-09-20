@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8"/>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'"
+    />
+    <title>wetris</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="./bulma.min.css"/>
+    <link rel="stylesheet" href="./settings.css"/>
+    <link rel="stylesheet" href="./buttons.css"/>
+</head>
+
+<body>
+<div id="divButtons">
+    <a class="button" href="./index.html">戻る</a>
+    <a class="button" id="save">キー設定を保存</a>
+    <a class="button" id="init">初期設定に戻す</a>
+</div>
+<div>
+    <label id="label">ここに文字が出ます</label>
+</div>
+</body>
+
+<script src="./communication.js" type="module"></script>
+</html>

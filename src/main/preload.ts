@@ -5,7 +5,11 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
         ipcRenderer.on(channel, (event: typeof IpcMainInvokeEvent, ...args: any[]) =>
             func(...args)
         );
-    },
+    }
+});
+
+contextBridge.exposeInMainWorld("socket", {
+    get: () => ipcRenderer.invoke("get")
 });
 
 contextBridge.exposeInMainWorld("wetris", {
@@ -18,13 +22,13 @@ contextBridge.exposeInMainWorld("wetris", {
     hardDrop: (idx: number) => ipcRenderer.invoke("hardDrop", idx),
     rotateLeft: (idx: number) => ipcRenderer.invoke("rotateLeft", idx),
     rotateRight: (idx: number) => ipcRenderer.invoke("rotateRight", idx),
-    hold: (idx: number) => ipcRenderer.invoke("hold", idx),
+    hold: (idx: number) => ipcRenderer.invoke("hold", idx)
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
     getInitConfig: () => ipcRenderer.invoke("getInitConfig"),
     getConfig: (jsonPath: string) => ipcRenderer.invoke("getConfig", jsonPath),
-    saveConfig: (jsonPath: string, data: any) => ipcRenderer.invoke("saveConfig", jsonPath, data),
+    saveConfig: (jsonPath: string, data: any) => ipcRenderer.invoke("saveConfig", jsonPath, data)
 });
 
 const INIT_FIELD = [
@@ -68,7 +72,7 @@ const INIT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 contextBridge.exposeInMainWorld("INIT_FIELD", INIT_FIELD);
 // xを増やすと右、yを増やすと下になる
