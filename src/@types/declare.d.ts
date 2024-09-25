@@ -27,3 +27,17 @@ type TupleOf<T, N extends number, R extends unknown[]> = R["length"] extends N
 
 type Row = Tuple<number, 12>;
 type Field = Tuple<Row, 41>;
+
+type PlayerInfo = {
+    readonly idx: number;
+    canvasField?: HTMLCanvasElement;
+    canvasHold?: HTMLCanvasElement;
+    canvasNext?: HTMLCanvasElement;
+    canvasFieldContext?: CanvasRenderingContext2D;
+    canvasHoldContext?: CanvasRenderingContext2D;
+    canvasNextContext?: CanvasRenderingContext2D;
+    labelScore?: HTMLLabelElement;
+    labelRen?: HTMLLabelElement;
+};
+
+type ElementIdList = [string, string, string, string, string];

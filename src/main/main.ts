@@ -43,7 +43,7 @@ const createWindow = () => {
         height: 720,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
-            devTools: false //デバッグツールを開かない
+            // devTools: false //デバッグツールを開かない
         }
     });
 
